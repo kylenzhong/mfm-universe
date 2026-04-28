@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Starter Story Intelligence — MFM Universe</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d1a;
+    --card: #141428;
+    --card2: #1a1a35;
+    --border: #2a2a4a;
+    --gold: #d4a000;
+    --gold2: #f0c040;
+    --accent: #ff6b35;
+    --accent2: #ff8c5e;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --green: #4ade80;
+    --android: #3ddc84;
+    --ios: #5fb3ff;
+    --vibe: #c44dff;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+  a { color: inherit; }
+
+  header {
+    background: linear-gradient(135deg, #1a0a0a 0%, #2a0a1a 50%, #1a0a35 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 28px 32px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-nav {
+    display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    background: rgba(255,107,53,0.08); border: 1px solid var(--border);
+    color: var(--muted); text-decoration: none; padding: 6px 14px;
+    border-radius: 20px; font-size: 12px; transition: all .2s;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent2); }
+  .nav-btn.active { border-color: var(--accent); color: var(--accent2); background: rgba(255,107,53,0.15); }
+  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 2.6vw, 22px);
+    color: var(--accent2);
+    text-shadow: 0 0 30px rgba(255,107,53,0.5);
+    line-height: 1.4;
+  }
+  .header-sub { color: var(--muted); font-size: 14px; margin-top: 8px; max-width: 720px; line-height: 1.5; }
+  .header-stats {
+    display: flex; gap: 16px; margin-top: 18px; flex-wrap: wrap;
+  }
+  .hstat {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 110px;
+  }
+  .hstat-val { color: var(--accent2); font-weight: 800; font-size: 22px; }
+  .hstat-lbl { color: var(--muted); font-size: 11px; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* SECTION HEADERS */
+  .section-wrap { max-width: 1200px; margin: 0 auto; padding: 32px; }
+  .section-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px; color: var(--accent2); margin-bottom: 8px;
+  }
+  .section-sub { color: var(--muted); font-size: 13px; margin-bottom: 22px; }
+
+  /* PLAYBOOKS */
+  .playbook-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+  .pb-card {
+    background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    transition: all .2s;
+    position: relative; overflow: hidden;
+  }
+  .pb-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, var(--accent), var(--gold));
+  }
+  .pb-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .pb-icon { font-size: 28px; margin-bottom: 10px; }
+  .pb-title { font-weight: 800; font-size: 17px; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+  .pb-summary { color: #ccc; font-size: 13.5px; line-height: 1.55; margin-bottom: 12px; }
+  .pb-quote {
+    border-left: 2px solid var(--accent);
+    padding: 8px 12px; background: rgba(255,107,53,0.05);
+    border-radius: 0 6px 6px 0; font-size: 12.5px; color: #ddd;
+    line-height: 1.55; font-style: italic; margin-bottom: 12px;
+  }
+  .pb-action {
+    background: rgba(74,222,128,0.06); border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 6px; padding: 10px 12px; font-size: 12.5px; color: #cfe;
+    line-height: 1.5;
+  }
+  .pb-action-lbl { color: var(--green); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .pb-evidence { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .pb-ep-pill {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--muted); font-size: 11px; padding: 3px 8px; border-radius: 10px;
+    cursor: pointer; transition: all .15s;
+  }
+  .pb-ep-pill:hover { border-color: var(--accent); color: var(--accent2); }
+
+  /* CONTROLS */
+  .controls {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(13,13,26,0.97); border-bottom: 1px solid var(--border);
+    padding: 14px 32px; backdrop-filter: blur(12px);
+  }
+  .controls-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .search-wrap { flex: 1; min-width: 220px; position: relative; }
+  .search-wrap input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 14px 10px 38px; border-radius: 8px;
+    font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border .2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap::before {
+    content: '🔍'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    font-size: 14px; pointer-events: none;
+  }
+  .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fbtn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: 7px 13px; border-radius: 20px;
+    font-size: 12px; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif;
+  }
+  .fbtn:hover { border-color: var(--accent); color: var(--text); }
+  .fbtn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+  .sort-select {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 12px; border-radius: 8px;
+    font-size: 13px; outline: none; cursor: pointer;
+  }
+
+  /* EPISODE GRID */
+  .results-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px; color: var(--muted); font-size: 13px;
+  }
+  .ep-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+  .ep-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all .2s;
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .ep-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+  .ep-thumb {
+    position: relative; aspect-ratio: 16/9; background: #000;
+    background-size: cover; background-position: center;
+  }
+  .ep-thumb::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(13,13,26,0.85) 100%);
+  }
+  .ep-money-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--accent); color: #000; font-weight: 800;
+    padding: 4px 10px; border-radius: 16px; font-size: 13px; z-index: 1;
+    box-shadow: 0 2px 8px rgba(255,107,53,0.4);
+  }
+  .ep-num-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.7); color: var(--muted); font-weight: 700;
+    padding: 3px 8px; border-radius: 4px; font-size: 11px; z-index: 1;
+  }
+  .ep-duration {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.85); color: white;
+    padding: 2px 6px; border-radius: 3px; font-size: 11px; z-index: 1;
+  }
+  .ep-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; }
+  .ep-title { font-weight: 700; font-size: 14px; line-height: 1.35; color: var(--text); margin-bottom: 8px; }
+  .ep-meta-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .ep-founder { color: var(--gold2); font-size: 12px; font-weight: 600; }
+  .ep-app { color: var(--accent2); font-size: 12px; font-weight: 600; }
+  .ep-cats { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+  .ep-cat {
+    font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 8px;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .ep-cat.mobile { background: rgba(95,179,255,0.15); color: var(--ios); }
+  .ep-cat.vibe { background: rgba(196,77,255,0.15); color: #d47fff; }
+  .ep-cat.saas { background: rgba(212,160,0,0.15); color: var(--gold2); }
+  .ep-cat.android { background: rgba(61,220,132,0.15); color: var(--android); }
+  .ep-thesis {
+    background: rgba(255,107,53,0.05); border-left: 2px solid var(--accent);
+    padding: 7px 10px; border-radius: 0 6px 6px 0;
+    color: #cdd; font-size: 12px; line-height: 1.5; margin-top: auto;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ep-tactics { display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0; }
+  .ep-tac {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    color: var(--muted); font-size: 10px; padding: 2px 6px; border-radius: 8px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.86); z-index: 200;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 18px; width: 100%; max-width: 760px;
+    max-height: 88vh; overflow: hidden; display: flex; flex-direction: column;
+    position: relative;
+  }
+  .modal-thumb {
+    aspect-ratio: 16/9; background: #000; background-size: cover; background-position: center;
+    position: relative;
+  }
+  .modal-thumb::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(26,26,53,1) 100%);
+  }
+  .modal-thumb-info {
+    position: absolute; bottom: 16px; left: 20px; right: 20px; z-index: 1;
+  }
+  .modal-thumb-title { font-size: 22px; font-weight: 800; line-height: 1.25; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.7); }
+  .modal-close {
+    position: absolute; top: 14px; right: 16px; z-index: 5;
+    background: rgba(0,0,0,0.6); border: none; color: white;
+    width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.9); }
+  .modal-body { overflow-y: auto; flex: 1; padding: 20px 28px 28px; }
+  .modal-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .modal-meta-pill {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--text); font-size: 12px; padding: 4px 10px; border-radius: 12px;
+  }
+  .modal-meta-pill.money { background: var(--accent); color: #000; font-weight: 700; border-color: var(--accent); }
+  .modal-section { margin-bottom: 22px; }
+  .modal-section h3 {
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--accent2); margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-section p { color: #ccc; font-size: 14px; line-height: 1.7; }
+  .modal-quote {
+    border-left: 3px solid var(--accent); padding: 12px 16px;
+    background: rgba(255,107,53,0.05); border-radius: 0 8px 8px 0;
+    font-style: italic; color: #ddd; line-height: 1.6; font-size: 14px;
+  }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .modal-tag {
+    background: rgba(212,160,0,0.1); border: 1px solid rgba(212,160,0,0.3);
+    color: var(--gold2); font-size: 12px; padding: 4px 10px; border-radius: 10px;
+  }
+  .modal-tag.ai { background: rgba(196,77,255,0.1); border-color: rgba(196,77,255,0.3); color: #d47fff; }
+  .modal-tag.platform { background: rgba(95,179,255,0.1); border-color: rgba(95,179,255,0.3); color: var(--ios); }
+  .modal-links {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .modal-link {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--text); text-decoration: none; padding: 9px 16px;
+    border-radius: 8px; font-size: 13px; transition: all .2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .modal-link:hover { border-color: var(--accent); color: var(--accent2); }
+  .modal-link.primary {
+    background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700;
+  }
+  .modal-link.primary:hover { background: var(--accent2); color: #000; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  @media (max-width: 600px) {
+    header, .controls, .section-wrap { padding-left: 16px; padding-right: 16px; }
+    .ep-grid, .playbook-grid { grid-template-columns: 1fr; }
+    .modal { border-radius: 12px; }
+    .modal-body { padding: 18px 20px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-nav">
+      <a href="MFM_Episodes.html" class="nav-btn">📻 MFM Episodes</a>
+      <a href="MFM_Guest_Profiles.html" class="nav-btn">👤 MFM Guests</a>
+      <a href="MFM_RPG.html" class="nav-btn">🎮 MFM RPG</a>
+      <a href="Starter_Story.html" class="nav-btn active">🚀 Starter Story</a>
+    </div>
+    <div class="header-title">🚀 STARTER STORY INTELLIGENCE</div>
+    <div class="header-sub">Pat Walls' channel — the latest 50 episodes, mined for apps, tactics, and idea-generation playbooks. The premise: solo founders are using AI to build apps that print $20K–$500K/month. This is what's actually working.</div>
+    <div class="header-stats">
+      <div class="hstat"><div class="hstat-val" id="statTotal">50</div><div class="hstat-lbl">Episodes Mined</div></div>
+      <div class="hstat"><div class="hstat-val" id="statSixFig">14</div><div class="hstat-lbl">$100K+/mo Apps</div></div>
+      <div class="hstat"><div class="hstat-val" id="statViews">5.5M</div><div class="hstat-lbl">Total Views</div></div>
+      <div class="hstat"><div class="hstat-val">8</div><div class="hstat-lbl">Playbooks Extracted</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- PLAYBOOKS SECTION -->
+<div class="section-wrap">
+  <div class="section-title">🧠 THE PLAYBOOKS</div>
+  <div class="section-sub">Cross-episode patterns. The repeatable tactics that show up over and over.</div>
+  <div class="playbook-grid" id="playbookGrid"></div>
+</div>
+
+<!-- EPISODE CONTROLS -->
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Search apps, founders, tactics, revenue…" oninput="renderGrid()">
+    </div>
+    <div class="filter-btns" id="filterBtns">
+      <button class="fbtn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="fbtn" data-filter="mobile" onclick="setFilter('mobile',this)">📱 Mobile</button>
+      <button class="fbtn" data-filter="vibe" onclick="setFilter('vibe',this)">⚡ Vibe Coded</button>
+      <button class="fbtn" data-filter="saas" onclick="setFilter('saas',this)">💼 SaaS</button>
+      <button class="fbtn" data-filter="android" onclick="setFilter('android',this)">🤖 Android</button>
+      <button class="fbtn" data-filter="six_figure" onclick="setFilter('six_figure',this)">💰 $100K+/mo</button>
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="renderGrid()">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="revenue">Revenue High→Low</option>
+      <option value="views">Most Viewed</option>
+    </select>
+  </div>
+</div>
+
+<!-- EPISODES SECTION -->
+<div class="section-wrap" style="padding-top:20px;">
+  <div class="section-title">🎬 ALL 50 EPISODES</div>
+  <div class="section-sub">Click any card to see the full breakdown — thesis, founder quote, tactics, and AI tools used.</div>
+  <div class="results-bar">
+    <span id="resultsCount"></span>
+    <span style="color:var(--muted); font-size:12px;">Click any card for full details</span>
+  </div>
+  <div class="ep-grid" id="epGrid"></div>
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="empty-icon">🎧</div>
+    <div>No episodes match your search</div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div class="modal-thumb" id="mThumb">
+      <div class="modal-thumb-info">
+        <div class="modal-thumb-title" id="mTitle"></div>
+      </div>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {"episodes":[{"index":1,"id":"D4fkiQfzw_I","title":"How I Work: $77K/Month Solopreneur","url":"https://www.youtube.com/watch?v=D4fkiQfzw_I","thumbnail":"https://i.ytimg.com/vi/D4fkiQfzw_I/hqdefault_custom_1.jpg?sqp=CNT7w88G-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA6Zvpgo0uMbIDe5faLJ7Ii-0O6Jg","upload_date":"20260426","view_count":49082,"duration_string":"10:39","founder":"Marc","app_name":null,"app_url":"https://marclou.com/","description_short":"Marc Lou makes $77K/month as a solopreneur. Everyone who follows him wonders the same thing: how does he ship so much? This is a day in his life and how he actually works.","headline_money":"$77K","top_revenues":["$77K/Month","$77K/month"],"ai_tools":[],"platforms":["iOS","Reddit","Instagram","ASO"],"tactics":["ads","ASO","launch","shipping","validate","boring","solopreneur"],"idea_methods":[],"pull_quote":"I make $77,000 a month as a solo entrepreneur.","thesis":"But the thing is, at some point, I started to see people liking the work.","upload_date_iso":"2026-04-26","categories":["mobile"]},{"index":2,"id":"iVy5J7iE-3Q","title":"I Spent 24 Hours With A SaaS Millionaire","url":"https://www.youtube.com/watch?v=iVy5J7iE-3Q","thumbnail":"https://i.ytimg.com/vi/iVy5J7iE-3Q/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCwDPBsrgsvxnCiwfQ3NAMdqPIzKA","upload_date":"20260419","view_count":66633,"duration_string":"16:04","founder":"Jeremy","app_name":"SaaS","app_url":"https://leadquest.ai/","description_short":"I traveled to Los Angeles, CA to spend 24 hours with Jeremy Redman and dive deep into his $3M SaaS business.","headline_money":"","top_revenues":[],"ai_tools":["Bolt","Vibe"],"platforms":["SEO"],"tactics":["subscription","ads","SEO","launch","Product Hunt","vibe coding","solopreneur"],"idea_methods":[],"pull_quote":"How did you get to this point where you had a $3 million per year SAS with one founder, one employee?","thesis":"Hey Pat, I just sold my SAS for millions and I wanted to share the secret with you.","upload_date_iso":"2026-04-19","categories":["vibe","saas"]},{"index":3,"id":"bq3-qH-CpYQ","title":"I Made $1.5M From An App You’ve Never Heard Of","url":"https://www.youtube.com/watch?v=bq3-qH-CpYQ","thumbnail":"https://i.ytimg.com/vi/bq3-qH-CpYQ/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCgca3Oq4hdo3V1S4CFpC4Dbxb0cg","upload_date":"20260412","view_count":65441,"duration_string":"14:22","founder":"Jordan","app_name":"SaaS","app_url":"https://parakeet.chat/","description_short":"An unexpected phone call gave Jordan Rejaud the idea for an app that's now done $1.5M in revenue. And he's done it with zero ads, no content, and a customer base most founders would never think to build for.","headline_money":"$1.5M","top_revenues":[],"ai_tools":[],"platforms":["ASO"],"tactics":["ads","ASO","iterate","MVP","validate","validation","niche","boring"],"idea_methods":[],"pull_quote":"And then he turned this hidden idea into a $300,000 per year SAS business.","thesis":"I went to college, went to the corporate world and realized I want to build stuff.","upload_date_iso":"2026-04-12","categories":["mobile"]},{"index":4,"id":"PIXXEAfo6MY","title":"My Niche Mobile App Makes $20K/Month","url":"https://www.youtube.com/watch?v=PIXXEAfo6MY","thumbnail":"https://i.ytimg.com/vi/PIXXEAfo6MY/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBv7F_4stbRb7Pp_Ma-FzPMXMjSEQ","upload_date":"20260408","view_count":35602,"duration_string":"14:09","founder":"Ethan","app_name":"CutCoach","app_url":"https://www.cutcoach.app/","description_short":"Ethan dropped out of college after realizing AI could build in a day what took him a week. 6 months later, his app makes $20K/month. This is his exact playbook for finding, building, and marketing a niche app.","headline_money":"$20K","top_revenues":["$20K/Month","$20K/month","$20K/month"],"ai_tools":["Cursor"],"platforms":["iOS","Instagram","ASO","Superwall"],"tactics":["ads","ASO","viral","launch","iterate","MVP","niche","copy"],"idea_methods":["painful","tools."],"pull_quote":"How did you find the idea for this app that eventually made $20,000 a month?","thesis":"And that might be the secret hiding in plain sight.","upload_date_iso":"2026-04-08","categories":["vibe","mobile"]},{"index":5,"id":"rGLXc1GmsaI","title":"How This App Makes $35K/Month","url":"https://www.youtube.com/watch?v=rGLXc1GmsaI","thumbnail":"https://i.ytimg.com/vi/rGLXc1GmsaI/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCXuCqN3go6XpZSSnudGx4j-fUMJg","upload_date":"20260405","view_count":69962,"duration_string":"21:49","founder":"Flo","app_name":"MonAI","app_url":"https://www.get-monai.app/","description_short":"Flo's app was stuck at a few hundred bucks for over a year. Then one partnership changed everything and grew his app to $35K/month.","headline_money":"$35K","top_revenues":["$35K/Month","$35K/month","$300 per month"],"ai_tools":[],"platforms":["iOS","App Store","Reddit","ASO"],"tactics":["subscription","free trial","ads","ASO","viral","launch","iterate","niche"],"idea_methods":[],"pull_quote":"So $300 MR in the first year and a half.","thesis":"We figured out that actually uh hard payroll with free trial works best for us.","upload_date_iso":"2026-04-05","categories":["mobile"]},{"index":6,"id":"dWeoSKLt_fc","title":"I'm 14 And I Built A $14K/Month App","url":"https://www.youtube.com/watch?v=dWeoSKLt_fc","thumbnail":"https://i.ytimg.com/vi/dWeoSKLt_fc/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBkTmiG_3TG-i_8_gTh1yaNmYIjRw","upload_date":"20260401","view_count":84322,"duration_string":"13:29","founder":"Evan","app_name":"Locked","app_url":"https://trylocked.app/","description_short":"Evan built a mobile app and scaled it to $14K/month in just 4 months. And he did it with just ONE strategy. This is his exact playbook for building a successful mobile app in 2026.","headline_money":"$14K","top_revenues":["$14K/Month","$14K/month","$14K/month"],"ai_tools":["Vibe"],"platforms":["iOS","iPhone","App Store","TikTok","Instagram","ASO","Superwall"],"tactics":["paywall","subscription","free trial","ads","ASO","rankings","viral","launch","shipping","vibe coding"],"idea_methods":["ranking"],"pull_quote":"Well, I'm excited to talk about how you grew this app to $14,000 a month and growing.","thesis":"This would be my playbook if I wanted to nail starting [music] out on a new app.","upload_date_iso":"2026-04-01","categories":["mobile"]},{"index":7,"id":"DkmStHS8NP0","title":"My App Made $120K in 24 Hours","url":"https://www.youtube.com/watch?v=DkmStHS8NP0","thumbnail":"https://i.ytimg.com/vi/DkmStHS8NP0/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBp9MVwOltVYwyKORs6kqR-phjQ9Q","upload_date":"20260329","view_count":148089,"duration_string":"23:36","founder":"Umberto","app_name":"Floga","app_url":"https://floga.io/","description_short":"Most app founders launch in silence. Umberto made $120K in 24 hours from an app that wasn't even finished. This is his exact launch playbook.","headline_money":"$120K","top_revenues":["$25 a month"],"ai_tools":[],"platforms":["iOS","App Store","ASO"],"tactics":["subscription","free trial","ASO","launch","validate","copy"],"idea_methods":[],"pull_quote":"We launched our first product on Kickstarter and generated over $200,000 in the first month and actually the the the whole brand was about mindful screenfree practice.","thesis":"Most people might tell you this strategy is a bad idea, but Ombberto had a playbook and it worked.","upload_date_iso":"2026-03-29","categories":["mobile"]},{"index":8,"id":"0pp4X58q_0s","title":"I Built a $100K/Month Android App","url":"https://www.youtube.com/watch?v=0pp4X58q_0s","thumbnail":"https://i.ytimg.com/vi/0pp4X58q_0s/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBEjsfv9U0c7DEhkuX0O8AvbUvx8Q","upload_date":"20260325","view_count":70859,"duration_string":"24:10","founder":"Steve","app_name":"Journable","app_url":"https://www.journable.com/","description_short":"While everyone else fights over iOS, 92% of Steve's mobile app revenue comes from Android. This is his exact playbook.","headline_money":"$100K","top_revenues":["$100K/Month","$180 a month","$100 a month"],"ai_tools":["Claude","Copilot","Vibe"],"platforms":["iOS","Android","iPhone","App Store","Google Play","Google Ads","SEO","ASO"],"tactics":["subscription","free trial","ads","SEO","ASO","keyword","launch","Product Hunt","shipping","vibe coding"],"idea_methods":[],"pull_quote":"Today, I'm really excited to share how we grew this to over $100,000 a month primarily on Android.","thesis":"Something I've realized is that most people are sleeping on the potential of Android.","upload_date_iso":"2026-03-25","categories":["vibe","mobile"]},{"index":9,"id":"spiC5m6AJNs","title":"I Make $250K/Month From 13 Businesses (After Losing Everything to AI)","url":"https://www.youtube.com/watch?v=spiC5m6AJNs","thumbnail":"https://i.ytimg.com/vi/spiC5m6AJNs/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLApPQgEZwhqORjKeJiuZ98LL3cW8w","upload_date":"20260322","view_count":36710,"duration_string":"11:45","founder":"Jacky","app_name":null,"app_url":"https://jackychou.com/","description_short":"Jacky was making $500K/month. Then AI and Google's algorithm updates wiped out nearly everything. This is how he rebuilt to $250K/month across 13 different businesses... and the one distribution strategy that made the comeback possible.","headline_money":"$250K","top_revenues":["$500K/month","$250K/Month","$250K/month"],"ai_tools":["ChatGPT"],"platforms":["iOS","SEO","ASO","Stripe"],"tactics":["ads","affiliate","SEO","ASO","launch","iterate","niche","agency"],"idea_methods":[],"pull_quote":"What are all the different apps and software and businesses that you built that make $250,000 a month?","thesis":"","upload_date_iso":"2026-03-22","categories":["mobile"]},{"index":10,"id":"4KfFB-dh71Y","title":"I Make $17K/Month With One Strategy","url":"https://www.youtube.com/watch?v=4KfFB-dh71Y","thumbnail":"https://i.ytimg.com/vi/4KfFB-dh71Y/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCgM6beMlyU647aLErlQCvOpjKbHQ","upload_date":"20260319","view_count":44119,"duration_string":"17:56","founder":"Ben","app_name":"FollowBuddy","app_url":"https://followbuddy.com/","description_short":"Ben makes $17K/month from a SaaS he grew without ads, going viral, or being creative. His strategy: make the same video over and over again. This is his full breakdown.","headline_money":"$17K","top_revenues":["$17K/Month","$17K/month"],"ai_tools":[],"platforms":["TikTok","Instagram","SEO"],"tactics":["subscription","free trial","ads","affiliate","SEO","keyword","viral","validate","niche","agency"],"idea_methods":["low competition","tools.","ranking"],"pull_quote":"We definitely push the yearly plan the most at a $50 per year price tag.","thesis":"Literally, anyone can use this exact playbook and use it for their app.","upload_date_iso":"2026-03-19","categories":["other"]},{"index":11,"id":"LRX8TWC2hTM","title":"I Make $60K/Month From the Most Boring SaaS on the Internet","url":"https://www.youtube.com/watch?v=LRX8TWC2hTM","thumbnail":"https://i.ytimg.com/vi/LRX8TWC2hTM/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC9p7UiKTDTG0DIUNc2imVsdgjo3g","upload_date":"20260315","view_count":123537,"duration_string":"12:06","founder":"Thomas","app_name":"Pckgr","app_url":"https://www.vanta.com/lp/demo-1k?utm_campaign=1k_offer&utm_source=starter-story&utm_medium=paid-partner","description_short":"Tom was an IT admin doing the most tedious job imaginable. Nobody was solving it, so he built the solution himself. Now it makes $60K/month with 1,000+ customers. This is his exact playbook for finding and building in boring niches.\n\nGet compliant: https://www.vanta.com/lp/demo-1k?utm_campaign=1k_offer&utm_source=starter-story&utm_medium=paid-partner","headline_money":"$60K","top_revenues":["$60K/Month","$60K/month"],"ai_tools":["Cursor","Claude"],"platforms":["Reddit"],"tactics":["subscription","ads","launch","MVP","validate","validation","niche","boring"],"idea_methods":["painful","low competition"],"pull_quote":"This business is doing $60,000 a month and this sort of like boring idea I've never even heard of.","thesis":"Then one day he thought, \"What if I could automate all this and turn it into a business?\"I realized it can sometimes take, you know, an hour to successfully package [music] an application.","upload_date_iso":"2026-03-15","categories":["vibe","saas"]},{"index":12,"id":"l4WEqPX52Cg","title":"How This $250K/Month SaaS Got Its First 100 Users (Steal This Playbook)","url":"https://www.youtube.com/watch?v=l4WEqPX52Cg","thumbnail":"https://i.ytimg.com/vi/l4WEqPX52Cg/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDWAHKIxkrIt6Dj8OgdJVOUMvrLsg","upload_date":"20260311","view_count":66808,"duration_string":"14:45","founder":"Joseph","app_name":"Supademo","app_url":"https://supademo.com/","description_short":"This is the story of how a $3M/year business got its first 100 paying customers. Every tactic, step by step, so you can do the same.","headline_money":"$250K","top_revenues":["$250K/Month"],"ai_tools":["Cursor"],"platforms":["Reddit","SEO","ASO"],"tactics":["free trial","ads","SEO","ASO","keyword","viral","launch","MVP","validate","validation"],"idea_methods":["painful"],"pull_quote":"This is Joseph and his SAS makes over $250,000 a month.","thesis":"","upload_date_iso":"2026-03-11","categories":["vibe","saas"]},{"index":13,"id":"LKARRA0MvY4","title":"I Built a $10K/Month SaaS Using Other People's Customers","url":"https://www.youtube.com/watch?v=LKARRA0MvY4","thumbnail":"https://i.ytimg.com/vi/LKARRA0MvY4/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBUTWWEHt4hynRmWpsZ376pQryf8Q","upload_date":"20260308","view_count":36848,"duration_string":"16:22","founder":"Ivan","app_name":"Lancer","app_url":"https://www.lancer.app/","description_short":"Ivan built a $10K/Month SaaS without finding a single customer himself. Instead, he found the people who already had them. This is his exact playbook","headline_money":"$10K","top_revenues":["$10K/Month","$10K/Month","$10K MRR"],"ai_tools":["Cursor","Opus"],"platforms":["Pinterest","ASO","Stripe"],"tactics":["subscription","ads","affiliate","ASO","launch","MVP","niche","boring","agency"],"idea_methods":[],"pull_quote":"Essentially, we managed to get to $10,000 a month, third or fourth month after launching.","thesis":"","upload_date_iso":"2026-03-08","categories":["vibe","saas"]},{"index":14,"id":"E_rX4JJrYkY","title":"Zero to $40K/Month With One Marketing Channel (No Social Media)","url":"https://www.youtube.com/watch?v=E_rX4JJrYkY","thumbnail":"https://i.ytimg.com/vi/E_rX4JJrYkY/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAQcCdvjSnbXAw0xMsbMnwipWpLmw","upload_date":"20260304","view_count":44766,"duration_string":"19:47","founder":"Miquel","app_name":"Late","app_url":"https://www.vanta.com/lp/demo-1k?utm_campaign=1k_offer&utm_source=starter-story&utm_medium=paid-partner","description_short":"This is the story of how Miquel grew Late to $40K/month with just one marketing system.","headline_money":"$40K","top_revenues":["$40K/Month","$40K/month","$200 per month"],"ai_tools":[],"platforms":["Google Play","Google Ads","Reddit","Instagram","Facebook","SEO","ASO"],"tactics":["ads","SEO","ASO","keyword","rankings","viral","launch","MVP","copy"],"idea_methods":["painful","search volume","low competition","tools.","ranking"],"pull_quote":"And today, he's already making over $40,000 a month.","thesis":"","upload_date_iso":"2026-03-04","categories":["other"]},{"index":15,"id":"qIlX7cQ2UdU","title":"I Make $15K/Month From One Website","url":"https://www.youtube.com/watch?v=qIlX7cQ2UdU","thumbnail":"https://i.ytimg.com/vi/qIlX7cQ2UdU/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBog47pDDCGKCOHRlTXDi9LNEEaNw","upload_date":"20260301","view_count":108506,"duration_string":"16:20","founder":"Maddox","app_name":null,"app_url":"https://maddoxcloud.com/","description_short":"Maddox built a $15K/month gaming website. This video breaks down his exact strategy for driving massive traffic to a simple website.","headline_money":"$15K","top_revenues":["$15K/Month","$15K/month","$15K/month"],"ai_tools":["Vibe"],"platforms":["AdSense","Google Ads","TikTok","Instagram","ASO"],"tactics":["ads","AdSense","ASO","viral","launch","iterate","MVP","vibe coding","niche","copy"],"idea_methods":["repurpose"],"pull_quote":"Fast forward like 2 years and I had made $240 in a day passively from Duckmath.","thesis":"","upload_date_iso":"2026-03-01","categories":["other"]},{"index":16,"id":"7vz6b_Ohdl0","title":"I Built a Niche App to $9K MRR","url":"https://www.youtube.com/watch?v=7vz6b_Ohdl0","thumbnail":"https://i.ytimg.com/vi/7vz6b_Ohdl0/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD5P7V5gHuU-3YV6Cfanpz8k5xXAw","upload_date":"20260225","view_count":62361,"duration_string":"15:30","founder":"Jonathan","app_name":"ChartDB","app_url":"http://chartdb.io/","description_short":"Jonathan Fishner built ChartDB, an open source database visualization tool for developers. This video breaks down how to identify and sell to your ICP, no matter how \"small\" you think the audience is.","headline_money":"$9K MRR","top_revenues":["$9K MRR"],"ai_tools":["Cursor","Claude"],"platforms":["Reddit","SEO","Stripe"],"tactics":["subscription","ads","SEO","keyword","launch","iterate","validate","validation","niche","copy"],"idea_methods":["painful","tools.","utility"],"pull_quote":"His tiny open source project makes $9,000 a month.","thesis":"","upload_date_iso":"2026-02-25","categories":["vibe"]},{"index":17,"id":"v-uhjlMg9L0","title":"I sold my company","url":"https://www.youtube.com/watch?v=v-uhjlMg9L0","thumbnail":"https://i.ytimg.com/vi/v-uhjlMg9L0/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDCb4kEsitFA1NTzD5KxskLsOAo9Q","upload_date":"20260223","view_count":93192,"duration_string":"10:39","founder":"This","app_name":null,"app_url":null,"description_short":"This is the story of how I sold Starter Story :)\n\nI'm sharing more about how and why here: https://go.starterstory.com/workshop\n\nAll love, \n– Pat & The Starter Story Team","headline_money":"","top_revenues":[],"ai_tools":[],"platforms":["Stripe"],"tactics":["shipping"],"idea_methods":[],"pull_quote":"When I quit my job, I had about $12,000 to my name.","thesis":"","upload_date_iso":"2026-02-23","categories":["other"]},{"index":18,"id":"W48emwbUlUE","title":"How I Built a $12K/Month Micro-SaaS","url":"https://www.youtube.com/watch?v=W48emwbUlUE","thumbnail":"https://i.ytimg.com/vi/W48emwbUlUE/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAn3nTJfv16ZH0_WhcYX2PZ5v0Rcw","upload_date":"20260211","view_count":52411,"duration_string":"17:22","founder":"Vikash","app_name":"BulkMockup","app_url":"https://www.bulkmockup.com/","description_short":"Vikash built Bulkmockup, a Photoshop plugin that makes $12K/month. This video breaks down the three-step content system he uses to grow and get customers on auto-pilot\n\nBuild your own micro-saas → https://build.starterstory.com/select-plan?promo=TINY&utm_source=youtube&utm_campaign=vikash\n\nFollow Vikash: https://x.com/vikashkprajapat\nCheck out BulkMockup: https://www.bulkmockup.com/\n\n🔔 Follow the ","headline_money":"$12K","top_revenues":["$12K/Month","$12K/month","$40 a month"],"ai_tools":[],"platforms":["SEO"],"tactics":["ads","SEO","keyword","viral","launch","validation","niche"],"idea_methods":["painful","tools.","ranking"],"pull_quote":"I built a Photoshop plug-in called Bulk Mockup that brings me $12,000 a month.","thesis":"So, I brought Vikos onto the channel to break down his entire playbook.","upload_date_iso":"2026-02-11","categories":["saas"]},{"index":19,"id":"9sJ2R0rM3CA","title":"I Make $150K/Month From 20 Tiny Apps","url":"https://www.youtube.com/watch?v=9sJ2R0rM3CA","thumbnail":"https://i.ytimg.com/vi/9sJ2R0rM3CA/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDyuDaB5pr84N6kxl7LAG9v3FG1JQ","upload_date":"20260208","view_count":126622,"duration_string":"16:54","founder":"Katie","app_name":null,"app_url":"https://barn2.com/","description_short":"Katie Keith runs a portfolio of plugins that generate over $1M/year in revenue. This video breaks down her multi-product playbook: how she built 20 products and how she allocates resources across them. \n\nGet compliant → https://delve.co/book-demo?utm_source=starterstory&utm_medium=youtube&utm_campaign=primary-feb-08-26\n\nGet our guide to build your $1M Solopreneur MVP: https://clickhubspot.com/rmuv","headline_money":"$150K","top_revenues":["$150K/Month"],"ai_tools":[],"platforms":["ASO"],"tactics":["subscription","ads","affiliate","ASO","launch","shipping","iterate","MVP","validate","niche"],"idea_methods":[],"pull_quote":"Over the past few years, she's built a portfolio of 19 apps that collectively make $1.8 million a year.","thesis":"","upload_date_iso":"2026-02-08","categories":["mobile"]},{"index":20,"id":"hYF4fQYlrso","title":"I Make $16K/Month... Even In A \"Tiny\" Niche","url":"https://www.youtube.com/watch?v=hYF4fQYlrso","thumbnail":"https://i.ytimg.com/vi/hYF4fQYlrso/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDp2myAxrIEM9G6HLTqOvZ3Qpt5Qg","upload_date":"20260205","view_count":87191,"duration_string":"17:21","founder":"Nic","app_name":"MRR","app_url":"https://www.blogtopin.com/","description_short":"Nic built a micro-saas that makes $16K MRR. And he did it by picking a painfully specific niche and solving their whole problem. This video breaks down how even a \"small\" niche can still get you to $10K/month\n\nMake sure your app is compliant → https://delve.co/book-demo?utm_source=starterstory&utm_medium=youtube&utm_campaign=primary-feb-05-26\n\nBuild your own micro-saas → https://build.starterstory","headline_money":"$16K","top_revenues":["$16K/Month","$16K MRR","$10K/month"],"ai_tools":["Cursor","Gemini"],"platforms":["Reddit","Instagram","Facebook","Pinterest","SEO","Stripe"],"tactics":["subscription","affiliate","SEO","viral","launch","Product Hunt","MVP","niche","boring","agency"],"idea_methods":["painful","tools."],"pull_quote":"So he built it in 6 weeks, launched it, and today this Microsass makes over $16,000 a month.","thesis":"","upload_date_iso":"2026-02-05","categories":["vibe"]},{"index":21,"id":"47QXbPGyzBI","title":"I Made $500K From 8 Different Income Streams","url":"https://www.youtube.com/watch?v=47QXbPGyzBI","thumbnail":"https://i.ytimg.com/vi/47QXbPGyzBI/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDNVnTyQyEpgWW_LkN7X66GiTGR5w","upload_date":"20260201","view_count":34033,"duration_string":"15:17","founder":"Florin","app_name":null,"app_url":"https://www.vanta.com/lp/demo-1k?utm_campaign=1k_offer&utm_source=starter-story&utm_medium=paid-partner","description_short":"Florin Pop is a developer who's made $500K over 6 years – not from one breakout hit, but by stacking dozens of tiny projects. This video breaks down his building framework and why playing the long game with a portfolio of projects beats chasing one big win.\n\nGet compliant → https://www.vanta.com/lp/demo-1k?utm_campaign=1k_offer&utm_source=starter-story&utm_medium=paid-partner\n\nBuild your own proje","headline_money":"$500K","top_revenues":[],"ai_tools":[],"platforms":["Reddit"],"tactics":["ads","launch","shipping","MVP","validate","validation","niche"],"idea_methods":["painful"],"pull_quote":"Uh I had YouTube which generated over $100,000 from ads and sponsorships.","thesis":"And in this video, we'll dive into all of his different projects and how much money they make, how he manages all these projects at the same time, and [music] his exact five-step playbook for finding your first win.","upload_date_iso":"2026-02-01","categories":["other"]},{"index":22,"id":"RPM4ImzcIFc","title":"How I Built It: $17K/Month Open Source SaaS","url":"https://www.youtube.com/watch?v=RPM4ImzcIFc","thumbnail":"https://i.ytimg.com/vi/RPM4ImzcIFc/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA6WP8b94PPXWh-vhEtqfsvIPWVJw","upload_date":"20260128","view_count":30449,"duration_string":"22:52","founder":"Nevo","app_name":"SaaS","app_url":"https://postiz.com/","description_short":"Nevo built an open source SaaS called Postiz. Over the past few years he has gotten over 25K GitHub stars and grown the app to over $17K MRR. This video breaks down how to market open-source projects in 2026 and beyond.\n\nBook a demo with Delve → https://delve.co/book-demo?utm_source=starterstory&utm_medium=youtube&utm_campaign=primary-jan-28-26\n\nGrab the niche communities playbook → https://build.","headline_money":"$17K","top_revenues":["$17K/Month","$17K MRR","$17K per month"],"ai_tools":["Opus","Copilot"],"platforms":["Reddit","Instagram","Facebook","SEO","ASO"],"tactics":["affiliate","SEO","ASO","launch","iterate","niche","clone","copy","translate"],"idea_methods":["tools.","ranking"],"pull_quote":"Post is currently making $17K per month.","thesis":"If distribution is something that you're serious about, well, I put together a quick resource for you called the niche communities playbook.","upload_date_iso":"2026-01-28","categories":["saas"]},{"index":23,"id":"pvjalHFNM9Q","title":"How I Used Reddit to Build a $34K/Month SaaS","url":"https://www.youtube.com/watch?v=pvjalHFNM9Q","thumbnail":"https://i.ytimg.com/vi/pvjalHFNM9Q/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDJYj0XO4Ea4kkSr-A4P03ZKjEzAw","upload_date":"20260125","view_count":59225,"duration_string":"16:43","founder":"Roman","app_name":"SaaS","app_url":"https://gojiberry.ai/","description_short":"Romàn Czerny runs a SaaS that makes $34K per month. And much of his early growth is thanks to a genius Reddit strategy. This video is a focused, tactical Reddit playbook: the templates that work, how to avoid getting banned, and how to turn Reddit into a consistent revenue channel for your app.\n\nSubscribe to The Hustle → https://clickhubspot.com/8abd40\n\nGrab the niche communities playbook → https:","headline_money":"$34K","top_revenues":["$34K/Month","$34K per month","$100 per month"],"ai_tools":["Vibe"],"platforms":["iOS","Reddit","Instagram","SEO","ASO"],"tactics":["subscription","ads","affiliate","SEO","ASO","viral","launch","niche","translate"],"idea_methods":["Reddit post","tools."],"pull_quote":"So that's around $30K [music] and the growth is pretty good.","thesis":"So, I decided to put together a playbook that you can download right now on how you can get your first 100 users on Reddit.","upload_date_iso":"2026-01-25","categories":["mobile","saas"]},{"index":24,"id":"R4BS_UiTBPw","title":"How I Built a $13K/Month SaaS","url":"https://www.youtube.com/watch?v=R4BS_UiTBPw","thumbnail":"https://i.ytimg.com/vi/R4BS_UiTBPw/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAV1oK1K7Xhh5IQteRM1p_CjvYxAw","upload_date":"20260121","view_count":36645,"duration_string":"23:08","founder":"Ayush","app_name":"SEO","app_url":"https://elephas.app/","description_short":"Ayush built Elephas, an AI app that’s making $150K/year. He grew the business in two phases: Phase 1 was Reddit and Phase 2 was SEO. This video breaks down his exact Reddit playbook and his SEO strategy, that helped him go from zero to $150K/year in just a few years.\n\nGrab the niche communities playbook → https://build.starterstory.com/build/playbook-communities?utm_source=youtube&utm_campaign=ayu","headline_money":"$13K","top_revenues":["$13K/Month","$100 a month"],"ai_tools":["Claude","Vibe"],"platforms":["iOS","App Store","Reddit","SEO","ASO"],"tactics":["subscription","SEO","ASO","keyword","viral","launch","validate","niche","copy"],"idea_methods":["Reddit post","search volume","keyword research","low competition","tools.","ranking"],"pull_quote":"So before we get into all that, I'd just like to understand a highlevel overview of how you took Elephas from zero to over $10,000 a month.","thesis":"This is Aayush, a guy from India who built an app that makes over $150,000 a year and he grew it using one formula, the Reddit and SEO playbook.","upload_date_iso":"2026-01-21","categories":["vibe","mobile","saas"]},{"index":25,"id":"yBjcmMhXSDk","title":"I Built a $20K/Month Mobile App: Here’s My Entire Playbook","url":"https://www.youtube.com/watch?v=yBjcmMhXSDk","thumbnail":"https://i.ytimg.com/vi/yBjcmMhXSDk/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAK-zRNhCIoM9U76Ix0yF3nohbuTQ","upload_date":"20260118","view_count":151662,"duration_string":"17:34","founder":"Mau","app_name":null,"app_url":"https://www.prayerlock.com/","description_short":"Mau is a solo founder who built and grew his mobile app to $20K/month. This video is the complete playbook for building mobile apps in 2026: how he built it with AI, grew organically, and is scaling with paid ads. \n\nBuild your own iOS app → https://build.starterstory.com/build/the-ios-bootcamp?utm_source=youtube&utm_campaign=mau\n\nFree Course: Ship Your First iOS App in 7 Days: https://clickhubspot","headline_money":"$20K","top_revenues":["$20K/Month","$20K/month","$25 a month"],"ai_tools":["Cursor","Sonnet","Gemini"],"platforms":["iOS","App Store","Instagram","ASO"],"tactics":["subscription","ads","ASO","launch","iterate","niche","copy"],"idea_methods":[],"pull_quote":"A previous month was at $15K and October was at 10K.","thesis":"","upload_date_iso":"2026-01-18","categories":["vibe","mobile"]},{"index":26,"id":"9r0qPeSJGog","title":"I built a $14K/month SaaS using Discord","url":"https://www.youtube.com/watch?v=9r0qPeSJGog","thumbnail":"https://i.ytimg.com/vi/9r0qPeSJGog/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD-3lMvUx2IZWKmN-fWFSgnsQQJHg","upload_date":"20260114","view_count":43978,"duration_string":"15:16","founder":"Sam","app_name":"Algrow","app_url":"https://algrow.online/","description_short":"Sam Adeniyi used Discord to validate and launch his first saas and now it makes $14K MRR (built entirely with ChatGPT + Cursor). This video breaks down how he used Discord to validate his idea and how knowing a niche community lets you build the perfect product. \n\nLearn how to find customers like Sam → https://build.starterstory.com/build/playbook-communities?utm_source=youtube&utm_campaign=algrow","headline_money":"$14K/month","top_revenues":["$14K/month","$14K MRR","$500 per month"],"ai_tools":["Cursor","ChatGPT","Gemini","Vibe"],"platforms":["iOS","Reddit","Facebook","ASO","Stripe"],"tactics":["affiliate","ASO","keyword","viral","launch","MVP","vibe code","vibe coding","validate","validation"],"idea_methods":["annoying"],"pull_quote":"There is a 25 a month plan, a 45 a month plan, and an $80 a month plan.","thesis":"And the way that I did this is something that I don't see many founders doing and it's tapping into Discord communities and growing your SAS through there and I'm excited to share that playbook with you today.","upload_date_iso":"2026-01-14","categories":["vibe","mobile","saas"]},{"index":27,"id":"XifgHi9R5Rc","title":"How My App Hit $60K/Month in 2 Months","url":"https://www.youtube.com/watch?v=XifgHi9R5Rc","thumbnail":"https://i.ytimg.com/vi/XifgHi9R5Rc/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB8GbfIo7CAdj52UpKPkzHbQOSc2g","upload_date":"20260111","view_count":101474,"duration_string":"19:51","founder":"Lara","app_name":"Kleo","app_url":"https://kleo.so/","description_short":"Lara just launched an AI writing tool for LinkedIn. They made $30K in 4 days, and went from $0 to $60K/month in less than 2 months. The secret? The Kleo Launch Playbook. This video breaks down exactly how they built up hype for their app, launched to a private beta, and hit $30K MRR in just a few days.\n\nGrab the personal brand playbook → https://build.starterstory.com/build/playbook-personal-brand","headline_money":"$60K","top_revenues":["$60K/Month","$60K/month","$30K MRR"],"ai_tools":["Claude","ChatGPT"],"platforms":["iOS","Instagram","ASO"],"tactics":["subscription","ads","ASO","viral","launch","niche","agency"],"idea_methods":[],"pull_quote":"Obviously, they didn't build and launch this product in 4 days, but they did go from 0 to $30,000 MRR in just a few days thanks to a very different approach to launching a SaaS.","thesis":"And the way we did all of this was by using the Cleo launch playbook.","upload_date_iso":"2026-01-11","categories":["vibe","mobile"]},{"index":28,"id":"Adl5_lJfkEE","title":"How I Grew My App to $13K/month (Even Though I Hate Marketing)","url":"https://www.youtube.com/watch?v=Adl5_lJfkEE","thumbnail":"https://i.ytimg.com/vi/Adl5_lJfkEE/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDq0WeGFEEB9eGkBMykMeFDwySgUQ","upload_date":"20260107","view_count":219300,"duration_string":"14:56","founder":"Bhanu","app_name":"SiteGPT","app_url":"https://sitegpt.ai/","description_short":"Bhanu built SiteGPT and he’s grown it to $13K/month. But here's the thing... he's a builder, NOT a marketer. In this video, we'll dive into how Bhanu used his building skills to get thousands of views on his product (for free). \n\nJoin an upcoming Starter Story Build Bootcamp → https://build.starterstory.com/select-plan?promo=BHANU&utm_source=youtube&utm_campaign=bhanu\n\nGet our Mobile App Growth Ch","headline_money":"$13K/month","top_revenues":["$13K/month","$13K/month"],"ai_tools":["Cursor","Vibe"],"platforms":["SEO","ASO"],"tactics":["subscription","ads","SEO","ASO","keyword","launch"],"idea_methods":["search volume","keyword research","tools."],"pull_quote":"What is SiteGPT and how does it make $13,000 a month?","thesis":"","upload_date_iso":"2026-01-07","categories":["vibe"]},{"index":29,"id":"FCGpgPZqmkY","title":"How I built my first SaaS without an audience ($25K/month)","url":"https://www.youtube.com/watch?v=FCGpgPZqmkY","thumbnail":"https://i.ytimg.com/vi/FCGpgPZqmkY/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBRx22SMU0Wj7dAp0uvKSLwuecB4A","upload_date":"20260104","view_count":64134,"duration_string":"14:58","founder":"Hassam","app_name":"MRR","app_url":null,"description_short":"Hassam is a non-technical founder who built his app 100% with AI. Then he hacked distribution by using someone else's audience to share his work. This video breaks down his distribution strategy that helped him his $25K MRR in 90 days. \n\nBuild an app with AI → https://build.starterstory.com/?utm_source=youtube&utm_campaign=hassam\n\nFollow Hassam: https://x.com/hasaamb\n\n🔔 Follow the Second Channel: ","headline_money":"$25K/month","top_revenues":["$25K/month","$25K MRR","$50 a month"],"ai_tools":["Cursor"],"platforms":["Reddit","Facebook"],"tactics":["subscription","launch","shipping","iterate","MVP","validate","validation","niche","copy"],"idea_methods":["tools."],"pull_quote":"We offer a $50 a month pricing to the coaching customers of Legacy X and we have the regular pricing model for $1.99 per month for the general public.","thesis":"So, when I eventually started building tools for my own Amazon business, I realized that I have something most developers don't, and that's the niche domain knowledge on Amazon.","upload_date_iso":"2026-01-04","categories":["vibe","saas"]},{"index":30,"id":"VYT-ip21P08","title":"How I Used Twitter to Hit $10K/Month","url":"https://www.youtube.com/watch?v=VYT-ip21P08","thumbnail":"https://i.ytimg.com/vi/VYT-ip21P08/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC9S3lTb6TvpAsEA19tmfMUPx7xZA","upload_date":"20251228","view_count":40911,"duration_string":"20:10","founder":"Rob","app_name":"SuperX","app_url":"https://superx.so/","description_short":"Over the past year, Rob Hallam has been furiously building in public on X/Twitter. He posts every day and has grown his app to over $10K/month. In this video, Rob breaks down his build in public playbook and how anyone can use the power of the internet to build their own successful saas.  \n\nGrab the Personal Brand Playbook → https://build.starterstory.com/build/playbook-personal-brand?utm_source=y","headline_money":"$10K","top_revenues":["$10K/Month","$10K/month","$200 a month"],"ai_tools":["Claude"],"platforms":["ASO","Stripe"],"tactics":["subscription","ads","ASO","viral","launch","shipping","niche","agency"],"idea_methods":["annoying"],"pull_quote":"We're doing $13,000 a month right now in monthly recurring revenue entirely through $29 a month subscriptions and we have about $450 active subscribers right now.","thesis":"Rob's exact content system that he uses every day to grow on X and his step-by-step playbook on how to build in public and get thousands of followers if he had to start over from scratch today.","upload_date_iso":"2025-12-28","categories":["vibe"]},{"index":31,"id":"ST2ROUFbdvU","title":"How We Grew Our App to $30K/Month","url":"https://www.youtube.com/watch?v=ST2ROUFbdvU","thumbnail":"https://i.ytimg.com/vi/ST2ROUFbdvU/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBvqhX0-Vk338mDDLI9ehXV_TpfKA","upload_date":"20251220","view_count":44411,"duration_string":"12:47","founder":"Alejandro","app_name":"MVP","app_url":null,"description_short":"Alejandro and Mario built Pushscroll: a fitness app that's making $30K/month. But they took an entirely different approach. This story is about a new way to build apps: where your first MVP isn’t code, it’s content.\n\nGet the Content-First Playbook → https://build.starterstory.com/build/playbook-validate-app-idea?utm_source=youtube&utm_campaign=pushscroll-playbook\n\nBuild an app with AI → https://bu","headline_money":"$30K","top_revenues":["$30K/Month","$30K/month"],"ai_tools":[],"platforms":["iOS","App Store","TikTok","Instagram","ASO"],"tactics":["ads","ASO","viral","launch","MVP","validate","validation","niche","copy"],"idea_methods":["painful"],"pull_quote":"This is Alejandro and Mario, two founders who built an app that makes $30,000 a month.","thesis":"","upload_date_iso":"2025-12-20","categories":["mobile"]},{"index":32,"id":"LYdJ3dfNCVs","title":"My mobile app made $800K in 365 days","url":"https://www.youtube.com/watch?v=LYdJ3dfNCVs","thumbnail":"https://i.ytimg.com/vi/LYdJ3dfNCVs/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCJz4LdpJdTA6jE7BiDbdedJqTfkA","upload_date":"20251217","view_count":53091,"duration_string":"13:18","founder":"Louis","app_name":"GlowUp","app_url":"https://www.useglowup.app/","description_short":"Louis built a mobile app that made $800K in 1 year. And he did it all by posting on TikTok for $0. This video breaks down how he did it and why this works.\n\nGet 90% off Xero for 6 months using this link. Terms & Conditions apply → https://xero5440.partnerlinks.io/StarterStory_mobileapp\n\nGet the TikTok Playbook → https://build.starterstory.com/build/playbook-organic-short-form?utm_source=youtube&ut","headline_money":"$800K","top_revenues":[],"ai_tools":[],"platforms":["iOS","iPhone","App Store","Google Play","TikTok","ASO","Superwall"],"tactics":["subscription","ads","ASO","viral","launch","shipping","MVP","niche"],"idea_methods":[],"pull_quote":"Immediately after building, it hit the top of the app store and in just one year it made over $800,000.","thesis":"","upload_date_iso":"2025-12-17","categories":["mobile"]},{"index":33,"id":"8kM-JcKpcDs","title":"How I grew my mobile app to $17K per month","url":"https://www.youtube.com/watch?v=8kM-JcKpcDs","thumbnail":"https://i.ytimg.com/vi/8kM-JcKpcDs/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDqhiET7GpHwClrQs6wj_KfVh563g","upload_date":"20251214","view_count":98751,"duration_string":"20:58","founder":"George","app_name":null,"app_url":null,"description_short":"George built a mobile app without writing a single line of code. This video breaks down how he vibe coded his app, his influencer partnership playbook, and how non-coders can build profitable mobile apps using AI tools.\n\nBuild an iOS app → https://build.starterstory.com/build/the-ios-bootcamp?utm_source=youtube&utm_campaign=george\n\nFollow George: https://x.com/GeorgeLampro20\n\n🔔 Follow the Second C","headline_money":"$17K per month","top_revenues":["$17K per month","$25 a month"],"ai_tools":["Cursor","Bolt","Vibe"],"platforms":["iOS","App Store","Instagram"],"tactics":["subscription","free trial","ads","viral","launch","MVP","vibe code","vibe coding","validate","niche"],"idea_methods":["tools."],"pull_quote":"Our pricing is $9.99 for the month and then $59.99 for the year.","thesis":"","upload_date_iso":"2025-12-14","categories":["vibe","mobile"]},{"index":34,"id":"vw2Yc4Y1PsU","title":"I make $10K/month from 28 apps","url":"https://www.youtube.com/watch?v=vw2Yc4Y1PsU","thumbnail":"https://i.ytimg.com/vi/vw2Yc4Y1PsU/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA_HL-vCDvLBLtjkqTrzOAcPUqjnw","upload_date":"20251211","view_count":232429,"duration_string":"14:01","founder":"Max","app_name":null,"app_url":null,"description_short":"Max is a full-time developer who builds apps before and after work. His philosophy is simple: ship fast, don’t get attached, and move on. In this video, we break down his entire process for finding app ideas and shipping them fast.\n\nFind your next business idea → https://clickhubspot.com/b2b1ab \n\nShip your next app → https://build.starterstory.com/select-plan?promo=28APPS&utm_source=youtube&utm_ca","headline_money":"$10K/month","top_revenues":["$10K/month","$200 a month","$200 a month"],"ai_tools":["Gemini"],"platforms":["iOS","Android","App Store","ASO"],"tactics":["ads","ASO","keyword","launch","shipping","MVP","ship fast","copy"],"idea_methods":["tools.","top apps"],"pull_quote":"During my off work hours in 8 month time, I've built a portfolio of 28 simple mobile apps that are now bringing me $10,000 monthly revenue.","thesis":"Most people think you need one big app to win, but Max proves that you can be successful with a portfolio of tiny bets.","upload_date_iso":"2025-12-11","categories":["mobile"]},{"index":35,"id":"k2jecxFu2as","title":"I shipped my app in 12 hours and now it makes $15K/month","url":"https://www.youtube.com/watch?v=k2jecxFu2as","thumbnail":"https://i.ytimg.com/vi/k2jecxFu2as/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBo5jBUj4XbZvMedWLQqfDjnG3acw","upload_date":"20251209","view_count":116905,"duration_string":"13:01","founder":"Louis","app_name":"Audiopen","app_url":"https://audiopen.ai/","description_short":"Louis Pereira shipped the MVP of his  app in just 12 hours. He got traction and customers on the first day. And today, he’s making over $15K/month from that same app. This is the story of how a regular dude from India changed his life by building and shipping fast. \n\nGet 90% off Xero for 6 months using this link. Terms & Conditions apply → https://xero5440.partnerlinks.io/StarterStory_theappIbuilt","headline_money":"$15K/month","top_revenues":["$15K/month","$15K/month","$800 a month"],"ai_tools":[],"platforms":["Pinterest","ASO","Stripe"],"tactics":["subscription","ads","ASO","launch","shipping","MVP","validate","validation"],"idea_methods":["tools."],"pull_quote":"No, it didn't make $15,000 a month overnight, but the core product, the core MVP was built in about 12 hours.","thesis":"","upload_date_iso":"2025-12-09","categories":["mobile"]},{"index":36,"id":"xeUhKuJbeWQ","title":"I Built 4 SaaS Apps to $100K MRR: Here's My Exact Playbook","url":"https://www.youtube.com/watch?v=xeUhKuJbeWQ","thumbnail":"https://i.ytimg.com/vi/xeUhKuJbeWQ/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBgn0TrIMiHGtatv8z6OHMZZxkxQQ","upload_date":"20251207","view_count":214255,"duration_string":"18:59","founder":"Tibo","app_name":"SaaS","app_url":null,"description_short":"Tibo runs a portfolio of successful micro-SaaS projects and in this video, we walk through his specific playbook he uses over and over again to launch successful saas companies. \n\nLearn how top startups grow → https://clickhubspot.com/c1f798\n\nBuild and launch an app → https://build.starterstory.com/build/ai-build-accelerator?utm_source=youtube&utm_campaign=tibo\n\nFollow Tibo: https://x.com/tibo_mak","headline_money":"$100K MRR","top_revenues":["$100K MRR"],"ai_tools":[],"platforms":["Reddit","SEO"],"tactics":["ads","affiliate","SEO","keyword","launch","Product Hunt","MVP","no-code","translate"],"idea_methods":["my own problem","tools."],"pull_quote":"Tibo's story is awesome and his portfolio of multiple $100,000 per month projects is very impressive.","thesis":"I've built many apps, so I'm going to be talking about my playbook, the one that I'm using every day and which got me to have four apps above 100 K per month.","upload_date_iso":"2025-12-07","categories":["saas"]},{"index":37,"id":"SJOFUBNHYqU","title":"I make $120K/year from 3 mobile apps","url":"https://www.youtube.com/watch?v=SJOFUBNHYqU","thumbnail":"https://i.ytimg.com/vi/SJOFUBNHYqU/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB_y0yIpiNzU9ngov7HpjnMQTJJMA","upload_date":"20251204","view_count":34858,"duration_string":"14:06","founder":"Presh","app_name":null,"app_url":"https://thewellness.company/","description_short":"Presh has built 3 niche health tracking apps. This video breaks down his philosophy of building for problems you personally experience and why health and wellness niches create sustainable app businesses.\n\nStay tax compliant → https://go.starterstory.com/presh\n\nBuild your own simple app → https://build.starterstory.com/build/ai-build-accelerator?utm_source=youtube&utm_campaign=presh\n\nFollow Presh:","headline_money":"$120K","top_revenues":[],"ai_tools":["Lovable","Bolt"],"platforms":["iPhone","App Store","ASO"],"tactics":["paywall","subscription","ads","ASO","launch","MVP","niche"],"idea_methods":["tools.","calculator","top apps"],"pull_quote":"This year, he's already launched three apps that are making over $10,000 a month.","thesis":"I asked Pre to come onto the channel to break down his playbook of building a portfolio of hyper niche apps.","upload_date_iso":"2025-12-04","categories":["vibe","mobile"]},{"index":38,"id":"7KqlwjBM_tM","title":"How I Built It: $30K/month Micro-SaaS (Subscribr Breakdown)","url":"https://www.youtube.com/watch?v=7KqlwjBM_tM","thumbnail":"https://i.ytimg.com/vi/7KqlwjBM_tM/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBdrDMYs9iMhGOPFeI1byfc3KRWbA","upload_date":"20251202","view_count":77260,"duration_string":"16:29","founder":"Gil","app_name":"Subscribr","app_url":"https://subscribr.ai/","description_short":"Gil is a developer who left the VC-backed world to bootstrap his own app. He has a simple playbook for building apps: pre-sell first and THEN build. In this video, we break down how he bootstrapped his app to over $30K/month\n\nBuild your own simple app → https://build.starterstory.com/build/ai-build-accelerator?utm_source=youtube&utm_campaign=gil\n\nFollow Gil: https://x.com/gilhildebrand\nCheck out h","headline_money":"$30K/month","top_revenues":["$30K/month","$30K/month","$300 a month"],"ai_tools":["Vibe"],"platforms":["SEO","ASO"],"tactics":["subscription","ads","SEO","ASO","viral","launch","vibe code","validate","validation"],"idea_methods":[],"pull_quote":"How do you decide to go the bootstrap route and how do you come up with an idea that eventually makes $30,000 a month?","thesis":"Meet Gil, a developer who built a SAS to $30,000 a month thanks to one simple strategy,which was, I think, the the key thing that made this successful.","upload_date_iso":"2025-12-02","categories":["saas"]},{"index":39,"id":"-OPKa8DIzKU","title":"My Apps Failed Until I Discovered This Playbook ($35K/month apps)","url":"https://www.youtube.com/watch?v=-OPKa8DIzKU","thumbnail":"https://i.ytimg.com/vi/-OPKa8DIzKU/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDIF4SdJYVUHKybBzoIksQBbobfOQ","upload_date":"20251130","view_count":55840,"duration_string":"14:08","founder":"Loic","app_name":"SaaS","app_url":null,"description_short":"Loïc Berthelot has co-founded 3 success SaaS apps using the same playbook. This video breaks down what that playbook is and how he used to to grow his apps to over $35K MRR each. \n\nBuild your own simple app → https://build.starterstory.com/build/ai-build-accelerator?utm_source=youtube&utm_campaign=loic\n\nFollow Loic: https://x.com/LoicBerthelot \n\n🔔 Follow the Second Channel: @StarterStoryBuild  \n🏁 ","headline_money":"$35K/month","top_revenues":["$35K/month","$35K MRR"],"ai_tools":["Cursor","Gemini"],"platforms":["Instagram","ASO"],"tactics":["ads","affiliate","ASO","keyword","viral","launch","iterate","MVP","validate","copy"],"idea_methods":["repurpose"],"pull_quote":"You said you had three companies that made over $35,000 MR after starting.","thesis":"I asked Lo to come onto the channel to break down his playbook for finding ideas that win.","upload_date_iso":"2025-11-30","categories":["vibe"]},{"index":40,"id":"wvYej-2KWDg","title":"How he makes $250K per month from a simple app (Letterly Breakdown)","url":"https://www.youtube.com/watch?v=wvYej-2KWDg","thumbnail":"https://i.ytimg.com/vi/wvYej-2KWDg/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA1zHcdUiHwf-JZpNo8BCP1lKsdqA","upload_date":"20251124","view_count":80400,"duration_string":"13:49","founder":"Anton","app_name":"Letterly","app_url":"https://letterly.app/","description_short":"Anton built a note-taking app that is designed to be simple and easy to use. This video breaks down his simple product philosophy and how focusing on design and UX created a product users love.\n\nGrab the Black Friday deal → https://www.starterstory.com/blackfriday?utm_source=youtube&utm_campaign=anton \n\nBuild your own simple app → https://build.starterstory.com/build/ai-build-accelerator?utm_sourc","headline_money":"$250K per month","top_revenues":["$250K per month"],"ai_tools":[],"platforms":["ASO"],"tactics":["free trial","ads","ASO","launch","iterate","validate","copy"],"idea_methods":["tools."],"pull_quote":"So, you come up with the idea, but honestly, I think a lot of people watching this might be wondering, and I'm wondering this, too, is how does this app make $200,000 a month?","thesis":"","upload_date_iso":"2025-11-24","categories":["mobile"]},{"index":41,"id":"nsn94Ad47GY","title":"Our Mobile App Made $85K in 8 months","url":"https://www.youtube.com/watch?v=nsn94Ad47GY","thumbnail":"https://i.ytimg.com/vi/nsn94Ad47GY/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBCPV-q0P78ks8z8HLKd02Wwjsj3Q","upload_date":"20251120","view_count":31585,"duration_string":"12:55","founder":null,"app_name":"Coherence","app_url":"https://www.coherencebreath.com/","description_short":"Jack and Nick are two brothers who turned their obsession with breathwork into a niche mobile app. But here's what they did different: they validated their idea with content before writing a single line of code. \n\nBuild an app with Rocket → https://www.rocket.new/?utm_source=youtube&utm_medium=starterstory&utm_campaign=3rdintegration \n\nStarter Story Build→ https://build.starterstory.com/build/ai-b","headline_money":"$85K","top_revenues":["$800 a month","$500 a month","$100 a month"],"ai_tools":["Cursor"],"platforms":["Instagram","ASO","Stripe"],"tactics":["subscription","free trial","ads","ASO","viral","launch","MVP","validate","niche"],"idea_methods":["painful","tools."],"pull_quote":"Meet Jack and Nick Sweeney, two brothers who built a mobile app this year that's already made $85,000.","thesis":"So, I brought them onto the channel to break down this entire playbook.","upload_date_iso":"2025-11-20","categories":["vibe","mobile"]},{"index":42,"id":"rCV-TVCnF6Q","title":"How We Built It: $30K/month Mobile App","url":"https://www.youtube.com/watch?v=rCV-TVCnF6Q","thumbnail":"https://i.ytimg.com/vi/rCV-TVCnF6Q/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAm3pb_9P2m3rBzGgsFoDhX548fkQ","upload_date":"20251118","view_count":36046,"duration_string":"10:50","founder":"Eyal","app_name":"MRR","app_url":null,"description_short":"Eyal and Yahli Hazan built an app that was stuck at $2K MRR for months. The problem? Their app simply wasn't good enough... So they spent 4 months rebuilding it and after relaunching, they hit over $10K MRR in one week. This video breaks down why distribution isn't everything and how to optimize your product based on data. \n\nJoin our Black Friday VIP list → https://www.starterstory.com/blackfriday","headline_money":"$30K/month","top_revenues":["$30K/month","$10K MRR","$2K MRR"],"ai_tools":["ChatGPT"],"platforms":["App Store","ASO","Superwall","RevenueCat"],"tactics":["paywall","free trial","ads","ASO","viral","launch","iterate"],"idea_methods":["tools."],"pull_quote":"How did you eventually build an app that's making over $30,000 a month?","thesis":"Eventually, in the middle of the NFL season last year, that's when we started launching, and that's when we sort of figured out that our product market fit wasn't exactly what we wanted.","upload_date_iso":"2025-11-18","categories":["mobile"]},{"index":43,"id":"LWPN-PAhtLA","title":"My website makes $35K/month (built in 3 hours)","url":"https://www.youtube.com/watch?v=LWPN-PAhtLA","thumbnail":"https://i.ytimg.com/vi/LWPN-PAhtLA/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLChV0YVwneBOVo0j4ekdO40PPdG0w","upload_date":"20251116","view_count":83210,"duration_string":"14:26","founder":null,"app_name":null,"app_url":null,"description_short":"Pontus Abrahamsson had a crazy idea on his flight to France. And as soon as he landed he called his co-founder and said, \"we need to build a directory.\" So they bought the domain, built the app in 3 hours, posted it, and it went super viral. This video breaks down why directories still work in 2025 and how to design beautiful websites with AI.\n\nJoin our Black Friday VIP list → https://www.starters","headline_money":"$35K/month","top_revenues":["$35K/month"],"ai_tools":["Cursor"],"platforms":["ASO"],"tactics":["ads","ASO","viral","launch","shipping","iterate","MVP","ship fast","copy"],"idea_methods":[],"pull_quote":"In this video, we'll dive into exactly what tools he used to build a $34,000 a month website in just 3 hours.","thesis":"the secret to why his directory took off when many others don't and his advice for anyone building websites like this right now.","upload_date_iso":"2025-11-16","categories":["vibe"]},{"index":44,"id":"2dfMUtHlQik","title":"How I Built It: $400K/Month Mobile App (Gravl)","url":"https://www.youtube.com/watch?v=2dfMUtHlQik","thumbnail":"https://i.ytimg.com/vi/2dfMUtHlQik/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAr9euENt4aoIzkNXHJXnrBNZWLKg","upload_date":"20251113","view_count":206954,"duration_string":"15:35","founder":null,"app_name":"Gravl","app_url":null,"description_short":"Julian Gargicevich discovered a fitness app that was crushing it, but when he tried it, he thought: \" Maybe I can build something better.\" He built his MVP in 2 months, posted it on Reddit, and his app had almost immediate product-market fit. Now his team is at $400K/month with 70K+ subscribers. \n\nEnd AI Analysis Paralysis → https://clickhubspot.com/4d74f4\n\nBuild your own app with AI→ https://buil","headline_money":"$400K","top_revenues":["$400K/Month","$400K/month"],"ai_tools":["Cursor"],"platforms":["Reddit"],"tactics":["subscription","ads","launch","MVP","validate","niche","agency","clone","copy","translate"],"idea_methods":[],"pull_quote":"The simple Reddit strategy that got him his first users and product market fit and the marketing playbook that scaled his app to over $400,000 a month.","thesis":"The simple Reddit strategy that got him his first users and product market fit and the marketing playbook that scaled his app to over $400,000 a month.","upload_date_iso":"2025-11-13","categories":["vibe","mobile"]},{"index":45,"id":"PmyXmpkTIdc","title":"I flipped 4 apps and made $500,000","url":"https://www.youtube.com/watch?v=PmyXmpkTIdc","thumbnail":"https://i.ytimg.com/vi/PmyXmpkTIdc/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAT5Ml8C433Nw43Vw8942fMdi97CA","upload_date":"20251109","view_count":96528,"duration_string":"16:41","founder":"Lotts","app_name":"MRR","app_url":null,"description_short":"Lotts Ezeike is a London-based founder who's perfected the art of flipping apps. His method: build apps fast, grow them to $10-20K MRR, sell them for all-cash deals, and moves on. He's done this four times and made over $500K.\n\n🚀 Build a full-stack app in minutes → https://go.starterstory.com/lotts\n\n🛠️ Build your own app with Starter Story Build → https://build.starterstory.com/build/ai-build-acce","headline_money":"$500","top_revenues":[],"ai_tools":[],"platforms":["iOS","Android","App Store","TikTok","Facebook","ASO","Stripe"],"tactics":["subscription","ads","ASO","launch","niche"],"idea_methods":["tools."],"pull_quote":"I've done this four times and made over $500,000.","thesis":"","upload_date_iso":"2025-11-09","categories":["mobile"]},{"index":46,"id":"67zh8_yiPh4","title":"I Built 3 SaaS Apps to $200K MRR: Here's My Exact Playbook","url":"https://www.youtube.com/watch?v=67zh8_yiPh4","thumbnail":"https://i.ytimg.com/vi/67zh8_yiPh4/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC9Djs4AvtZVmx3k5yfo2NBilnJkg","upload_date":"20251102","view_count":806571,"duration_string":"13:39","founder":"Mike","app_name":"SaaS","app_url":null,"description_short":"Mike is a founder from Australia who has bootstrapped three SaaS apps to a combined $200K MRR. This video breaks down his 10-step playbook and his portfolio approach to building multiple sustainable SaaS businesses simultaneously.\n\nLearn How to Build a Unicorn → https://clickhubspot.com/ed613c\n\nBuild your own app with AI→ https://build.starterstory.com/build/ai-build-accelerator?utm_source=youtube","headline_money":"$200K MRR","top_revenues":["$200K MRR","$200K MRR"],"ai_tools":["ChatGPT"],"platforms":["Reddit","Facebook","ASO"],"tactics":["ASO","launch","MVP","no-code","validation","boring","agency"],"idea_methods":["Reddit post","tools.","ranking"],"pull_quote":"We then grow the company to about $10,000 [music] MRR, which covers costs there or thereabouts, depending on which company it is.","thesis":"Each successful app he's created follows the same repeatable framework.","upload_date_iso":"2025-11-02","categories":["saas"]},{"index":47,"id":"orYTlk_BhW8","title":"I vibe coded a $12K/month mobile app (Stoppr Breakdown)","url":"https://www.youtube.com/watch?v=orYTlk_BhW8","thumbnail":"https://i.ytimg.com/vi/orYTlk_BhW8/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDvK775iLa8cC2ROSh-MuJYiCatlQ","upload_date":"20251030","view_count":42621,"duration_string":"10:05","founder":"David","app_name":"Stoppr","app_url":"https://www.stoppr.app/","description_short":"David Attias was working in finance when he discovered an app making $200K/month. He thought the app was genius. So he rebuilt it in a different niche, and five months later, STOPPR is generating $12K/month with zero coding background required. This video breaks down David's full app building playbook.\n\n🚀 Turn a few sentences into a full-stack app → https://go.starterstory.com/stoppr\n\n🛠️ Want to b","headline_money":"$12K/month","top_revenues":["$200K/month","$12K/month","$12K/month"],"ai_tools":["Cursor","Vibe"],"platforms":["App Store","TikTok","Instagram","ASO","Stripe","RevenueCat"],"tactics":["subscription","ads","ASO","keyword","MVP","vibe code","validate","niche","clone","copy"],"idea_methods":["keyword research"],"pull_quote":"So, in a couple weeks, he vibe coded a one-for-one clone, changed the colors, switched the niche, and just 6 months later, he's gone from zero to $10,000 a month.","thesis":"I brought David onto the channel to break down his entire playbook.","upload_date_iso":"2025-10-30","categories":["vibe","mobile"]},{"index":48,"id":"9WWvLj-NqEE","title":"My 2 apps made $1.5M","url":"https://www.youtube.com/watch?v=9WWvLj-NqEE","thumbnail":"https://i.ytimg.com/vi/9WWvLj-NqEE/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLACtwOo65xFfWIVibAKttE8WVNfgg","upload_date":"20251028","view_count":374038,"duration_string":"14:43","founder":"Kelechi","app_name":null,"app_url":null,"description_short":"Kelechi was a 22-year-old from Nigeria who came to the US with $100 and a dream. He built Social Wizard: an AI-powered dating assistant that helps people respond to Instagram stories and craft better conversations. He has made nearly $1M, and his app has been used millions of times. This video breaks down how he found the idea and his TikTok marketing strategy that got 2M views. \n\nThe fastest path","headline_money":"$1.5M","top_revenues":[],"ai_tools":["Claude","Gemini","Vibe"],"platforms":["App Store","TikTok","Instagram","SEO"],"tactics":["subscription","ads","SEO","viral","launch","vibe coding","niche"],"idea_methods":[],"pull_quote":"Quickly scaled to about $60,000 a month.","thesis":"And in this video, we'll dive into his two apps that made over a million dollars, his secret distribution strategy you've probably never heard of before, and his playbook on how he'd start over from scratch today.","upload_date_iso":"2025-10-28","categories":["vibe"]},{"index":49,"id":"CwHD6Fg-Mjs","title":"I vibe coded a $20K/month mobile app in 14 days","url":"https://www.youtube.com/watch?v=CwHD6Fg-Mjs","thumbnail":"https://i.ytimg.com/vi/CwHD6Fg-Mjs/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDIi0493edr_b2tqICU8_k9Iww4sw","upload_date":"20251026","view_count":486164,"duration_string":"13:26","founder":"Connor","app_name":null,"app_url":null,"description_short":"Connor Burd is a 23-year-old founder who has built several apps that make $100K/month. He vibe-coded his latest project in just 14 days, and it’s already at $20K/month. This video breaks down his repeatable framework for revenue-first apps, why he only uses Facebook ads to grow, and the exact vibe coding process that lets him build in 2 weeks what used to take him 6-8 months.\n\nBuild your own app w","headline_money":"$20K/month","top_revenues":["$100K/month","$20K/month","$20K/month"],"ai_tools":["Cursor","Claude","Vibe"],"platforms":["iOS","App Store","Instagram","Facebook"],"tactics":["paywall","subscription","ads","viral","launch","ship fast","vibe code","vibe coding","validate","validation"],"idea_methods":["tools."],"pull_quote":"To prove it, [music] he joined a hackathon of over 55,000 people, built an app from scratch, grew it to $20,000 a month, and won the entire thing.","thesis":"This is [music] Connor, a 23-year-old kid who cracked the code on building apps that actually make money.","upload_date_iso":"2025-10-26","categories":["vibe","mobile"]},{"index":50,"id":"T5zMsTw8GWQ","title":"How I built a $30K/month mobile app","url":"https://www.youtube.com/watch?v=T5zMsTw8GWQ","thumbnail":"https://i.ytimg.com/vi/T5zMsTw8GWQ/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDQlkln0vFfWPRsBC-SLu8Nto8cfw","upload_date":"20251023","view_count":77927,"duration_string":"14:51","founder":"John","app_name":"McEvoy","app_url":"https://travelwhiz.app/","description_short":"John McEvoy was a graphic designer who taught himself to code. He built Momego and grew it to $30K MRR – all by himself. The biggest unlock? John uses hyper-local app store optimization and SEO. This video breaks down exactly how he built Momego and grew it to 5M downloads, 400K monthly users, and $30K MRR.\n\nLLC Formation, Bookkeeping, Business Taxes, and more in one platform → https://go.starters","headline_money":"$30K/month","top_revenues":["$30K/month","$30K MRR","$30K MRR"],"ai_tools":[],"platforms":["iOS","Android","App Store","SEO","ASO"],"tactics":["subscription","free trial","ads","SEO","ASO","keyword","launch","boring"],"idea_methods":["tools."],"pull_quote":"And in this video, we'll go over the app that makes him $30,000 a month.","thesis":"","upload_date_iso":"2025-10-23","categories":["mobile"]}],"playbooks":[{"title":"The Android + AdSense Thesis","icon":"🤖","summary":"While iOS gets all the attention, Android has higher download volume, lower competition, and stronger AdSense/banner ad RPMs in many niches. Multiple founders make $100K+/mo primarily from Android.","evidence_episodes":[8,50],"key_quote":"Most people think iOS is the only place where you can make money building apps, but Steve proved the exact opposite. — Pat Walls on episode #8 (Journable, $100K/mo, 92% from Android)","actionable":"If you're bootstrapping, ship Android first. The AdSense ecosystem rewards utility apps with high session counts. Test both — but don't assume iOS will win."},{"title":"Vibe Coding the MVP in 14 Days","icon":"⚡","summary":"Use Cursor + Claude (or similar) to ship a working app in 1-2 weeks. The skill that used to take 6 months is now compressed. Multiple $20K-$100K/mo apps in the dataset were built in under a month.","evidence_episodes":[49,47,36],"key_quote":"I built my latest app in less than 2 weeks, 100% with AI. — Connor Burd on episode #49","actionable":"Default stack: Cursor as IDE, Claude Sonnet/Opus for reasoning, ship a v1 you can show to paying customers within 14 days."},{"title":"Clone a Proven App — Different Niche","icon":"🧬","summary":"Don't invent. Find an English/American app already doing $50K-$500K/mo, then rebuild it for a different niche, language, or geography. New ideas need validation; cloned ideas come pre-validated.","evidence_episodes":[47,46,44],"key_quote":"I cloned a very successful app, and first month of revenue, I made $5,000. — David Attias (Stoppr, ep #47)","actionable":"Browse top-grossing categories on App Figures or Sensor Tower. Pick one with a clear function, then rebuild it 1% better in a niche where the original isn't dominant."},{"title":"Portfolio Approach (10-20 Tiny Apps)","icon":"🧩","summary":"Instead of one big swing, ship many small apps. Each one targets a niche and earns $5K-$50K/mo. The portfolio compounds — and de-risks any single failure.","evidence_episodes":[19,36,46,9],"key_quote":"I've built four apps which passed over $100K per month. — Tibo (ep #36)","actionable":"Build a portfolio thesis: pick a meta-niche (e.g. WordPress plugins, voice utilities, productivity SaaS) and ship one new product per quarter."},{"title":"ASO + Hyper-Local SEO","icon":"🎯","summary":"App Store Optimization is the #1 acquisition channel mentioned in the dataset (36 episodes). The advanced version: hyper-local — translate your listing into 30+ languages and dominate long-tail city/country queries.","evidence_episodes":[50,40,8,4],"key_quote":"John uses hyper-local app store optimization and SEO — 5M downloads, 400K monthly users. (ep #50, Momego)","actionable":"Use App Tweak/Sensor Tower for keyword research. Translate to top 30 languages. Iterate on screenshots monthly."},{"title":"Reddit + Niche Communities for First 100 Users","icon":"🔥","summary":"Multiple founders got product-market fit from a single well-targeted Reddit post. The trick: post in the niche subreddit your app actually serves (not r/SaaS).","evidence_episodes":[44,47,12],"key_quote":"He built his MVP in 2 months, posted it on Reddit, and his app had almost immediate product-market fit. — Julian (Gravl, ep #44, $400K/mo)","actionable":"Find the 3 subreddits where your target user already complains about the problem. Post your build there with a free tier or trial code."},{"title":"Subscription + Free Trial + Paywall Tuning","icon":"💳","summary":"30 of 50 episodes mention subscription monetization as the primary model. Tools like Superwall and RevenueCat let you A/B test paywalls without code changes — and the lift is huge.","evidence_episodes":[5,44,4,50],"key_quote":"We figured out that hard paywall with free trial works best for us. — Flo (MonAI, ep #5, $35K/mo)","actionable":"Default stack: Superwall for paywall A/B, RevenueCat for sub management, hard paywall with 3-7 day free trial."},{"title":"Solve Your Own Painful Problem","icon":"🩹","summary":"The most resilient idea pattern: founder hit the problem themselves daily. Not a 'gap in the market' — a personal annoyance. Letterly came from speech-to-text frustration; Momego from waiting for buses.","evidence_episodes":[40,50,44,1],"key_quote":"I wanted a way to see where the bus was on a map. — John McEvoy (Momego, ep #50, 5M downloads)","actionable":"Keep a 'friction log' for 30 days. Anything that costs you 5+ minutes per week is a candidate. Build the smallest version of the fix."}],"aggregates":{"ai_tools":[["Cursor",17],["Vibe",13],["Claude",8],["Gemini",6],["ChatGPT",5],["Bolt",3],["Copilot",2],["Opus",2],["Sonnet",1],["Lovable",1]],"platforms":[["ASO",36],["iOS",19],["Instagram",18],["SEO",17],["App Store",17],["Reddit",16],["Stripe",11],["TikTok",8],["Facebook",8],["Superwall",4],["iPhone",4],["Android",4],["Google Play",3],["Google Ads",3],["Pinterest",3]],"tactics":[["launch",46],["ads",42],["ASO",36],["subscription",30],["niche",29],["MVP",25],["viral",24],["validate",22],["SEO",17],["copy",16],["iterate",14],["keyword",14],["validation",13],["shipping",12],["free trial",11],["affiliate",10],["vibe coding",8],["agency",8],["boring",7],["vibe code",5]],"idea_methods":[["tools.",23],["painful",10],["ranking",7],["low competition",4],["search volume",3],["Reddit post",3],["keyword research",3],["repurpose",2],["annoying",2],["top apps",2],["utility",1],["my own problem",1],["calculator",1]],"total_views":5504716,"episodes_count":50},"six_figure":14,"total_views":5504716};
+const EPISODES = DATA.episodes;
+const PLAYBOOKS = DATA.playbooks;
+
+let activeFilter = 'all';
+
+function parseRevenue(s) {
+  if (!s) return 0;
+  const m = s.match(/\$?(\d+(?:\.\d+)?)\s*(K|M|k|m)?/);
+  if (!m) return 0;
+  let n = parseFloat(m[1]);
+  const u = (m[2] || '').toLowerCase();
+  if (u === 'k') n *= 1000;
+  else if (u === 'm') n *= 1000000;
+  return n;
+}
+
+function renderPlaybooks() {
+  const grid = document.getElementById('playbookGrid');
+  grid.innerHTML = PLAYBOOKS.map(pb => `
+    <div class="pb-card">
+      <div class="pb-icon">${pb.icon}</div>
+      <div class="pb-title">${pb.title}</div>
+      <div class="pb-summary">${pb.summary}</div>
+      <div class="pb-quote">"${pb.key_quote}"</div>
+      <div class="pb-action">
+        <div class="pb-action-lbl">▸ Actionable</div>
+        ${pb.actionable}
+      </div>
+      <div class="pb-evidence">
+        ${pb.evidence_episodes.map(idx => `<span class="pb-ep-pill" onclick="openModalByIndex(${idx})">Episode #${idx}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function matchesFilter(ep) {
+  if (activeFilter === 'all') return true;
+  if (activeFilter === 'six_figure') return parseRevenue(ep.headline_money) >= 100000;
+  if (activeFilter === 'android') return ep.platforms.includes('Android');
+  return ep.categories.includes(activeFilter);
+}
+
+function matchesSearch(ep) {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (!q) return true;
+  const hay = [ep.title, ep.founder, ep.app_name, ep.thesis, ep.pull_quote, ep.description_short, ...(ep.tactics||[]), ...(ep.platforms||[]), ...(ep.ai_tools||[])].filter(Boolean).join(' ').toLowerCase();
+  return hay.includes(q);
+}
+
+function sortEpisodes(arr) {
+  const s = document.getElementById('sortSelect').value;
+  const sorted = [...arr];
+  if (s === 'newest') sorted.sort((a,b) => (b.upload_date || '').localeCompare(a.upload_date || ''));
+  if (s === 'oldest') sorted.sort((a,b) => (a.upload_date || '').localeCompare(b.upload_date || ''));
+  if (s === 'revenue') sorted.sort((a,b) => parseRevenue(b.headline_money) - parseRevenue(a.headline_money));
+  if (s === 'views') sorted.sort((a,b) => (b.view_count||0) - (a.view_count||0));
+  return sorted;
+}
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderGrid();
+}
+
+function fmtDate(s) {
+  if (!s || s.length < 8) return '';
+  const d = new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)+'T12:00:00');
+  return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+function fmtViews(v) {
+  if (!v) return '';
+  if (v >= 1000000) return (v/1000000).toFixed(1)+'M views';
+  if (v >= 1000) return (v/1000).toFixed(0)+'K views';
+  return v + ' views';
+}
+
+function renderGrid() {
+  const filtered = sortEpisodes(EPISODES.filter(ep => matchesFilter(ep) && matchesSearch(ep)));
+  const grid = document.getElementById('epGrid');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('resultsCount').textContent = `${filtered.length} episode${filtered.length !== 1 ? 's' : ''} shown`;
+  if (filtered.length === 0) { grid.innerHTML = ''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map(ep => {
+    const founderApp = [];
+    if (ep.founder) founderApp.push(`<span class="ep-founder">🎙 ${ep.founder}</span>`);
+    if (ep.app_name) founderApp.push(`<span class="ep-app">📦 ${ep.app_name}</span>`);
+    const cats = (ep.categories || []).slice(0,3).map(c => `<span class="ep-cat ${c}">${c}</span>`).join('');
+    const platforms = (ep.platforms || []).includes('Android') ? `<span class="ep-cat android">android</span>` : '';
+    const tactics = (ep.tactics || []).slice(0,4).map(t => `<span class="ep-tac">${t}</span>`).join('');
+    const thesis = ep.thesis || ep.pull_quote || '';
+    const money = ep.headline_money ? `<div class="ep-money-badge">${ep.headline_money}</div>` : '';
+    const thumb = ep.thumbnail || '';
+    return `
+      <div class="ep-card" onclick="openModal('${ep.id}')">
+        <div class="ep-thumb" style="background-image:url('${thumb}')">
+          <div class="ep-num-badge">EP #${ep.index}</div>
+          ${money}
+          <div class="ep-duration">${ep.duration_string || ''}</div>
+        </div>
+        <div class="ep-body">
+          <div class="ep-title">${ep.title}</div>
+          <div class="ep-meta-row">${founderApp.join('')}</div>
+          <div class="ep-cats">${cats}${platforms}</div>
+          ${tactics ? `<div class="ep-tactics">${tactics}</div>` : ''}
+          ${thesis ? `<div class="ep-thesis">${thesis}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openModal(id) {
+  const ep = EPISODES.find(e => e.id === id);
+  if (!ep) return;
+  showModal(ep);
+}
+function openModalByIndex(idx) {
+  const ep = EPISODES.find(e => e.index === idx);
+  if (!ep) return;
+  showModal(ep);
+}
+
+function showModal(ep) {
+  document.getElementById('mTitle').textContent = ep.title;
+  document.getElementById('mThumb').style.backgroundImage = `url('${ep.thumbnail||''}')`;
+
+  const meta = [];
+  meta.push(`<span class="modal-meta-pill">EP #${ep.index}</span>`);
+  if (ep.headline_money) meta.push(`<span class="modal-meta-pill money">${ep.headline_money}</span>`);
+  if (ep.upload_date) meta.push(`<span class="modal-meta-pill">${fmtDate(ep.upload_date)}</span>`);
+  if (ep.view_count) meta.push(`<span class="modal-meta-pill">${fmtViews(ep.view_count)}</span>`);
+  if (ep.duration_string) meta.push(`<span class="modal-meta-pill">⏱ ${ep.duration_string}</span>`);
+
+  let body = `<div class="modal-meta">${meta.join('')}</div>`;
+
+  if (ep.founder || ep.app_name) {
+    body += `<div class="modal-section">
+      <h3>Founder & App</h3>
+      <p>`;
+    if (ep.founder) body += `<strong style="color:var(--gold2)">🎙 ${ep.founder}</strong>`;
+    if (ep.founder && ep.app_name) body += ` — `;
+    if (ep.app_name) body += `<strong style="color:var(--accent2)">📦 ${ep.app_name}</strong>`;
+    if (ep.app_url) body += `<br><a class="modal-link" style="margin-top:8px;display:inline-flex" href="${ep.app_url}" target="_blank">🔗 ${ep.app_url}</a>`;
+    body += `</p></div>`;
+  }
+
+  if (ep.thesis) {
+    body += `<div class="modal-section"><h3>Thesis</h3><div class="modal-quote">${ep.thesis}</div></div>`;
+  }
+  if (ep.pull_quote && ep.pull_quote !== ep.thesis) {
+    body += `<div class="modal-section"><h3>Key Quote</h3><div class="modal-quote">"${ep.pull_quote}"</div></div>`;
+  }
+  if (ep.description_short) {
+    body += `<div class="modal-section"><h3>Episode Summary</h3><p>${ep.description_short}</p></div>`;
+  }
+  if (ep.tactics && ep.tactics.length) {
+    body += `<div class="modal-section"><h3>Tactics Mentioned</h3><div class="modal-tags">${ep.tactics.map(t=>`<span class="modal-tag">${t}</span>`).join('')}</div></div>`;
+  }
+  if (ep.platforms && ep.platforms.length) {
+    body += `<div class="modal-section"><h3>Platforms & Channels</h3><div class="modal-tags">${ep.platforms.map(t=>`<span class="modal-tag platform">${t}</span>`).join('')}</div></div>`;
+  }
+  if (ep.ai_tools && ep.ai_tools.length) {
+    body += `<div class="modal-section"><h3>AI Tools Used</h3><div class="modal-tags">${ep.ai_tools.map(t=>`<span class="modal-tag ai">${t}</span>`).join('')}</div></div>`;
+  }
+  if (ep.idea_methods && ep.idea_methods.length) {
+    body += `<div class="modal-section"><h3>Idea Generation Patterns</h3><div class="modal-tags">${ep.idea_methods.map(t=>`<span class="modal-tag">${t}</span>`).join('')}</div></div>`;
+  }
+  body += `<div class="modal-section"><h3>Watch on YouTube</h3>
+    <div class="modal-links">
+      <a class="modal-link primary" href="${ep.url}" target="_blank">📺 Watch Episode</a>
+      ${ep.app_url ? `<a class="modal-link" href="${ep.app_url}" target="_blank">🚀 Visit ${ep.app_name||'App'}</a>` : ''}
+    </div></div>`;
+
+  document.getElementById('mBody').innerHTML = body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalBtn(); }
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+
+renderPlaybooks();
+renderGrid();
+</script>
+</body>
+</html>

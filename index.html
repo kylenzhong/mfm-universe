@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MFM Universe — Founder Intelligence</title>
+<meta name="description" content="An interactive intelligence layer over My First Million and Starter Story — episodes, guests, playbooks, and the apps that print money.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d1a;
+    --card: #141428;
+    --card2: #1a1a35;
+    --border: #2a2a4a;
+    --gold: #d4a000;
+    --gold2: #f0c040;
+    --orange: #ff6b35;
+    --orange2: #ff8c5e;
+    --purple: #c44dff;
+    --blue: #5fb3ff;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 800px 400px at 20% 0%, rgba(212,160,0,0.10), transparent 70%),
+      radial-gradient(ellipse 600px 400px at 80% 30%, rgba(255,107,53,0.10), transparent 70%),
+      radial-gradient(ellipse 700px 500px at 50% 90%, rgba(196,77,255,0.08), transparent 70%);
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 60px 32px 80px; position: relative; z-index: 1; }
+
+  .hero { text-align: center; margin-bottom: 60px; }
+  .hero-eyebrow {
+    color: var(--gold2); font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(20px, 4vw, 36px);
+    background: linear-gradient(135deg, var(--gold2) 0%, var(--orange2) 50%, var(--purple) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; line-height: 1.4;
+    margin-bottom: 18px;
+  }
+  .hero-sub {
+    color: var(--muted); font-size: 16px; line-height: 1.7;
+    max-width: 680px; margin: 0 auto;
+  }
+
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-bottom: 48px;
+  }
+  .tile {
+    background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 26px;
+    text-decoration: none; color: var(--text);
+    transition: all .25s; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; min-height: 220px;
+  }
+  .tile::before {
+    content: ''; position: absolute; left: 0; top: 0; right: 0; height: 3px;
+    background: var(--accent, var(--gold));
+  }
+  .tile:hover { transform: translateY(-4px); border-color: var(--accent, var(--gold)); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+  .tile.episodes { --accent: var(--gold); }
+  .tile.guests { --accent: var(--blue); }
+  .tile.rpg { --accent: var(--purple); }
+  .tile.starter { --accent: var(--orange); }
+  .tile-icon { font-size: 36px; margin-bottom: 14px; }
+  .tile-title {
+    font-weight: 800; font-size: 18px; margin-bottom: 8px;
+    color: var(--accent, var(--gold));
+  }
+  .tile-desc {
+    color: #cdd; font-size: 13.5px; line-height: 1.55; margin-bottom: 16px;
+    flex: 1;
+  }
+  .tile-stats {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    border-top: 1px solid var(--border); padding-top: 12px;
+  }
+  .tile-stat { font-size: 11px; color: var(--muted); }
+  .tile-stat strong { color: var(--text); font-weight: 700; }
+  .tile-arrow {
+    position: absolute; top: 24px; right: 24px;
+    color: var(--muted); font-size: 18px; transition: all .2s;
+  }
+  .tile:hover .tile-arrow { color: var(--accent, var(--gold)); transform: translate(2px, -2px); }
+
+  .footer {
+    text-align: center; color: var(--muted); font-size: 12px;
+    border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px;
+  }
+  .footer a { color: var(--gold2); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-eyebrow">An Interactive Intelligence Layer</div>
+    <div class="hero-title">🎙 MFM UNIVERSE 🚀</div>
+    <p class="hero-sub">A searchable, mineable view of two of the best founder podcasts on the internet — <strong>My First Million</strong> and <strong>Starter Story</strong>. Every episode tagged with key ideas, every guest profiled, every playbook surfaced.</p>
+  </div>
+
+  <div class="tile-grid">
+    <a href="MFM_Episodes.html" class="tile episodes">
+      <div class="tile-arrow">→</div>
+      <div class="tile-icon">📻</div>
+      <div class="tile-title">MFM Episodes</div>
+      <div class="tile-desc">Every MFM episode with key ideas, guest tagging, and topic search. The brain dump of 800+ episodes, indexed and queryable.</div>
+      <div class="tile-stats">
+        <span class="tile-stat"><strong>800+</strong> episodes</span>
+        <span class="tile-stat">Key ideas</span>
+        <span class="tile-stat">Topic search</span>
+      </div>
+    </a>
+
+    <a href="MFM_Guest_Profiles.html" class="tile guests">
+      <div class="tile-arrow">→</div>
+      <div class="tile-icon">👤</div>
+      <div class="tile-title">Guest Profiles</div>
+      <div class="tile-desc">The 44 most notable guests profiled with companies founded, net worth, key insights, and links to the episodes they appeared on.</div>
+      <div class="tile-stats">
+        <span class="tile-stat"><strong>44</strong> profiles</span>
+        <span class="tile-stat">Companies</span>
+        <span class="tile-stat">Net worth</span>
+      </div>
+    </a>
+
+    <a href="Starter_Story.html" class="tile starter">
+      <div class="tile-arrow">→</div>
+      <div class="tile-icon">🚀</div>
+      <div class="tile-title">Starter Story</div>
+      <div class="tile-desc">The latest 50 Starter Story episodes mined for apps, revenue, tactics. 8 cross-episode playbooks extracted — including the Android+AdSense thesis and vibe coding the MVP in 14 days.</div>
+      <div class="tile-stats">
+        <span class="tile-stat"><strong>50</strong> episodes</span>
+        <span class="tile-stat"><strong>12</strong> $100K+/mo apps</span>
+        <span class="tile-stat"><strong>8</strong> playbooks</span>
+      </div>
+    </a>
+
+    <a href="MFM_RPG.html" class="tile rpg">
+      <div class="tile-arrow">→</div>
+      <div class="tile-icon">🎮</div>
+      <div class="tile-title">MFM RPG</div>
+      <div class="tile-desc">A pixel-art RPG where you play through the MFM universe, leveling up by absorbing the lessons of past episodes. For fun and study both.</div>
+      <div class="tile-stats">
+        <span class="tile-stat">Pixel art</span>
+        <span class="tile-stat">Interactive</span>
+        <span class="tile-stat">Playable in browser</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="footer">
+    Built by <a href="https://github.com/kylenzhong" target="_blank">Kyle Zhong</a> ·
+    Source on <a href="https://github.com/kylenzhong/mfm-universe" target="_blank">GitHub</a> ·
+    Not affiliated with My First Million, Starter Story, Sam Parr, Shaan Puri, or Pat Walls — just a fan project.
+  </div>
+</div>
+
+</body>
+</html>

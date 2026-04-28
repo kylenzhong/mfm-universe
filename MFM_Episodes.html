@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MFM Episode Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d1a;
+    --card: #141428;
+    --card2: #1a1a35;
+    --border: #2a2a4a;
+    --gold: #d4a000;
+    --gold2: #f0c040;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --solo: #3a6fd8;
+    --guest: #c44dff;
+    --hot: #ff4d4d;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0a0a1f 0%, #1a0a35 50%, #0a1a35 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 28px 32px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(212,160,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-nav {
+    display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    background: rgba(212,160,0,0.1); border: 1px solid var(--border);
+    color: var(--muted); text-decoration: none; padding: 6px 14px;
+    border-radius: 20px; font-size: 12px; transition: all .2s;
+  }
+  .nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(16px, 3vw, 26px);
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(212,160,0,0.5);
+    line-height: 1.4;
+  }
+  .header-sub { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .header-stats {
+    display: flex; gap: 20px; margin-top: 16px; flex-wrap: wrap;
+  }
+  .hstat {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px; text-align: center;
+  }
+  .hstat-val { color: var(--gold2); font-weight: 700; font-size: 20px; }
+  .hstat-lbl { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  /* CONTROLS */
+  .controls {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(13,13,26,0.97); border-bottom: 1px solid var(--border);
+    padding: 14px 32px; backdrop-filter: blur(12px);
+  }
+  .controls-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .search-wrap { flex: 1; min-width: 220px; position: relative; }
+  .search-wrap input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 14px 10px 38px; border-radius: 8px;
+    font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border .2s;
+  }
+  .search-wrap input:focus { border-color: var(--gold); }
+  .search-wrap::before {
+    content: '🔍'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    font-size: 14px; pointer-events: none;
+  }
+  .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fbtn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: 7px 13px; border-radius: 20px;
+    font-size: 12px; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif;
+  }
+  .fbtn:hover { border-color: var(--gold); color: var(--text); }
+  .fbtn.active { background: var(--gold); border-color: var(--gold); color: #000; font-weight: 700; }
+  .sort-select {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 12px; border-radius: 8px;
+    font-size: 13px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer;
+  }
+
+  /* GRID */
+  .main { max-width: 1200px; margin: 0 auto; padding: 28px 32px; }
+  .results-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px; color: var(--muted); font-size: 13px;
+  }
+  .episode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  /* CARD */
+  .ep-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    cursor: pointer; transition: all .2s; position: relative; overflow: hidden;
+  }
+  .ep-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--accent, var(--gold));
+  }
+  .ep-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+  .ep-card-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .ep-num {
+    background: rgba(212,160,0,0.12); color: var(--gold);
+    font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 5px;
+    white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+  }
+  .ep-title { font-weight: 700; font-size: 15px; line-height: 1.35; color: var(--text); }
+  .ep-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .ep-type {
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .ep-type.solo { background: rgba(58,111,216,0.2); color: #6a9fff; }
+  .ep-type.guest { background: rgba(196,77,255,0.2); color: #d47fff; }
+  .ep-type.hot { background: rgba(255,77,77,0.2); color: #ff8888; }
+  .ep-date { color: var(--muted); font-size: 12px; }
+  .ep-guest {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--gold2); font-size: 13px; font-weight: 600; margin-bottom: 10px;
+  }
+  .ep-guest-icon { font-size: 15px; }
+  .ep-topics { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+  .ep-topic {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--muted); font-size: 11px; padding: 3px 8px; border-radius: 10px;
+  }
+  .ep-insight {
+    background: rgba(212,160,0,0.06); border-left: 2px solid var(--gold);
+    padding: 8px 10px; border-radius: 0 6px 6px 0;
+    color: #ccc; font-size: 12px; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.82); z-index: 200;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 18px; width: 100%; max-width: 720px;
+    max-height: 88vh; overflow: hidden; display: flex; flex-direction: column;
+    position: relative;
+  }
+  .modal-header {
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(212,160,0,0.06) 0%, transparent 100%);
+    flex-shrink: 0;
+  }
+  .modal-close {
+    position: absolute; top: 18px; right: 20px;
+    background: rgba(255,255,255,0.1); border: none; color: var(--text);
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center; transition: .2s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.2); }
+  .modal-ep-num { color: var(--gold); font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  .modal-title { font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .modal-guest-line { color: var(--gold2); font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+  .modal-meta-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .modal-body { overflow-y: auto; flex: 1; padding: 24px 28px; }
+  .modal-section { margin-bottom: 24px; }
+  .modal-section h3 {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--gold); margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-section p { color: #ccc; font-size: 14px; line-height: 1.7; }
+  .modal-topics { display: flex; flex-wrap: wrap; gap: 7px; }
+  .modal-topic {
+    background: rgba(212,160,0,0.1); border: 1px solid rgba(212,160,0,0.3);
+    color: var(--gold2); font-size: 12px; padding: 5px 11px; border-radius: 12px;
+  }
+  .insight-block {
+    background: rgba(212,160,0,0.06); border: 1px solid rgba(212,160,0,0.2);
+    border-radius: 8px; padding: 14px; margin-bottom: 10px;
+  }
+  .insight-block .insight-title {
+    font-size: 13px; font-weight: 700; color: var(--gold2); margin-bottom: 6px;
+  }
+  .insight-block p { font-size: 13px; color: #bbb; line-height: 1.6; }
+  .quote-block {
+    border-left: 3px solid var(--gold); padding: 10px 14px;
+    margin-bottom: 10px; background: rgba(255,255,255,0.03); border-radius: 0 8px 8px 0;
+  }
+  .quote-block p { font-size: 14px; color: #ddd; font-style: italic; line-height: 1.6; }
+  .listen-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .listen-link {
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    color: var(--text); text-decoration: none; padding: 8px 14px;
+    border-radius: 8px; font-size: 13px; transition: .2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .listen-link:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* EMPTY */
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  @media (max-width: 600px) {
+    header, .controls, .main { padding-left: 16px; padding-right: 16px; }
+    .episode-grid { grid-template-columns: 1fr; }
+    .modal { border-radius: 12px; }
+    .modal-header, .modal-body { padding: 18px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-nav">
+      <a href="MFM_Guest_Profiles.html" class="nav-btn">👤 Guest Profiles</a>
+      <a href="MFM_RPG.html" class="nav-btn">🎮 MFM RPG</a>
+      <a href="Starter_Story.html" class="nav-btn">🚀 Starter Story</a>
+    </div>
+    <div class="header-title">📻 MFM EPISODE INTELLIGENCE</div>
+    <div class="header-sub">My First Million · Key Ideas, Guests & Insights from Every Episode</div>
+    <div class="header-stats">
+      <div class="hstat"><div class="hstat-val" id="statTotal">—</div><div class="hstat-lbl">Episodes Indexed</div></div>
+      <div class="hstat"><div class="hstat-val" id="statGuest">—</div><div class="hstat-lbl">Guest Episodes</div></div>
+      <div class="hstat"><div class="hstat-val" id="statSolo">—</div><div class="hstat-lbl">Solo Episodes</div></div>
+      <div class="hstat"><div class="hstat-val">800+</div><div class="hstat-lbl">Total Episodes Ever</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Search episodes, guests, topics, ideas…" oninput="renderGrid()">
+    </div>
+    <div class="filter-btns" id="filterBtns">
+      <button class="fbtn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="fbtn" data-filter="guest" onclick="setFilter('guest',this)">🎙 Guest</button>
+      <button class="fbtn" data-filter="solo" onclick="setFilter('solo',this)">🧠 Solo</button>
+      <button class="fbtn" data-filter="2026" onclick="setFilter('2026',this)">2026</button>
+      <button class="fbtn" data-filter="2025" onclick="setFilter('2025',this)">2025</button>
+      <button class="fbtn" data-filter="2024" onclick="setFilter('2024',this)">2024</button>
+      <button class="fbtn" data-filter="classic" onclick="setFilter('classic',this)">🏆 Classic</button>
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="renderGrid()">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="num_desc">Ep # High→Low</option>
+      <option value="num_asc">Ep # Low→High</option>
+    </select>
+  </div>
+</div>
+
+<div class="main">
+  <div class="results-bar">
+    <span id="resultsCount"></span>
+    <span style="color:var(--muted); font-size:12px;">Click any card for full details</span>
+  </div>
+  <div class="episode-grid" id="episodeGrid"></div>
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="empty-icon">🎧</div>
+    <div>No episodes match your search</div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+      <div class="modal-ep-num" id="mEpNum"></div>
+      <div class="modal-title" id="mTitle"></div>
+      <div class="modal-guest-line" id="mGuest"></div>
+      <div class="modal-meta-row" id="mMeta"></div>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+// ─── EPISODE DATABASE ────────────────────────────────────────────────────────
+const EPISODES = [
+  {
+    num: 807,
+    title: "The Wildest Stories in AI Right Now",
+    type: "solo",
+    date: "2026-03-19",
+    guests: [],
+    topics: ["Artificial Intelligence", "AI Trends", "Tech News"],
+    insight: "Sam and Shaan break down the most fascinating and strange AI stories happening right now — from unexpected use cases to companies quietly being disrupted.",
+    keyIdeas: [
+      { title: "AI Disruption is Quiet", detail: "The biggest AI disruptions aren't headline news — they're happening silently inside boring industries." },
+      { title: "Speed of Change", detail: "The pace of AI adoption is outrunning most founder's ability to adapt their business models." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 806,
+    title: "DHH: $100M+ Advice That'll Piss Off Every Business Guru",
+    type: "guest",
+    date: "2026-03-17",
+    guests: ["David Heinemeier Hansson"],
+    topics: ["AI Criticism", "Business Independence", "Contrarian Thinking", "Apple", "Open Source"],
+    insight: "DHH, creator of Ruby on Rails and Basecamp co-founder, shares why he's been publicly wrong — and right — about major tech bets, his battle with Apple, and why the conventional startup advice is broken.",
+    keyIdeas: [
+      { title: "Being Wrong in Public", detail: "DHH has a history of taking strong contrarian stances (against Agile, against VC funding, against Apple's App Store monopoly). He believes being willing to be wrong publicly is how you find the truth." },
+      { title: "AI Skepticism from a Builder", detail: "Despite being technical, DHH questions whether current AI hype matches reality for most businesses, urging founders to think critically rather than chase trends." },
+      { title: "Fighting Apple", detail: "His campaign against Apple's App Store practices became a landmark case in developer rights and platform power — even getting Congress involved." }
+    ],
+    quotes: ["If your business only works because you're exploiting workers or users, it's not a good business."],
+    classic: false
+  },
+  {
+    num: 805,
+    title: "We Named a Billion Dollar Startup With the Guy That Named BlackBerry, Febreze and Swiffer",
+    type: "guest",
+    date: "2026-03-13",
+    guests: ["Steve Manning"],
+    topics: ["Branding", "Naming Strategy", "Product Marketing", "Consumer Products"],
+    insight: "The naming consultant behind some of the most iconic brand names in history (BlackBerry, Febreze, Swiffer) reveals the exact framework for creating names that become billion-dollar brands.",
+    keyIdeas: [
+      { title: "Names Should Feel Wrong First", detail: "The best brand names often feel strange or uncomfortable at launch. BlackBerry sounded weird for a phone. That strangeness makes them memorable." },
+      { title: "The Naming Process", detail: "Great naming starts with brand strategy — understanding the emotion you want to own — before any wordplay begins." },
+      { title: "Live Naming Exercise", detail: "Sam and Shaan pitch startup ideas and Steve names them in real time, revealing how a professional approaches naming from scratch." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 803,
+    title: "Bill Gurley: How to Avoid the Biggest Mistake You Can Make in Life",
+    type: "guest",
+    date: "2026-03-05",
+    guests: ["Bill Gurley"],
+    topics: ["Investing", "Life Philosophy", "Career Advice", "Venture Capital", "Regret"],
+    insight: "Legendary VC Bill Gurley — early Uber investor — shares the investment framework he's honed over decades and the one mistake that costs most people everything: optimizing for the wrong thing.",
+    keyIdeas: [
+      { title: "Avoid Path Dependence", detail: "Most people lock into a career path early and optimize within it rather than questioning whether the path itself is right. That's the biggest mistake." },
+      { title: "Asymmetric Bets", detail: "Gurley explains how to identify opportunities where the downside is limited but upside is enormous — the foundation of great investing." },
+      { title: "Uber Bet", detail: "He explains why the Uber investment was so obvious to him when others passed — and what signals he looks for in transformative companies." }
+    ],
+    quotes: ["The best investments look like mistakes until they don't."],
+    classic: false
+  },
+  {
+    num: 802,
+    title: "Selling Your $50M/Year App at Age 19",
+    type: "guest",
+    date: "2026-03-01",
+    guests: ["Zach Yadegari"],
+    topics: ["App Business", "Young Entrepreneurs", "Exits", "MyFitnessPal", "Growth Hacking"],
+    insight: "19-year-old Zach Yadegari built a fitness app to $50M+ in annual revenue and sold it to MyFitnessPal — all before he could legally drink. His story breaks every conventional wisdom about startup timelines.",
+    keyIdeas: [
+      { title: "Speed Over Perfection", detail: "Zach launched fast, iterated based on real user feedback, and didn't wait for product perfection. Speed is a competitive advantage at any age." },
+      { title: "Acquisition Funnel Math", detail: "He reverse-engineered his growth by understanding exactly what a user was worth and how much he could spend to acquire one — then went all in on paid channels." },
+      { title: "Age as an Asset", detail: "Being a teenage founder was a PR advantage that got him coverage and partnerships others couldn't get." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 801,
+    title: "Biggest Life Lessons From Investing, Who Wins in AI Race, Plus AI-Proof Business Ideas",
+    type: "guest",
+    date: "2026-02-26",
+    guests: ["Sheel Mohnot"],
+    topics: ["Investing Lessons", "AI Race", "AI-Proof Businesses", "Fintech", "VC"],
+    insight: "Fintech investor Sheel Mohnot shares the investing lessons he'd only share with friends, breaks down who he thinks will win the AI race, and reveals business models that will survive — even thrive — in an AI-dominated world.",
+    keyIdeas: [
+      { title: "AI-Proof Businesses", detail: "Businesses built on human trust, regulated industries, physical services, and community will be hardest for AI to replace." },
+      { title: "Who Wins AI", detail: "Sheel argues the winners won't be the model companies but the vertical application builders who own a specific industry's workflow." },
+      { title: "Investing Reality Check", detail: "Most VC advice is survivorship bias. Sheel shares what he'd actually tell a friend investing their own money." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 800,
+    title: "'Think and Grow Rich' Is a Lie (But The Advice Still Works)",
+    type: "solo",
+    date: "2026-02-22",
+    guests: [],
+    topics: ["Think and Grow Rich", "Business Books", "Indie Hacking", "Sam's Dating Business"],
+    insight: "Sam and Shaan dig into the bizarre true story behind Think and Grow Rich — the book is built on fabricated interviews — but conclude the core framework still works. Plus Sam reveals his new side venture.",
+    keyIdeas: [
+      { title: "Think and Grow Rich Deception", detail: "Napoleon Hill likely never met many of the business titans he claimed to interview. The anecdotes are fabricated or exaggerated. Yet the mental framework — desire, faith, persistence — maps to how real success actually happens." },
+      { title: "Indie Hacker Lessons", detail: "The episode pulls key lessons from the Indie Hackers community: start with one customer, charge immediately, and treat your first product as a learning vehicle." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 799,
+    title: "Dumb iPhone Apps Are Making People Rich Again (Here's How)",
+    type: "guest",
+    date: "2026-02-24",
+    guests: ["Pat Walls"],
+    topics: ["App Business", "Indie Hacking", "Starter Story", "Solo Founders", "Revenue Models"],
+    insight: "Starter Story founder Pat Walls reveals the resurgence of simple, boring iPhone apps generating millions — and the exact playbook behind finding, building, and monetizing them.",
+    keyIdeas: [
+      { title: "The Boring App Playbook", detail: "The biggest app opportunities are in embarrassingly simple utility apps that solve one problem really well and charge a subscription." },
+      { title: "Starter Story Model", detail: "Pat built Starter Story into a media business that generates revenue through content subscriptions — not advertising — by going deep on 'how did they do it' stories." },
+      { title: "Solo Founder Viability", detail: "More than ever, a single person can build a $1M+ app business. Pat catalogs hundreds of examples." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 796,
+    title: "Asking Scott Galloway 10 Questions We're Not Allowed To Ask (Unfiltered)",
+    type: "guest",
+    date: "2026-02-16",
+    guests: ["Scott Galloway"],
+    topics: ["Wealth Building", "Financial Education", "College", "Big Tech", "Relationships"],
+    insight: "NYU professor Scott Galloway answers the questions most interviewers are too polite to ask — his actual net worth, his biggest financial mistakes, what he tells his kids about money, and why college is still worth it (or isn't).",
+    keyIdeas: [
+      { title: "Wealth Math", detail: "Galloway breaks down how he built real wealth: not through his media brand but through equity in his companies and smart investing in real assets." },
+      { title: "The College Calculus", detail: "His nuanced take: for most people, the credential still matters enormously. But the ROI calculation is changing fast and depends heavily on the field." },
+      { title: "What He'd Tell His Kids", detail: "Work for a company growing fast enough that average performance gets promoted. Don't optimize for salary — optimize for equity and trajectory." }
+    ],
+    quotes: ["Luxury is not what you buy. Luxury is time."],
+    classic: false
+  },
+  {
+    num: 792,
+    title: "I Spent 48 Hours With 10 Billionaires. Here's What I Learned",
+    type: "solo",
+    date: "2026-02-05",
+    guests: ["MrBeast", "Scooter Braun", "Nick Mowbray", "Jesse Itzler"],
+    topics: ["Billionaire Mindset", "Networking", "Wealth Psychology", "Lifestyle Design"],
+    insight: "Shaan spent 48 hours at a private event with 10 billionaires and comes back with the most surprising observations — what they talk about, how they think, and the one thing they all share.",
+    keyIdeas: [
+      { title: "Obsession is the Common Thread", detail: "Every billionaire in the room was manically obsessed with their domain. Not 'passionate' — obsessed to the point of strangeness." },
+      { title: "They're Still Playing", detail: "Contrary to the 'bored billionaire' narrative, the wealthiest people at the event were actively building new things — not coasting." },
+      { title: "Network Access Changes Thinking", detail: "Being around people operating at that level makes 'impossible' goals seem routine. Environment shapes ambition." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 790,
+    title: "How I Went From $0 to $1M in 12 Months (Tyler Denk / Beehiiv)",
+    type: "guest",
+    date: "2026-01-29",
+    guests: ["Tyler Denk"],
+    topics: ["Newsletter Business", "Beehiiv", "SaaS Growth", "Startup Scaling", "Product-Market Fit"],
+    insight: "Tyler Denk, CEO of Beehiiv, walks through the exact playbook of taking a newsletter platform from zero to $1M ARR in 12 months — and what they learned that Morning Brew didn't teach them.",
+    keyIdeas: [
+      { title: "Newsletter Infrastructure Play", detail: "Beehiiv identified that while newsletters were booming, the infrastructure was terrible. They built the picks-and-shovels business for the newsletter gold rush." },
+      { title: "Bottoms-Up SaaS", detail: "Individual newsletter writers adopted Beehiiv personally before it spread to their organizations — the same bottoms-up GTM that made Figma and Notion work." },
+      { title: "Morning Brew Advantage", detail: "Tyler used his inside knowledge of what Morning Brew needed (and didn't have) to build exactly the right features first." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 787,
+    title: "Morgan Housel: The Art of Spending Money",
+    type: "guest",
+    date: "2026-02-10",
+    guests: ["Morgan Housel"],
+    topics: ["Financial Psychology", "Spending", "Wealth Management", "Happiness", "Money Philosophy"],
+    insight: "The Psychology of Money author returns to go deeper on the hardest financial question: once you have money, how do you actually spend it well?",
+    keyIdeas: [
+      { title: "Spending Identity Mismatch", detail: "Most wealthy people have a spending identity frozen at when they were broke — and it makes them miserable. Updating it intentionally is a skill." },
+      { title: "The Diminishing Returns Curve", detail: "There's a predictable point where more spending stops generating more happiness. Most people never find it because they keep moving the goal post." },
+      { title: "Spend on Time, Not Things", detail: "The best ROI on spending is buying back your own time — outsourcing tasks you hate and creating white space." }
+    ],
+    quotes: ["The goal isn't to be rich. The goal is to stop thinking about money."],
+    classic: false
+  },
+  {
+    num: 786,
+    title: "The Most Important Founder You've Never Heard Of (Demis Hassabis / DeepMind)",
+    type: "guest",
+    date: "2026-01-25",
+    guests: ["Demis Hassabis"],
+    topics: ["Artificial Intelligence", "DeepMind", "AlphaGo", "Protein Folding", "Scientific Discovery"],
+    insight: "DeepMind CEO Demis Hassabis explains how he used games to crack general intelligence, why AlphaFold is the biggest scientific breakthrough of our generation, and where AI goes next.",
+    keyIdeas: [
+      { title: "Games as AI Training Grounds", detail: "Games provide the perfect environment for AI — clear rules, measurable outcomes, infinite data. DeepMind used games to develop general reasoning capabilities." },
+      { title: "AlphaFold's Magnitude", detail: "Solving the protein folding problem — which stumped biologists for 50 years — in one year is potentially worth more than all other AI advances combined for human health." },
+      { title: "AGI Timeline", detail: "Hassabis believes AGI (human-level AI across domains) is closer than most scientists publicly admit — but the last 10% is the hardest." }
+    ],
+    quotes: ["We're not trying to build AI that mimics humans. We're trying to build AI that solves problems humans haven't solved."],
+    classic: false
+  },
+  {
+    num: 780,
+    title: "Jesse Itzler: Planning an Epic 2026",
+    type: "guest",
+    date: "2026-01-30",
+    guests: ["Jesse Itzler"],
+    topics: ["Lifestyle Design", "Year Planning", "Entrepreneurship", "Mental Toughness", "Habits"],
+    insight: "Jesse Itzler — who hired Navy SEAL David Goggins to live with him and once ran a 100-mile race with no training — breaks down how he plans his year for maximum aliveness.",
+    keyIdeas: [
+      { title: "Calendar as Strategy", detail: "Jesse fills his calendar with specific adventures, challenges, and experiences FIRST — before business. Business fills in the gaps." },
+      { title: "Voluntary Discomfort", detail: "Every year Jesse commits to something physically terrifying. He believes voluntary suffering builds the mental framework to handle involuntary suffering." },
+      { title: "Life Math", detail: "He calculates how many summer Fridays he has left with his kids and uses it to make every one count. Specific numbers make abstract time visceral." }
+    ],
+    quotes: ["Don't save your best for a special occasion. Today is the special occasion."],
+    classic: false
+  },
+  {
+    num: 760,
+    title: "Cathie Wood: Answering The Hardest Investing Questions",
+    type: "guest",
+    date: "2025-11-02",
+    guests: ["Cathie Wood"],
+    topics: ["Investing", "ARK Invest", "AI Stocks", "Innovation", "Contrarian Bets"],
+    insight: "ARK Invest CEO Cathie Wood faces the hardest questions about her fund's performance and doubles down on her thesis that AI, robotics, and genomics will create the greatest wealth creation in history.",
+    keyIdeas: [
+      { title: "The Innovation S-Curve", detail: "Cathie argues we're at the knee of the S-curve for multiple converging technologies simultaneously — AI, robotics, energy storage, genomics, and blockchain — which creates unprecedented investment opportunity." },
+      { title: "Defending Volatility", detail: "ARK's concentrated positions in early-stage innovation means massive drawdowns are inevitable and expected. Most investors can't stomach them — that's the alpha." },
+      { title: "5-Year vs 5-Month Thinking", detail: "Traditional fund managers are measured quarterly. Cathie is measured over 5 years, which allows different — and she argues better — investment decisions." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 754,
+    title: "How To Start $1 Billion Companies From Boring Products",
+    type: "solo",
+    date: "2025-10-12",
+    guests: [],
+    topics: ["Business Ideas", "Category Design", "Positioning", "Boring Industries", "Billion Dollar Ideas"],
+    insight: "Sam and Shaan break down the exact formula for finding billion-dollar companies hiding in boring, overlooked product categories — and walk through 5 specific opportunities they see right now.",
+    keyIdeas: [
+      { title: "The Boring Wedge", detail: "The best billion-dollar opportunities are in industries that haven't had a 'designed for this decade' player. Boring = uncontested." },
+      { title: "Category Creation vs. Competition", detail: "Instead of competing in an existing category, create a new one. Boring products can anchor entirely new categories with the right positioning." },
+      { title: "Five Specific Opportunities", detail: "They walk through specific industry niches they believe are ripe for $1B companies: pet care, senior services, home services platforms, trade services, and B2B boring SaaS." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 740,
+    title: "Robert Greene On How To Reinvent Yourself at Any Age",
+    type: "guest",
+    date: "2025-09-05",
+    guests: ["Robert Greene"],
+    topics: ["Reinvention", "The 48 Laws of Power", "Deep Work", "Career Strategy", "Human Nature"],
+    insight: "The author of The 48 Laws of Power and The Laws of Human Nature shares the mental framework for reinventing yourself at any stage of life — and why most people fail at it.",
+    keyIdeas: [
+      { title: "The Apprenticeship Phase Never Ends", detail: "Robert argues most people stop being apprentices too early. True masters maintain the beginner's hunger for decades longer than normal." },
+      { title: "Your Primal Inclinations", detail: "Reinvention works only when you follow your genuine obsessions — not what society validates. The path that energizes you even without reward." },
+      { title: "The Strategy of Boldness", detail: "Every bold move creates its own reality. Timid moves invite counter-attack. The audacious play changes the game itself." }
+    ],
+    quotes: ["The biggest obstacle to creativity is your impatience. The desire to hurry up the process and avoid the pain of practice."],
+    classic: false
+  },
+  {
+    num: 703,
+    title: "Agency — The Most Valuable Skill For Any Founder",
+    type: "solo",
+    date: "2025-05-08",
+    guests: ["George Mack"],
+    topics: ["Agency", "Founder Mindset", "Self-Reliance", "Mental Models", "Entrepreneurship"],
+    insight: "Sam, Shaan, and writer George Mack break down 'agency' — the ability to act on the world rather than waiting for the world to act on you — and why it's the highest leverage skill for founders.",
+    keyIdeas: [
+      { title: "Agency is Learnable", detail: "High-agency behavior — cold emailing CEOs, finding workarounds, making things happen without permission — can be deliberately practiced and strengthened." },
+      { title: "Low-Agency Tells", detail: "The opposite of agency is learned helplessness: assuming external constraints are fixed, not questioning default paths, waiting to be told what to do." },
+      { title: "Agency Compounding", detail: "Every act of agency makes the next one easier. The first cold email you send is hardest. By the thousandth it's reflexive." }
+    ],
+    quotes: ["High agency people don't ask for permission. They ask for forgiveness if they need to."],
+    classic: false
+  },
+  {
+    num: 687,
+    title: "The High Schooler Making $20M a Year",
+    type: "guest",
+    date: "2025-03-15",
+    guests: ["Zach Yadegari"],
+    topics: ["Teen Entrepreneur", "App Business", "Rapid Growth", "Fitness Tech"],
+    insight: "Before the MyFitnessPal exit — Zach Yadegari's first appearance explaining how he built a fitness app to $20M revenue while still in high school.",
+    keyIdeas: [
+      { title: "$0 to $20M in 10 Months", detail: "Zach went from idea to $20M ARR in under a year by focusing relentlessly on one acquisition channel and one product improvement at a time." },
+      { title: "Teen Advantage", detail: "He used his age as a marketing story and leveraged TikTok natively — giving him organic reach older founders couldn't replicate." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 670,
+    title: "I Run A $180M+ Company... Here's How I'm Using AI Daily",
+    type: "guest",
+    date: "2025-01-26",
+    guests: ["Andrew Wilkinson"],
+    topics: ["AI Implementation", "Business Operations", "Productivity", "AI Tools", "Remote Teams"],
+    insight: "Andrew Wilkinson — who owns 30+ internet companies through Tiny — shares the specific ways he's deploying AI across his portfolio to cut costs, accelerate decisions, and find new opportunities.",
+    keyIdeas: [
+      { title: "AI as Chief of Staff", detail: "Andrew uses AI to pre-process his information diet — summarizing reports, flagging anomalies in financial data, and preparing briefings before meetings." },
+      { title: "Portfolio AI Playbook", detail: "Each Tiny company runs an AI audit: map every workflow, identify which steps involve summarization or classification, replace with AI, redeploy humans to judgment work." },
+      { title: "AI Opportunities in His Portfolio", detail: "He identified 3 companies in his portfolio that could 2x profit in 12 months purely by AI-augmenting their current teams." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 639,
+    title: "The $600M Protein Bar Founder is Back Again",
+    type: "guest",
+    date: "2024-10-18",
+    guests: ["Peter Rahal"],
+    topics: ["RXBAR", "CPG", "Brand Building", "Exit Strategy", "Repeat Founders"],
+    insight: "RXBAR founder Peter Rahal — who sold to Kellogg's for $600M — returns to share what he's building next and the lessons from his first exit that most founders never learn until it's too late.",
+    keyIdeas: [
+      { title: "The Kellogg's Lesson", detail: "He wishes he'd held out longer before selling. The company was growing so fast that waiting another 2 years would have doubled the exit. But he didn't know what he didn't know." },
+      { title: "Consumer Brand Formula", detail: "RXBAR's genius was brutal transparency: the front of the package listed ONLY ingredients, nothing else. The constraint became the brand." },
+      { title: "What He Knows Now", detail: "Second-time founders know how to think about board composition, cap table hygiene, and optionality — things first-timers learn expensively." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 627,
+    title: "Life Hacks From the King of Introverts + 7 Business Ideas",
+    type: "guest",
+    date: "2024-09-10",
+    guests: ["Nick Gray"],
+    topics: ["Networking", "Introvert Strategy", "Event Hosting", "Social Skills", "The 2 Hour Cocktail Party"],
+    insight: "Nick Gray turned his introversion into a superpower by cracking the code on hosting perfect 2-hour cocktail parties — and built a business teaching others to do it.",
+    keyIdeas: [
+      { title: "The 2-Hour Party Formula", detail: "Short time limit (2 hours), name tags with job title + interesting fact, two formal icebreakers, end on time. This creates the best networking events with zero awkwardness." },
+      { title: "Introverts as Better Hosts", detail: "Introverts make better event hosts because they obsessively engineer structure — removing the social risk that makes events uncomfortable for everyone." },
+      { title: "Hosting as Career Leverage", detail: "Hosting consistently puts you at the center of every relationship in the room. Over years, this compounds into an extraordinary network." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 597,
+    title: "EXCLUSIVE: $3B Founder Reveals His Next Big Idea",
+    type: "guest",
+    date: "2024-06-21",
+    guests: ["Brett Adcock"],
+    topics: ["Figure AI", "Robotics", "School Safety", "Serial Entrepreneurship", "Archer Aviation"],
+    insight: "Brett Adcock — who built and sold Vettery, then founded Archer Aviation and Figure AI — reveals what he's betting on next and why robotics is the biggest opportunity in human history.",
+    keyIdeas: [
+      { title: "The Robotics Moment", detail: "Brett believes we're at the iPhone moment for humanoid robots — where the core technology has finally crossed the threshold for mass deployment. The next decade will be the robotics decade." },
+      { title: "Figure's Vision", detail: "Figure AI is building humanoid robots for factory work first — not because it's glamorous but because it's the highest-value, most replicable first deployment." },
+      { title: "Serial Founder Pattern", detail: "Brett's career shows a pattern: pick a hard problem 10 years early, go all-in before it's obvious, exit, pick the next one. Timing is everything." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 587,
+    title: "Andrew Wilkinson: The Step-by-Step CEO Hiring Process",
+    type: "guest",
+    date: "2024-05-10",
+    guests: ["Andrew Wilkinson"],
+    topics: ["CEO Hiring", "Delegation", "Management", "Leadership", "Operating Companies"],
+    insight: "Andrew Wilkinson reveals the exact process he's used to hire CEOs for 30+ companies — from sourcing to the final decision — and the mistakes that have cost him millions.",
+    keyIdeas: [
+      { title: "The Job Scorecard", detail: "Before posting any role, Andrew builds a scorecard with 5 measurable outcomes the CEO must achieve in year one. This filters candidates better than any interview." },
+      { title: "Reference Check Reality", detail: "The official references are useless. He calls people who weren't on the reference list — former colleagues, employees who worked for the candidate — and asks: 'On a scale of 1-10, how likely are you to rehire?' Anything under 9 is a red flag." },
+      { title: "The Transition Period", detail: "The single most expensive mistake: not planning the handoff. He now does a formal 90-day transition where the outgoing and incoming CEO overlap." }
+    ],
+    quotes: [],
+    classic: false
+  },
+  {
+    num: 581,
+    title: "Scott Galloway: Get-Rich Formula They Won't Teach in School",
+    type: "guest",
+    date: "2024-04-08",
+    guests: ["Scott Galloway"],
+    topics: ["Wealth Building", "Career Advice", "Young People", "Financial Education", "Big Tech"],
+    insight: "Scott Galloway delivers the wealth-building framework he wishes someone had handed him at 22 — including where to work, what to own, and how to think about risk.",
+    keyIdeas: [
+      { title: "Work for a Rocketship", detail: "The single most important career decision in your 20s is joining a company growing so fast that mediocre performance still leads to rapid promotion. Choose trajectory, not brand." },
+      { title: "Own Assets, Not Income", detail: "High income doesn't create wealth — asset ownership does. The goal is to convert income into assets (equity, real estate, index funds) as fast as possible." },
+      { title: "Get Comfortable Being Uncomfortable", detail: "Galloway argues that the willingness to move to where the opportunities are — geographically and professionally — is one of the highest leverage decisions young people can make." }
+    ],
+    quotes: ["You are not as special as you think. And that's great news — because it means you have to do the work."],
+    classic: true
+  },
+  {
+    num: 577,
+    title: "The Wild Story Of 'Mr. Tull' — From Laundromats To $3.5B Hollywood",
+    type: "guest",
+    date: "2024-03-15",
+    guests: ["Thomas Tull"],
+    topics: ["Legendary Pictures", "Hollywood", "Moneyball Strategy", "Business Building", "Serial Entrepreneur"],
+    insight: "Thomas Tull went from managing laundromats to founding Legendary Pictures (Dark Knight, Godzilla, Jurassic World) using a Moneyball approach to Hollywood — and then pivoted again to tech and defense.",
+    keyIdeas: [
+      { title: "Moneyball for Movies", detail: "Tull applied quant analysis to greenlight decisions, betting on franchises with built-in audiences rather than chasing critical acclaim. The Dark Knight was his first big thesis validation." },
+      { title: "Pattern: Boring → Glamorous", detail: "He built wealth through boring service businesses (laundromats, tax prep, auto repair) then used that capital to buy into exciting, higher-multiple industries." },
+      { title: "Defense Tech Bet", detail: "After selling Legendary, Tull moved into defense tech and sports franchises — betting that boring US defense procurement was about to be disrupted by Silicon Valley-style companies." }
+    ],
+    quotes: [],
+    classic: true
+  },
+  {
+    num: 539,
+    title: "Everything I Learned From 48 Hours With MrBeast & 9 Other Billionaires",
+    type: "guest",
+    date: "2023-12-15",
+    guests: ["MrBeast"],
+    topics: ["Billionaire Mindset", "Content Creation", "MrBeast Business", "Wealth Psychology", "Networking"],
+    insight: "Shaan reports back from a private gathering with some of the world's most interesting billionaires — and shares what he observed that surprised him most.",
+    keyIdeas: [
+      { title: "MrBeast's Obsession Level", detail: "MrBeast talks about YouTube the way other people talk about breathing — every waking moment is devoted to understanding what makes a video perform. His obsession is incomparable." },
+      { title: "Billionaires Don't Relax", detail: "The narrative of 'I worked hard, now I'm enjoying life' doesn't exist at the top. The most successful people are still intensely engaged in building." },
+      { title: "The Table You Sit At", detail: "Proximity to a higher level of ambition and execution gradually recalibrates what you believe is possible." }
+    ],
+    quotes: [],
+    classic: true
+  },
+  {
+    num: 513,
+    title: "My $0 to $1 Million Guide — How I Would Start Over in 2024",
+    type: "solo",
+    date: "2023-09-15",
+    guests: [],
+    topics: ["Starting From Zero", "First Million", "Business Ideas", "Bootstrapping", "Shaan Puri Framework"],
+    insight: "Shaan Puri builds a step-by-step playbook — live on the podcast — for how he'd earn his first million dollars if he woke up tomorrow with nothing but his skills.",
+    keyIdeas: [
+      { title: "The $0 to $10K Phase", detail: "The fastest path to $10K is freelance consulting in your area of expertise. Don't build a product yet. Get your first $10K by selling your brain, not your product." },
+      { title: "$10K to $100K Phase", detail: "Productize one service into a repeatable offer, get 10 clients, systematize delivery. You now have a business, not a job." },
+      { title: "$100K to $1M Phase", detail: "Replace yourself in the delivery and start building a product or media asset that generates income without trading hours for dollars." }
+    ],
+    quotes: ["The first $10K is the hardest. Not because money is hard to earn, but because your belief system hasn't been updated yet."],
+    classic: true
+  },
+  {
+    num: 511,
+    title: "Scott Galloway: On His $100M Net Worth and Scarcity Mindset",
+    type: "guest",
+    date: "2023-09-08",
+    guests: ["Scott Galloway"],
+    topics: ["Wealth Psychology", "Scarcity Mindset", "Net Worth", "Young People", "Career Advice"],
+    insight: "Scott Galloway gets unusually personal about his own net worth, why he still thinks in scarcity despite being wealthy, and the practical advice for young people he'd give his younger self.",
+    keyIdeas: [
+      { title: "Scarcity Never Fully Leaves", detail: "Even at $100M+ net worth, Galloway admits to checking his accounts constantly and thinking in scarcity. The mindset forged in lean times doesn't auto-update." },
+      { title: "The Young Person Playbook", detail: "Be around great people, live in cities with opportunity density, take career risks early when stakes are low, and never stop learning." },
+      { title: "Body as an Asset", detail: "He argues that taking care of your physical health in your 20s-30s is one of the highest ROI investments you can make — it compounds over decades." }
+    ],
+    quotes: [],
+    classic: true
+  },
+  {
+    num: 398,
+    title: "Austin Rief: Building & Selling Morning Brew For Millions In 5 Years",
+    type: "guest",
+    date: "2022-12-20",
+    guests: ["Austin Rief"],
+    topics: ["Morning Brew", "Newsletter Business", "Media Company", "Exit", "B2B Media"],
+    insight: "Austin Rief walks through the complete Morning Brew story — from a dorm room side project to a $75M acquisition by Business Insider — and what they'd do differently.",
+    keyIdeas: [
+      { title: "Newsletter as Brand Vehicle", detail: "Morning Brew's genius was not the newsletter itself but the brand it built. The newsletter was the delivery mechanism for a specific personality and voice that readers trusted." },
+      { title: "Advertising as Product", detail: "Morning Brew treated ad placements as products with defined audiences, not inventory. This let them charge 10x the CPM of legacy media." },
+      { title: "The Expansion Mistake", detail: "Expanding into B2B verticals too fast diluted the brand. The core newsletter's focus was its biggest asset and they nearly killed it by growing too broad." }
+    ],
+    quotes: [],
+    classic: true
+  },
+  {
+    num: 224,
+    title: "Rob Dyrdek: How Tracking Every Second Took Him from 0 to $405M",
+    type: "guest",
+    date: "2021-08-15",
+    guests: ["Rob Dyrdek"],
+    topics: ["Time Tracking", "Life Metrics", "Systematic Living", "Wealth Building", "Fantasy Factory"],
+    insight: "Rob Dyrdek explains the life operating system he built — tracking every hour, structuring every week, measuring every relationship — that turned him from a skater into a $405M business empire.",
+    keyIdeas: [
+      { title: "Life as an Operating System", detail: "Rob treats his life like a company: every hour is categorized, every activity is evaluated against goals, and quarterly reviews recalibrate everything. Most people never design their life." },
+      { title: "The 4 Life Buckets", detail: "He tracks time across 4 categories: being a great husband/father, health, business, and learning. When one bucket is empty, he drops everything else to fill it." },
+      { title: "Rhythm Stacks", detail: "Daily rhythms → weekly rhythms → quarterly reviews → annual planning. Each level reinforces the others. Without all four, the system collapses." }
+    ],
+    quotes: ["I don't have a work-life balance. I have a life design."],
+    classic: true
+  },
+  {
+    num: 209,
+    title: "Gary Vaynerchuk: Why NFTs Are the Future",
+    type: "guest",
+    date: "2021-06-10",
+    guests: ["Gary Vaynerchuk"],
+    topics: ["NFTs", "Web3", "Content Creation", "VeeFriends", "Marketing"],
+    insight: "Gary Vee explains why he's betting his reputation on NFTs — and the broader thesis about digital ownership and creator monetization that underpins VeeFriends.",
+    keyIdeas: [
+      { title: "NFTs as Ownership Layer", detail: "Gary argues NFTs represent the first true digital ownership primitive — the ability to own something on the internet the way you own a physical object." },
+      { title: "VeeFriends Thesis", detail: "VeeFriends uses NFTs as access tokens to his real-world conference and mentorship — making the token's value tied to real utility, not just speculation." },
+      { title: "Content Creators Win", detail: "He believes the artists and creators who adopt NFTs early will disintermediate the platforms that currently extract all the value from their work." }
+    ],
+    quotes: [],
+    classic: true
+  },
+  {
+    num: 178,
+    title: "Balaji Srinivasan: How to Fix Media, Cloud Cities & Crypto",
+    type: "guest",
+    date: "2021-02-20",
+    guests: ["Balaji Srinivasan"],
+    topics: ["Media Decentralization", "Cloud Cities", "Cryptocurrency", "Network States", "Tech Philosophy"],
+    insight: "Balaji Srinivasan — former CTO of Coinbase, Andreessen Horowitz GP — lays out his vision for decentralized everything: media, governance, and cities.",
+    keyIdeas: [
+      { title: "The Media Cartel Problem", detail: "Legacy media coordinates to amplify certain narratives and suppress others. The solution isn't better media — it's a cryptographically verifiable public record that can't be edited." },
+      { title: "Cloud First, Land Second", detail: "His network state thesis: communities form online first around shared values, then eventually claim physical territory. Cloud → Land, not Land → Cloud." },
+      { title: "Crypto as Exit", detail: "Balaji sees crypto as giving individuals the ability to exit legacy financial and governance systems — a genuine alternative that increases negotiating power with existing nation-states." }
+    ],
+    quotes: ["The network state is a new form of government, started by a founder, built on consensus, and anchored by cryptocurrency."],
+    classic: true
+  },
+  {
+    num: 97,
+    title: "The Warren Buffett of the Internet Returns",
+    type: "guest",
+    date: "2020-07-15",
+    guests: ["Andrew Wilkinson"],
+    topics: ["Internet Holding Company", "Berkshire Model", "Newsletters", "Passive Income", "Local Media"],
+    insight: "Andrew Wilkinson's early MFM appearance laying out his Berkshire Hathaway for the internet thesis — buying profitable internet businesses instead of building them.",
+    keyIdeas: [
+      { title: "Buy, Don't Build", detail: "Andrew realized that acquiring profitable, boring internet businesses was a better risk-adjusted return than building new ones. The businesses exist, have customers, and have proven revenue." },
+      { title: "Local Newsletter Opportunity", detail: "He identified a gap: local newspapers were dying but local communities still craved local news. A modern, email-first local publication could outperform legacy newspapers with 10% of the cost." },
+      { title: "The Berkshire Mental Model", detail: "He deliberately models Tiny after Berkshire: permanent capital, hands-off management, focus on high-quality operators, patient hold periods." }
+    ],
+    quotes: [],
+    classic: true
+  },
+  {
+    num: null,
+    title: "Pieter Levels: Making $2.7M A Year With No Employees",
+    type: "guest",
+    date: "2022-07-14",
+    guests: ["Pieter Levels"],
+    topics: ["Solo Founder", "Indie Hacking", "Nomad Living", "Product Portfolio", "Bootstrapping"],
+    insight: "Pieter Levels — the original digital nomad hacker — explains how he built a portfolio of profitable internet products alone, generating $2.7M in annual revenue with zero employees.",
+    keyIdeas: [
+      { title: "The 12 Startups in 12 Months Framework", detail: "Pieter launched 12 products in 12 months to find product-market fit. Most failed. Two (Nomad List and Remote OK) became multi-million dollar businesses." },
+      { title: "Ruthless Simplicity", detail: "Every product he builds has to be the simplest possible thing. No funding, no team, no complexity. If it can't be built in a week, it's too complex." },
+      { title: "Revenue Before Features", detail: "Charge on day one. Pieter sets up payment before building features. If people won't pay for the concept, no feature will fix it." }
+    ],
+    quotes: ["Ship it. Ship it now. Then fix it."],
+    classic: true
+  },
+  {
+    num: null,
+    title: "Palmer Luckey: Building Anduril After Oculus",
+    type: "guest",
+    date: "2022-04-10",
+    guests: ["Palmer Luckey"],
+    topics: ["Anduril Industries", "Defense Tech", "Oculus VR", "National Security", "Contrarian Founder"],
+    insight: "Palmer Luckey — who created Oculus at 19 and sold it to Facebook for $2B — explains why he left Silicon Valley's consensus reality to start a defense company and why he thinks it's the most important work happening in tech.",
+    keyIdeas: [
+      { title: "Defense Tech as Moral Imperative", detail: "Palmer argues that the US defense apparatus is so broken that the country's security genuinely depends on Silicon Valley founders disrupting it. It's not a business play — it's a security necessity." },
+      { title: "Anduril's Approach", detail: "Rather than selling products to the DoD through traditional procurement (slow, corrupt, legacy-locked), Anduril builds products on its own dime and proves them before bringing them to the government." },
+      { title: "Authenticity Over Optics", detail: "Getting fired from Facebook for his political views made him unemployable in Silicon Valley — which freed him to build something the Valley couldn't." }
+    ],
+    quotes: [],
+    classic: true
+  },
+  {
+    num: null,
+    title: "Naval Ravikant: How to Get Rich (Without Getting Lucky)",
+    type: "guest",
+    date: "2020-09-05",
+    guests: ["Naval Ravikant"],
+    topics: ["Wealth Building", "Leverage", "Specific Knowledge", "AngelList", "Philosophy"],
+    insight: "Naval Ravikant — AngelList founder and philosopher-investor — delivers the frameworks for building wealth that don't depend on luck, connections, or timing.",
+    keyIdeas: [
+      { title: "Specific Knowledge", detail: "Seek out specific knowledge — knowledge that can't be trained, that society values highly, that you acquire through genuine curiosity. This is the foundation of outsized wealth." },
+      { title: "The Four Types of Leverage", detail: "Labor, capital, code, and media. The first two require other humans. Code and media create leverage while you sleep — products of the mind that can be infinitely reproduced." },
+      { title: "Escape Competition Through Authenticity", detail: "Be so uniquely yourself that no one can compete with you. Your combination of skills, experiences, and perspective is the one thing no one else has." }
+    ],
+    quotes: ["Escape competition through authenticity. No one can compete with you on being you."],
+    classic: true
+  },
+  {
+    num: null,
+    title: "Alex Hormozi: From Gym Operator to $100M Offers",
+    type: "guest",
+    date: "2022-10-20",
+    guests: ["Alex Hormozi"],
+    topics: ["$100M Offers", "Sales", "Gym Launch", "Acquisition.com", "Business Scaling"],
+    insight: "Alex Hormozi — who built and sold a gym franchise at 29 and wrote the highest-rated business book in years — breaks down the offer creation framework that generates millions.",
+    keyIdeas: [
+      { title: "The Grand Slam Offer", detail: "An offer so good that people feel stupid saying no. It requires stacking value until the perceived benefit massively outweighs the price." },
+      { title: "Gym Launch Origin", detail: "He cracked the code on filling gyms using a specific 6-week challenge offer and built a franchise helping gym owners do the same — without taking equity, only revenue share." },
+      { title: "Acquisition Model", detail: "Acquisition.com doesn't invest — it partners. Hormozi and his team operate inside portfolio companies, bringing sales and marketing firepower in exchange for equity." }
+    ],
+    quotes: ["The market doesn't pay for your effort. It pays for your value."],
+    classic: true
+  },
+  {
+    num: null,
+    title: "Tim Ferriss: The 4-Hour Philosophy Applied to Business Building",
+    type: "guest",
+    date: "2021-04-10",
+    guests: ["Tim Ferriss"],
+    topics: ["4-Hour Workweek", "Lifestyle Design", "Angel Investing", "Early Retirement", "Systems Thinking"],
+    insight: "Tim Ferriss revisits his 4-Hour Workweek thesis 15 years later — what held up, what he got wrong, and how he'd apply the framework in a post-pandemic world.",
+    keyIdeas: [
+      { title: "Lifestyle Design First", detail: "Define your ideal day first. Then engineer the business to produce it. Most people do it backwards — build the business, then hope to design a life around it." },
+      { title: "Fear-Setting vs. Goal-Setting", detail: "Tim's most impactful mental practice: define worst-case scenarios explicitly. Most feared outcomes are recoverable and temporary. The fear is holding you back from low-risk experiments." },
+      { title: "Angel Portfolio Strategy", detail: "He invests small checks at the earliest stage into founders he believes in — not chasing returns but buying access to the world's most interesting people and problems." }
+    ],
+    quotes: ["A person's success in life can usually be measured by the number of uncomfortable conversations they are willing to have."],
+    classic: true
+  }
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let activeFilter = 'all';
+let activeModal = null;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  updateStats();
+  renderGrid();
+};
+
+function updateStats() {
+  const total = EPISODES.length;
+  const guest = EPISODES.filter(e => e.type === 'guest').length;
+  const solo = EPISODES.filter(e => e.type === 'solo').length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statGuest').textContent = guest;
+  document.getElementById('statSolo').textContent = solo;
+}
+
+// ─── FILTER / SORT ───────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function matchesFilter(ep) {
+  if (activeFilter === 'all') return true;
+  if (activeFilter === 'guest') return ep.type === 'guest';
+  if (activeFilter === 'solo') return ep.type === 'solo';
+  if (activeFilter === 'classic') return ep.classic === true;
+  if (activeFilter === '2026') return ep.date.startsWith('2026');
+  if (activeFilter === '2025') return ep.date.startsWith('2025');
+  if (activeFilter === '2024') return ep.date.startsWith('2024');
+  return true;
+}
+
+function matchesSearch(ep) {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (!q) return true;
+  const hay = [
+    ep.title, ep.insight, ep.type,
+    ...ep.guests, ...ep.topics,
+    ...(ep.keyIdeas || []).map(k => k.title + ' ' + k.detail),
+    ...(ep.quotes || [])
+  ].join(' ').toLowerCase();
+  return q.split(' ').every(word => hay.includes(word));
+}
+
+function sortEpisodes(arr) {
+  const s = document.getElementById('sortSelect').value;
+  return [...arr].sort((a, b) => {
+    if (s === 'newest') return new Date(b.date) - new Date(a.date);
+    if (s === 'oldest') return new Date(a.date) - new Date(b.date);
+    if (s === 'num_desc') return (b.num || 0) - (a.num || 0);
+    if (s === 'num_asc') return (a.num || 0) - (b.num || 0);
+    return 0;
+  });
+}
+
+// ─── RENDER GRID ─────────────────────────────────────────────────────────────
+function renderGrid() {
+  const filtered = sortEpisodes(EPISODES.filter(ep => matchesFilter(ep) && matchesSearch(ep)));
+  const grid = document.getElementById('episodeGrid');
+  const empty = document.getElementById('emptyState');
+  const rc = document.getElementById('resultsCount');
+  rc.textContent = `${filtered.length} episode${filtered.length !== 1 ? 's' : ''} shown`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map(ep => {
+    const typeLabel = ep.type === 'solo' ? 'Solo' : 'Guest';
+    const typeClass = ep.type;
+    const accentColor = ep.type === 'solo' ? 'var(--solo)' : ep.classic ? 'var(--gold)' : 'var(--guest)';
+    const guestLine = ep.guests.length ? `<div class="ep-guest"><span class="ep-guest-icon">🎙</span>${ep.guests.join(', ')}</div>` : '';
+    const topicsHtml = ep.topics.slice(0, 4).map(t => `<span class="ep-topic">${t}</span>`).join('');
+    const insightPreview = ep.insight ? `<div class="ep-insight">${ep.insight}</div>` : '';
+
+    return `
+    <div class="ep-card" style="--accent:${accentColor}" onclick="openModal('${ep.title.replace(/'/g,"\\'")}')">
+      <div class="ep-card-top">
+        ${ep.num ? `<div class="ep-num">EP ${ep.num}</div>` : '<div class="ep-num">CLASSIC</div>'}
+        <div class="ep-title">${ep.title}</div>
+      </div>
+      <div class="ep-meta">
+        <span class="ep-type ${typeClass}">${typeLabel}</span>
+        ${ep.classic ? '<span class="ep-type hot">🏆 Classic</span>' : ''}
+        <span class="ep-date">${formatDate(ep.date)}</span>
+      </div>
+      ${guestLine}
+      <div class="ep-topics">${topicsHtml}</div>
+      ${insightPreview}
+    </div>`;
+  }).join('');
+}
+
+function formatDate(d) {
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function openModal(title) {
+  const ep = EPISODES.find(e => e.title === title);
+  if (!ep) return;
+  activeModal = ep;
+
+  document.getElementById('mEpNum').textContent = ep.num ? `Episode ${ep.num}` : 'Classic Episode';
+  document.getElementById('mTitle').textContent = ep.title;
+  document.getElementById('mGuest').textContent = ep.guests.length
+    ? '🎙 ' + ep.guests.join(' · ')
+    : '🧠 Sam Parr & Shaan Puri';
+
+  const meta = document.getElementById('mMeta');
+  const typeClass = ep.type === 'solo' ? 'solo' : 'guest';
+  meta.innerHTML = `
+    <span class="ep-type ${typeClass}">${ep.type === 'solo' ? 'Solo Episode' : 'Guest Episode'}</span>
+    ${ep.classic ? '<span class="ep-type hot">🏆 Classic</span>' : ''}
+    <span class="ep-date" style="font-size:13px">${formatDate(ep.date)}</span>
+  `;
+
+  const body = document.getElementById('mBody');
+  let html = '';
+
+  // Overview
+  if (ep.insight) {
+    html += `
+    <div class="modal-section">
+      <h3>Episode Overview</h3>
+      <p>${ep.insight}</p>
+    </div>`;
+  }
+
+  // Topics
+  if (ep.topics.length) {
+    html += `
+    <div class="modal-section">
+      <h3>Topics Covered</h3>
+      <div class="modal-topics">${ep.topics.map(t => `<span class="modal-topic">${t}</span>`).join('')}</div>
+    </div>`;
+  }
+
+  // Key Ideas
+  if (ep.keyIdeas && ep.keyIdeas.length) {
+    html += `<div class="modal-section"><h3>Key Ideas & Insights</h3>`;
+    ep.keyIdeas.forEach(idea => {
+      html += `
+      <div class="insight-block">
+        <div class="insight-title">💡 ${idea.title}</div>
+        <p>${idea.detail}</p>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Quotes
+  if (ep.quotes && ep.quotes.length) {
+    html += `<div class="modal-section"><h3>Best Quotes</h3>`;
+    ep.quotes.forEach(q => {
+      html += `<div class="quote-block"><p>"${q}"</p></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Listen
+  html += `
+  <div class="modal-section">
+    <h3>Listen to this Episode</h3>
+    <div class="listen-links">
+      <a class="listen-link" href="https://www.mfmpod.com/episodes/" target="_blank">🌐 MFM Website</a>
+      <a class="listen-link" href="https://open.spotify.com/show/3mliji9352UAk3XnWElnDV" target="_blank">🎵 Spotify</a>
+      <a class="listen-link" href="https://podcasts.apple.com/us/podcast/my-first-million/id1469759170" target="_blank">🎧 Apple Podcasts</a>
+      <a class="listen-link" href="https://www.youtube.com/@thesamshaanshow" target="_blank">📺 YouTube</a>
+    </div>
+  </div>`;
+
+  // Guest profile link
+  if (ep.guests.length) {
+    html += `
+    <div class="modal-section">
+      <h3>Guest Profiles</h3>
+      <div class="listen-links">
+        ${ep.guests.map(g => `<a class="listen-link" href="MFM_Guest_Profiles.html" target="_blank">👤 ${g} Profile</a>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  body.innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+</script>
+</body>
+</html>

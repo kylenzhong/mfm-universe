@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MFM Universe RPG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #d4c090;
+            color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        #gameContainer {
+            width: 100%;
+            max-width: 1200px;
+            background: #d4c090;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+        }
+
+        /* TITLE SCREEN */
+        #titleScreen {
+            text-align: center;
+            background: #d4c090;
+            padding: 40px;
+            border: 3px solid #d4a000;
+            display: none;
+        }
+
+        #titleScreen.active {
+            display: block;
+        }
+
+        .title-text {
+            font-size: 48px;
+            color: #ffdd00;
+            text-shadow: 3px 3px #000, -1px -1px #000;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle-text {
+            font-size: 20px;
+            color: #d4a000;
+            margin-bottom: 30px;
+        }
+
+        .start-button {
+            background: #3d3d3d;
+            border: 3px solid #d4a000;
+            color: #ffdd00;
+            padding: 15px 30px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .start-button:hover {
+            background: #5d5d5d;
+        }
+
+        /* MAIN GAME LAYOUT */
+        .game-wrapper {
+            display: flex;
+            gap: 10px;
+            background: #d4c090;
+            padding: 0;
+        }
+
+        /* LEFT PANEL - STATS */
+        .stats-panel {
+            width: 200px;
+            background: #3d3d3d;
+            border: 3px solid #d4a000;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            color: #fff;
+        }
+
+        .stats-panel.active {
+            display: flex;
+        }
+
+        .stat-box {
+            background: #2d2d2d;
+            border: 2px solid #d4a000;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .stat-label {
+            color: #ffdd00;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .hp-bar, .xp-bar {
+            width: 100%;
+            height: 12px;
+            background: #1a1a1a;
+            border: 1px solid #d4a000;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .hp-fill, .xp-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .hp-fill { background: #00ff00; }
+        .xp-fill { background: #00bfff; }
+
+        .hp-fill.low {
+            background: #ff6600;
+        }
+
+        .hp-fill.critical {
+            background: #ff0000;
+        }
+
+        /* CENTER - GAME CANVAS */
+        #mapCanvas {
+            border: 3px solid #d4a000;
+            background: #d4c090;
+            flex: 1;
+            max-width: 600px;
+        }
+
+        /* RIGHT PANEL - BUTTONS */
+        .action-panel {
+            width: 140px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-panel.active {
+            display: flex;
+        }
+
+        .action-button {
+            background: #3d3d3d;
+            border: 3px solid #d4a000;
+            color: #ffdd00;
+            padding: 12px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-button:hover {
+            background: #5d5d5d;
+        }
+
+        .action-button:active {
+            background: #1d1d1d;
+        }
+
+        /* ENCOUNTER DIALOG */
+        #encounterDialog {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d2d2d;
+            border: 3px solid #000;
+            border-radius: 0;
+            padding: 15px;
+            width: 90%;
+            max-width: 500px;
+            z-index: 100;
+            box-shadow: -3px 3px 0 rgba(0,0,0,0.3);
+        }
+
+        #encounterDialog.active {
+            display: block;
+        }
+
+        .encounter-content {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .encounter-avatar {
+            font-size: 40px;
+            flex-shrink: 0;
+        }
+
+        .encounter-text {
+            color: #fff;
+            font-size: 12px;
+            flex: 1;
+        }
+
+        .encounter-text .guest-name {
+            color: #ffdd00;
+            font-weight: bold;
+        }
+
+        .encounter-instruction {
+            color: #ffdd00;
+            margin-top: 10px;
+            font-size: 11px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* BATTLE SCREEN */
+        #battleScreen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, #87ceeb 0%, #e0f6ff 100%);
+            z-index: 200;
+        }
+
+        #battleScreen.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .battle-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 40px;
+        }
+
+        .battle-opponent {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .battle-opponent-avatar {
+            font-size: 60px;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.3);
+            border: 3px solid #000;
+        }
+
+        .opponent-info {
+            color: #000;
+            font-size: 14px;
+        }
+
+        .opponent-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        .opponent-hp-bar {
+            width: 200px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #000;
+            overflow: hidden;
+        }
+
+        .opponent-hp-fill {
+            height: 100%;
+            background: #00ff00;
+            transition: width 0.3s;
+        }
+
+        .player-avatar {
+            font-size: 60px;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.3);
+            border: 3px solid #000;
+        }
+
+        .battle-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .question-box {
+            background: #3d3d3d;
+            border: 3px solid #000;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #fff;
+            font-size: 16px;
+            text-align: left;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            max-width: 600px;
+        }
+
+        .answer-button {
+            background: #3d3d3d;
+            border: 3px solid #d4a000;
+            color: #ffdd00;
+            padding: 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .answer-button:hover:not(:disabled) {
+            background: #5d5d5d;
+        }
+
+        .answer-button.correct {
+            background: #00ff00;
+            color: #000;
+            border-color: #000;
+        }
+
+        .answer-button.incorrect {
+            background: #ff0000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .answer-button:disabled {
+            cursor: not-allowed;
+        }
+
+        /* COLLECTION SCREEN */
+        #collectionScreen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #4d0099 0%, #9933ff 100%);
+            z-index: 150;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        #collectionScreen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .collection-header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffdd00;
+            font-size: 24px;
+        }
+
+        .collection-counter {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .collection-card {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #d4a000;
+            padding: 15px;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .collection-card.uncaptured {
+            opacity: 0.5;
+        }
+
+        .card-number {
+            color: #ffdd00;
+            font-size: 10px;
+        }
+
+        .card-avatar {
+            font-size: 40px;
+        }
+
+        .card-name {
+            color: #fff;
+            font-size: 10px;
+        }
+
+        .card-question {
+            color: #ffff00;
+            font-size: 30px;
+        }
+
+        .collection-pagination {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff0000;
+            border: 3px solid #000;
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .close-button:hover {
+            background: #cc0000;
+        }
+
+        /* INFO BAR */
+        .info-bar {
+            background: #3d3d3d;
+            border-top: 3px solid #d4a000;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 11px;
+            text-align: center;
+            display: none;
+        }
+
+        .info-bar.active {
+            display: block;
+        }
+
+        /* HIDDEN CLASS */
+        .hidden {
+            display: none !important;
+        }
+
+        /* FLOATING TEXT */
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: none;
+            animation: float-up 1s ease-out forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+
+        /* SHAKE ANIMATION */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .game-wrapper {
+                flex-direction: column;
+            }
+            .stats-panel, .action-panel {
+                width: 100%;
+                flex-direction: row;
+            }
+            #mapCanvas {
+                max-width: 100%;
+            }
+            .collection-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .title-text {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 3px 3px #000, -1px -1px #000;
+            }
+            50% {
+                text-shadow: 3px 3px #000, -1px -1px #000, 0 0 10px rgba(255, 221, 0, 0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- TITLE SCREEN -->
+        <div id="titleScreen" class="active">
+            <div class="title-text">MFM UNIVERSE</div>
+            <div class="subtitle-text">Catch 'Em All!</div>
+            <div id="titleSprites" style="display:flex;justify-content:center;gap:8px;margin:20px 0;flex-wrap:wrap;"></div>
+            <button class="start-button" onclick="startGame()">START GAME</button>
+            <button class="start-button" onclick="showCollection()">VIEW COLLECTION</button>
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+              <a href="MFM_Guest_Profiles.html" style="text-decoration:none;color:#d4c090;background:rgba(0,0,0,0.4);border:2px solid #8B7355;padding:8px 14px;border-radius:4px;font-family:'Press Start 2P',cursive;font-size:8px;">👤 GUESTS</a>
+              <a href="MFM_Episodes.html" style="text-decoration:none;color:#d4c090;background:rgba(0,0,0,0.4);border:2px solid #8B7355;padding:8px 14px;border-radius:4px;font-family:'Press Start 2P',cursive;font-size:8px;">📻 EPISODES</a>
+            </div>
+        </div>
+
+        <!-- MAIN GAME -->
+        <div class="game-wrapper">
+            <!-- LEFT PANEL - STATS -->
+            <div class="stats-panel" id="statsPanel">
+                <div class="stat-box">
+                    <div class="stat-label">LEVEL</div>
+                    <div class="stat-value" id="levelDisplay">1</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">XP</div>
+                    <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+                    <div class="stat-value" id="xpDisplay">0/100</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">HP</div>
+                    <div class="hp-bar"><div class="hp-fill" id="hpFill" style="width: 100%"></div></div>
+                    <div class="stat-value" id="hpDisplay">100/100</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">CAPTURED</div>
+                    <div class="stat-value" id="capturedDisplay">0/9</div>
+                </div>
+            </div>
+
+            <!-- CENTER - GAME CANVAS -->
+            <canvas id="mapCanvas" width="640" height="480"></canvas>
+
+            <!-- RIGHT PANEL - BUTTONS -->
+            <div class="action-panel" id="actionPanel">
+                <button class="action-button" onclick="showCollection()">COLLECTION</button>
+                <button class="action-button" onclick="toggleMute()">MUTE</button>
+                <button class="action-button" onclick="showStats()">STATS</button>
+                <button class="action-button" onclick="goToTitle()">TITLE</button>
+            </div>
+        </div>
+
+        <!-- ENCOUNTER DIALOG -->
+        <div id="encounterDialog">
+            <div class="encounter-content">
+                <div class="encounter-avatar" id="encounterAvatar">🏢</div>
+                <div class="encounter-text">
+                    <div class="guest-name" id="encounterName">Guest Name</div>
+                    <div id="encounterDescription"></div>
+                    <div class="encounter-instruction">Press SPACE to Battle!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BATTLE SCREEN -->
+        <div id="battleScreen">
+            <div class="battle-header">
+                <div class="battle-opponent">
+                    <div class="battle-opponent-avatar" id="opponentAvatar">🏢</div>
+                    <div class="opponent-info">
+                        <div class="opponent-name" id="opponentName">Guest</div>
+                        <div class="opponent-hp-bar"><div class="opponent-hp-fill" id="opponentHpFill" style="width: 100%"></div></div>
+                        <div id="opponentHpText">HP: 80/80</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="battle-body">
+                <div class="question-box" id="questionBox">
+                    <span id="questionText">Question here</span>
+                </div>
+                <div class="answers-grid" id="answersGrid">
+                    <!-- Answers will be inserted here -->
+                </div>
+            </div>
+
+            <div class="battle-header">
+                <div style="margin-left: auto; text-align: right;">
+                    <div class="opponent-name">YOU</div>
+                    <div class="opponent-hp-bar"><div class="opponent-hp-fill" id="playerHpFill" style="width: 100%; background: #ffdd00;"></div></div>
+                    <div id="playerHpText">HP: 100/100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLLECTION SCREEN -->
+        <div id="collectionScreen">
+            <button class="close-button" onclick="closeCollection()">✕</button>
+            <div class="collection-header">MFM COLLECTION</div>
+            <div class="collection-counter">
+                <span id="collectionCount">0</span> / 9 Captured
+            </div>
+            <div class="collection-grid" id="collectionGrid">
+                <!-- Cards will be inserted here -->
+            </div>
+            <div class="collection-pagination">
+                Page 1 / 1
+            </div>
+        </div>
+
+        <!-- INFO BAR -->
+        <div class="info-bar" id="infoBar">
+            Use Arrow Keys or WASD to Move • Space to Battle • Collection to View Captured Guests
+        </div>
+    </div>
+
+    <script>
+        // ==================== PIXEL ART SPRITE SYSTEM ====================
+        // Each sprite is a 16x16 grid of hex color values (null = transparent)
+        const SPRITES = {
+            // Dharmesh Shah: Bald, glasses, brown skin, dark blue shirt
+            "Dharmesh Shah": [
+                [null,null,null,null,null,"#8B6914","#8B6914","#8B6914","#8B6914","#8B6914","#8B6914",null,null,null,null,null],
+                [null,null,null,null,"#8B6914","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#8B6914",null,null,null,null],
+                [null,null,null,"#8B6914","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#8B6914",null,null,null],
+                [null,null,null,"#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17",null,null,null],
+                [null,null,null,"#C68E17","#222","#222","#C68E17","#C68E17","#C68E17","#222","#222","#C68E17","#C68E17",null,null,null],
+                [null,null,null,"#C68E17","#fff","#111","#C68E17","#C68E17","#C68E17","#fff","#111","#C68E17","#C68E17",null,null,null],
+                [null,null,null,"#C68E17","#C68E17","#C68E17","#C68E17","#9B5E10","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17",null,null,null],
+                [null,null,null,null,"#C68E17","#C68E17","#9B5E10","#9B5E10","#9B5E10","#C68E17","#C68E17","#C68E17",null,null,null,null],
+                [null,null,null,null,"#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17","#C68E17",null,null,null,null],
+                [null,null,null,null,null,"#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C",null,null,null,null,null],
+                [null,null,null,null,"#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C",null,null,null,null],
+                [null,null,null,"#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C","#1B3A5C",null,null,null],
+                [null,null,null,"#1B3A5C","#1B3A5C","#C68E17","#1B3A5C","#1B3A5C","#1B3A5C","#C68E17","#1B3A5C","#1B3A5C","#1B3A5C",null,null,null],
+                [null,null,null,null,"#C68E17","#C68E17",null,null,null,"#C68E17","#C68E17",null,null,null,null,null],
+                [null,null,null,null,"#333","#333",null,null,null,"#333","#333",null,null,null,null,null],
+                [null,null,null,"#333","#333",null,null,null,null,null,"#333","#333",null,null,null,null]
+            ],
+            // Jesse Itzler: Dark hair, athletic, red/black running gear
+            "Jesse Itzler": [
+                [null,null,null,null,null,"#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a",null,null,null,null,null],
+                [null,null,null,null,"#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a",null,null,null,null],
+                [null,null,null,"#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a",null,null,null],
+                [null,null,null,"#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C",null,null,null],
+                [null,null,null,"#E8B87C","#fff","#333","#E8B87C","#E8B87C","#E8B87C","#fff","#333","#E8B87C","#E8B87C",null,null,null],
+                [null,null,null,"#E8B87C","#E8B87C","#E8B87C","#E8B87C","#D4A06A","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C",null,null,null],
+                [null,null,null,"#E8B87C","#E8B87C","#E8B87C","#D4A06A","#D4A06A","#D4A06A","#E8B87C","#E8B87C","#E8B87C","#E8B87C",null,null,null],
+                [null,null,null,null,"#E8B87C","#E8B87C","#E8B87C","#c44","#E8B87C","#E8B87C","#E8B87C","#E8B87C",null,null,null,null],
+                [null,null,null,null,"#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C","#E8B87C",null,null,null,null],
+                [null,null,null,null,null,"#cc2222","#cc2222","#cc2222","#cc2222","#cc2222","#cc2222",null,null,null,null,null],
+                [null,null,null,null,"#cc2222","#cc2222","#cc2222","#cc2222","#cc2222","#cc2222","#cc2222","#cc2222",null,null,null,null],
+                [null,null,null,"#cc2222","#cc2222","#cc2222","#222","#222","#222","#cc2222","#cc2222","#cc2222","#cc2222",null,null,null],
+                [null,null,null,"#cc2222","#E8B87C","#E8B87C","#cc2222","#cc2222","#cc2222","#E8B87C","#E8B87C","#cc2222","#cc2222",null,null,null],
+                [null,null,null,null,"#E8B87C","#E8B87C",null,null,null,"#E8B87C","#E8B87C",null,null,null,null,null],
+                [null,null,null,null,"#222","#222",null,null,null,"#222","#222",null,null,null,null,null],
+                [null,null,null,"#ff4444","#ff4444",null,null,null,null,null,"#ff4444","#ff4444",null,null,null,null]
+            ],
+            // Andrew Wilkinson: Beard, lighter skin, green sweater
+            "Andrew Wilkinson": [
+                [null,null,null,null,null,"#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a",null,null,null,null,null],
+                [null,null,null,null,"#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a",null,null,null,null],
+                [null,null,null,"#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#fff","#444","#F0C8A0","#F0C8A0","#F0C8A0","#fff","#444","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#D4A88A","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,null,"#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a",null,null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,null,"#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32",null,null,null,null,null],
+                [null,null,null,null,"#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32",null,null,null,null],
+                [null,null,null,"#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32","#2e7d32",null,null,null],
+                [null,null,null,"#2e7d32","#F0C8A0","#F0C8A0","#2e7d32","#2e7d32","#2e7d32","#F0C8A0","#F0C8A0","#2e7d32","#2e7d32",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0",null,null,null,"#F0C8A0","#F0C8A0",null,null,null,null,null],
+                [null,null,null,null,"#444","#444",null,null,null,"#444","#444",null,null,null,null,null],
+                [null,null,null,"#444","#444",null,null,null,null,null,"#444","#444",null,null,null,null]
+            ],
+            // Elan Lee: Spiky dark hair, purple gaming shirt
+            "Elan Lee": [
+                [null,null,null,"#1a1a2e",null,"#1a1a2e",null,"#1a1a2e",null,"#1a1a2e",null,"#1a1a2e",null,null,null,null],
+                [null,null,null,null,"#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e",null,null,null,null],
+                [null,null,null,"#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e","#1a1a2e",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0","#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#D4A88A","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#c44","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,null,"#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e",null,null,null,null,null],
+                [null,null,null,null,"#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e",null,null,null,null],
+                [null,null,null,"#7b2d8e","#7b2d8e","#7b2d8e","#ff00ff","#7b2d8e","#ff00ff","#7b2d8e","#7b2d8e","#7b2d8e","#7b2d8e",null,null,null],
+                [null,null,null,"#7b2d8e","#F0C8A0","#F0C8A0","#7b2d8e","#7b2d8e","#7b2d8e","#F0C8A0","#F0C8A0","#7b2d8e","#7b2d8e",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0",null,null,null,"#F0C8A0","#F0C8A0",null,null,null,null,null],
+                [null,null,null,null,"#333","#333",null,null,null,"#333","#333",null,null,null,null,null],
+                [null,null,null,"#333","#333",null,null,null,null,null,"#333","#333",null,null,null,null]
+            ],
+            // Greg Isenberg: Modern tech bro, dark hair, orange hoodie
+            "Greg Isenberg": [
+                [null,null,null,null,null,"#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a",null,null,null,null,null],
+                [null,null,null,null,"#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a",null,null,null,null],
+                [null,null,null,"#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a","#2a1a0a",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0","#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#D4A88A","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#c44","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,"#E65100","#E65100","#E65100","#E65100","#E65100","#E65100","#E65100","#E65100",null,null,null,null],
+                [null,null,null,"#E65100","#E65100","#E65100","#E65100","#BF360C","#E65100","#E65100","#E65100","#E65100","#E65100",null,null,null],
+                [null,null,null,"#E65100","#E65100","#E65100","#E65100","#BF360C","#E65100","#E65100","#E65100","#E65100","#E65100",null,null,null],
+                [null,null,null,"#E65100","#F0C8A0","#F0C8A0","#E65100","#E65100","#E65100","#F0C8A0","#F0C8A0","#E65100","#E65100",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0",null,null,null,"#F0C8A0","#F0C8A0",null,null,null,null,null],
+                [null,null,null,null,"#333","#333",null,null,null,"#333","#333",null,null,null,null,null],
+                [null,null,null,"#333","#333",null,null,null,null,null,"#333","#333",null,null,null,null]
+            ],
+            // Tyler Denk: Short brown hair, blue tech tee
+            "Tyler Denk": [
+                [null,null,null,null,null,"#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226",null,null,null,null,null],
+                [null,null,null,null,"#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226",null,null,null,null],
+                [null,null,null,"#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226","#6B4226",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0","#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#D4A88A","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#c44","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,null,"#1565C0","#1565C0","#1565C0","#1565C0","#1565C0","#1565C0",null,null,null,null,null],
+                [null,null,null,null,"#1565C0","#1565C0","#1565C0","#1565C0","#1565C0","#1565C0","#1565C0","#1565C0",null,null,null,null],
+                [null,null,null,"#1565C0","#1565C0","#1565C0","#00ff66","#1565C0","#00ff66","#1565C0","#1565C0","#1565C0","#1565C0",null,null,null],
+                [null,null,null,"#1565C0","#F0C8A0","#F0C8A0","#1565C0","#1565C0","#1565C0","#F0C8A0","#F0C8A0","#1565C0","#1565C0",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0",null,null,null,"#F0C8A0","#F0C8A0",null,null,null,null,null],
+                [null,null,null,null,"#333","#333",null,null,null,"#333","#333",null,null,null,null,null],
+                [null,null,null,"#333","#333",null,null,null,null,null,"#333","#333",null,null,null,null]
+            ],
+            // Alex Lieberman: Dark curly hair, blue/navy casual shirt
+            "Alex Lieberman": [
+                [null,null,null,null,"#1a1a0a","#1a1a0a",null,"#1a1a0a",null,"#1a1a0a","#1a1a0a",null,null,null,null,null],
+                [null,null,null,"#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a",null,null,null,null],
+                [null,null,null,"#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a","#1a1a0a",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0","#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#D4A88A","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#c44","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,null,"#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e",null,null,null,null,null],
+                [null,null,null,null,"#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e",null,null,null,null],
+                [null,null,null,"#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e","#1a237e",null,null,null],
+                [null,null,null,"#1a237e","#F0C8A0","#F0C8A0","#1a237e","#1a237e","#1a237e","#F0C8A0","#F0C8A0","#1a237e","#1a237e",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0",null,null,null,"#F0C8A0","#F0C8A0",null,null,null,null,null],
+                [null,null,null,null,"#333","#333",null,null,null,"#333","#333",null,null,null,null,null],
+                [null,null,null,"#333","#333",null,null,null,null,null,"#333","#333",null,null,null,null]
+            ],
+            // Austin Rief: Short neat hair, white dress shirt
+            "Austin Rief": [
+                [null,null,null,null,null,"#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520",null,null,null,null,null],
+                [null,null,null,null,"#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520",null,null,null,null],
+                [null,null,null,"#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520","#4a3520",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0","#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#D4A88A","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#c44","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,null,"#eee","#eee","#eee","#eee","#eee","#eee",null,null,null,null,null],
+                [null,null,null,null,"#eee","#eee","#eee","#ccc","#eee","#eee","#eee","#eee",null,null,null,null],
+                [null,null,null,"#eee","#eee","#eee","#eee","#ccc","#eee","#eee","#eee","#eee","#eee",null,null,null],
+                [null,null,null,"#eee","#F0C8A0","#F0C8A0","#eee","#eee","#eee","#F0C8A0","#F0C8A0","#eee","#eee",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0",null,null,null,"#F0C8A0","#F0C8A0",null,null,null,null,null],
+                [null,null,null,null,"#333","#333",null,null,null,"#333","#333",null,null,null,null,null],
+                [null,null,null,"#333","#333",null,null,null,null,null,"#333","#333",null,null,null,null]
+            ],
+            // Jesse Cole: Yellow tuxedo (his trademark!), brown hair
+            "Jesse Cole": [
+                [null,null,null,null,null,"#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a",null,null,null,null,null],
+                [null,null,null,null,"#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a",null,null,null,null],
+                [null,null,null,"#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a","#5a3a1a",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0","#F0C8A0","#fff","#333","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#D4A88A","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#c44","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+                [null,null,null,null,null,"#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700",null,null,null,null,null],
+                [null,null,null,null,"#FFD700","#FFD700","#FFD700","#111","#FFD700","#FFD700","#FFD700","#FFD700",null,null,null,null],
+                [null,null,null,"#FFD700","#FFD700","#fff","#FFD700","#111","#FFD700","#fff","#FFD700","#FFD700","#FFD700",null,null,null],
+                [null,null,null,"#FFD700","#F0C8A0","#F0C8A0","#FFD700","#FFD700","#FFD700","#F0C8A0","#F0C8A0","#FFD700","#FFD700",null,null,null],
+                [null,null,null,null,"#F0C8A0","#F0C8A0",null,null,null,"#F0C8A0","#F0C8A0",null,null,null,null,null],
+                [null,null,null,null,"#FFD700","#FFD700",null,null,null,"#FFD700","#FFD700",null,null,null,null,null],
+                [null,null,null,"#333","#333",null,null,null,null,null,"#333","#333",null,null,null,null]
+            ]
+        };
+
+        // Offscreen canvas cache for pre-rendered sprites at various sizes
+        const _spriteCache = {};
+
+        function renderSpriteToCanvas(spriteName, size) {
+            const cacheKey = spriteName + '_' + size;
+            if (_spriteCache[cacheKey]) return _spriteCache[cacheKey];
+
+            const spriteData = SPRITES[spriteName];
+            if (!spriteData) return null;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const pixelSize = size / 16;
+
+            for (let y = 0; y < 16; y++) {
+                for (let x = 0; x < 16; x++) {
+                    const color = spriteData[y][x];
+                    if (color) {
+                        ctx.fillStyle = color;
+                        ctx.fillRect(Math.floor(x * pixelSize), Math.floor(y * pixelSize), Math.ceil(pixelSize), Math.ceil(pixelSize));
+                    }
+                }
+            }
+
+            _spriteCache[cacheKey] = canvas;
+            return canvas;
+        }
+
+        // Draw a sprite onto a target canvas context at position (x, y) with given size
+        function drawSprite(ctx, spriteName, x, y, size) {
+            const spriteCanvas = renderSpriteToCanvas(spriteName, size);
+            if (spriteCanvas) {
+                ctx.drawImage(spriteCanvas, x, y, size, size);
+            } else {
+                // Fallback to emoji if sprite not found
+                const guest = GUESTS.find(g => g.name === spriteName);
+                if (guest) {
+                    ctx.font = `bold ${Math.floor(size * 0.7)}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(guest.emoji, x + size/2, y + size/2);
+                }
+            }
+        }
+
+        // Create a data URL from a sprite for use in HTML img elements
+        function getSpriteDataURL(spriteName, size) {
+            const canvas = renderSpriteToCanvas(spriteName, size || 64);
+            return canvas ? canvas.toDataURL() : '';
+        }
+
+        // ==================== GUEST DATA ====================
+        const GUESTS = [
+            {
+                name: "Dharmesh Shah",
+                emoji: "🏢",
+                color: "#00ff9d",
+                hp: 80,
+                difficulty: 1,
+                number: 1,
+                questions: [
+                    { q: "What is Dharmesh Shah's company that he co-founded?", a: "HubSpot", b: "Slack", c: "Stripe", d: "Shopify", correct: "a" },
+                    { q: "How much did Dharmesh pay for chat.com?", a: "$10M", b: "$15.5M", c: "$20M", d: "$25M", correct: "b" },
+                    { q: "Dharmesh is known for creating what?", a: "The 10X Rule", b: "The Culture Code", c: "Zero to One", d: "The Lean Startup", correct: "b" },
+                    { q: "How many startups has Dharmesh been an angel investor in?", a: "30+", b: "50+", c: "90+", d: "150+", correct: "c" },
+                    { q: "What was Dharmesh's approximate net worth before exiting HubSpot?", a: "$500M", b: "$1B", c: "$2B", d: "$5B", correct: "c" }
+                ]
+            },
+            {
+                name: "Jesse Itzler",
+                emoji: "🏃",
+                color: "#00d9ff",
+                hp: 90,
+                difficulty: 2,
+                number: 2,
+                questions: [
+                    { q: "Jesse Itzler co-founded which jet card company?", a: "NetJets", b: "Marquis Jet", c: "VistaJet", d: "XOJet", correct: "b" },
+                    { q: "What company did Marquis Jet sell to?", a: "Berkshire Hathaway", b: "Apollo Global", c: "KKR", d: "Blackstone", correct: "a" },
+                    { q: "Who is Jesse Itzler married to?", a: "Sophia Amoruso", b: "Sarah Blakely", c: "Sheryl Sandberg", d: "Arianna Huffington", correct: "b" },
+                    { q: "Jesse lived with who for 30 days as an experiment?", a: "A Navy SEAL", b: "A Navy pilot", c: "A Marine", d: "A Special Forces officer", correct: "a" },
+                    { q: "What sports team does Jesse own?", a: "Atlanta Hawks", b: "Atlanta Falcons", c: "Atlanta Braves", d: "Atlanta United", correct: "a" }
+                ]
+            },
+            {
+                name: "Andrew Wilkinson",
+                emoji: "🦅",
+                color: "#ffff00",
+                hp: 85,
+                difficulty: 2,
+                number: 3,
+                questions: [
+                    { q: "Andrew Wilkinson founded which internet holding company?", a: "Tiny", b: "Initialized Capital", c: "Y Combinator", d: "Sequoia Capital", correct: "a" },
+                    { q: "What design tool did Andrew's company acquire?", a: "Figma", b: "Dribbble", c: "Sketch", d: "Adobe XD", correct: "b" },
+                    { q: "What is Andrew Wilkinson often compared to?", a: "Steve Jobs", b: "Warren Buffett", c: "Mark Zuckerberg", d: "Elon Musk", correct: "b" },
+                    { q: "Andrew acquired which design studio?", a: "Design+Code", b: "MetaLab", c: "Fantasy Interactive", d: "Dropbox Design", correct: "b" },
+                    { q: "What's Andrew's famous approach to startups?", a: "Growth at all costs", b: "Serial pivoting", c: "Contrarian", d: "First mover advantage", correct: "c" }
+                ]
+            },
+            {
+                name: "Elan Lee",
+                emoji: "🎮",
+                color: "#ff00ff",
+                hp: 88,
+                difficulty: 2,
+                number: 4,
+                questions: [
+                    { q: "What is Elan Lee's most famous creation?", a: "Cards Against Humanity", b: "Exploding Kittens", c: "Codenames", d: "Ticket to Ride", correct: "b" },
+                    { q: "What was the record for Exploding Kittens on Kickstarter?", a: "$5M", b: "$8.7M", c: "$10M", d: "$15M", correct: "b" },
+                    { q: "Where did Elan Lee work before game design?", a: "Google", b: "Amazon", c: "Microsoft Xbox", d: "Apple", correct: "c" },
+                    { q: "Exploding Kittens was the #___ most-backed Kickstarter ever?", a: "1st", b: "2nd", c: "3rd", d: "5th", correct: "a" },
+                    { q: "What type of games does Elan focus on?", a: "Digital games", b: "Board games", c: "Physical games", d: "VR games", correct: "c" }
+                ]
+            },
+            {
+                name: "Greg Isenberg",
+                emoji: "🌐",
+                color: "#ff6600",
+                hp: 82,
+                difficulty: 1,
+                number: 5,
+                questions: [
+                    { q: "What is Greg Isenberg CEO of?", a: "Community Labs", b: "Late Checkout", c: "Spartan Radar", d: "The Breakout List", correct: "b" },
+                    { q: "Greg is known as an expert in what?", a: "SaaS", b: "Crypto", c: "Internet communities", d: "Supply chain", correct: "c" },
+                    { q: "What platform did Greg advise on?", a: "Twitter", b: "Discord", c: "Reddit", d: "Slack", correct: "c" },
+                    { q: "Greg is known for what startup trait?", a: "Ideas machine", b: "Product design", c: "Technical depth", d: "Sales mastery", correct: "a" },
+                    { q: "What is Greg's philosophy about startups?", a: "Move fast, break things", b: "Community-driven", c: "Profitable from day 1", d: "Venture-scale only", correct: "b" }
+                ]
+            },
+            {
+                name: "Tyler Denk",
+                emoji: "📬",
+                color: "#00ff66",
+                hp: 92,
+                difficulty: 3,
+                number: 6,
+                questions: [
+                    { q: "What company is Tyler Denk CEO of?", a: "Substack", b: "ConvertKit", c: "Beehiiv", d: "Revue", correct: "c" },
+                    { q: "What was Tyler's previous company?", a: "The Hustle", b: "Morning Brew", c: "Product Hunt", d: "Indie Hackers", correct: "b" },
+                    { q: "What milestone did Beehiiv reach under Tyler's leadership?", a: "$5M ARR", b: "$10M ARR", c: "$20M+ ARR", d: "$50M+ ARR", correct: "c" },
+                    { q: "What is Tyler's speciality?", a: "Venture capital", b: "Growth hacking", c: "Engineering", d: "Design", correct: "b" },
+                    { q: "What role did Tyler have at Morning Brew?", a: "Founder", b: "CEO", c: "Early employee", d: "CTO", correct: "c" }
+                ]
+            },
+            {
+                name: "Alex Lieberman",
+                emoji: "☕",
+                color: "#ff3366",
+                hp: 86,
+                difficulty: 2,
+                number: 7,
+                questions: [
+                    { q: "Alex Lieberman co-founded which newsletter?", a: "The Hustle", b: "Morning Brew", c: "Axios Pro", d: "Briefing", correct: "b" },
+                    { q: "For how much did Business Insider buy majority stake in Morning Brew?", a: "$30M", b: "$50M", c: "$75M", d: "$100M", correct: "c" },
+                    { q: "What is Alex Lieberman an advocate for?", a: "Hustle culture", b: "Mental health", c: "Crypto adoption", d: "Venture capital", correct: "b" },
+                    { q: "What condition does Alex have?", a: "Dyslexia", b: "ADHD", c: "OCD", d: "Autism", correct: "b" },
+                    { q: "Alex is known as what type of creator?", a: "Video creator", b: "Podcast host", c: "Content creator", d: "Newsletter writer", correct: "c" }
+                ]
+            },
+            {
+                name: "Austin Rief",
+                emoji: "📰",
+                color: "#00ffcc",
+                hp: 84,
+                difficulty: 2,
+                number: 8,
+                questions: [
+                    { q: "Austin Rief co-founded which company?", a: "The Hustle", b: "Morning Brew", c: "Axios", d: "Semafor", correct: "b" },
+                    { q: "What was Morning Brew's origin?", a: "A TechCrunch article", b: "A college newsletter", c: "A podcast", d: "A Twitter thread", correct: "b" },
+                    { q: "How many subscribers did Morning Brew scale to?", a: "100K", b: "500K", c: "Millions", d: "10+ million", correct: "d" },
+                    { q: "What is Austin's current role?", a: "CEO", b: "Founder", c: "Investor", d: "Advisor", correct: "c" },
+                    { q: "What business model did Morning Brew pioneer?", a: "Freemium", b: "Sponsored newsletter", c: "Subscription", d: "B2B licensing", correct: "b" }
+                ]
+            },
+            {
+                name: "Jesse Cole",
+                emoji: "⚾",
+                color: "#ffdd00",
+                hp: 87,
+                difficulty: 2,
+                number: 9,
+                questions: [
+                    { q: "What team does Jesse Cole own?", a: "Savannah Slugs", b: "Savannah Bananas", c: "Savannah Swallows", d: "Savannah Wildcats", correct: "b" },
+                    { q: "What is Jesse Cole's trademark?", a: "Red suit", b: "Blue bow tie", c: "Yellow tuxedo", d: "Green hat", correct: "c" },
+                    { q: "What philosophy does Jesse Cole follow?", a: "Winning first", b: "Fans first", c: "Profit first", d: "Brand first", correct: "b" },
+                    { q: "Savannah Bananas are what level of baseball?", a: "Major League", b: "Minor League", c: "College", d: "Independent league", correct: "b" },
+                    { q: "What made the Bananas go viral?", a: "Social media", b: "TV deals", c: "Entertainment-first approach", d: "Prize money", correct: "c" }
+                ]
+            }
+        ];
+
+        // ==================== GAME STATE ====================
+        let gameState = {
+            currentScreen: 'title',
+            playerLevel: 1,
+            playerXP: 0,
+            playerMaxHP: 100,
+            playerHP: 100,
+            capturedGuests: [],
+            battleState: null,
+            map: null,
+            muted: false,
+            encounterActive: false,
+            currentEncounter: null
+        };
+
+        // ==================== MAP SYSTEM ====================
+        const TILE_SIZE = 40;
+        const MAP_WIDTH = 16;
+        const MAP_HEIGHT = 12;
+
+        function initMap() {
+            gameState.currentScreen = 'map';
+            gameState.map = {
+                playerX: 8,
+                playerY: 6,
+                guestLocations: generateGuestLocations()
+            };
+
+            document.getElementById('titleScreen').classList.remove('active');
+            document.getElementById('statsPanel').classList.add('active');
+            document.getElementById('actionPanel').classList.add('active');
+            document.getElementById('infoBar').classList.add('active');
+
+            updateStats();
+            drawMap();
+            setupMapControls();
+        }
+
+        function generateGuestLocations() {
+            const locations = {};
+            GUESTS.forEach((guest, idx) => {
+                let x, y, valid;
+                do {
+                    valid = true;
+                    x = Math.floor(Math.random() * MAP_WIDTH);
+                    y = Math.floor(Math.random() * MAP_HEIGHT);
+                    Object.values(locations).forEach(loc => {
+                        if (loc.x === x && loc.y === y) valid = false;
+                    });
+                } while (!valid || (x < 2 && y < 2) || (x > MAP_WIDTH - 3 && y > MAP_HEIGHT - 3));
+                locations[guest.name] = { x, y, guest, encountered: false };
+            });
+            return locations;
+        }
+
+        function drawMap() {
+            const canvas = document.getElementById('mapCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Background gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#a8d67c');
+            grad.addColorStop(1, '#7ac74c');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Define decorative map features (trees, paths, buildings)
+            const TREE_TILES = [[0,0],[0,1],[0,2],[1,0],[1,1],[15,0],[15,1],[15,2],[14,0],[14,1],[0,10],[0,11],[1,11],[15,10],[15,11],[14,11]];
+            const PATH_TILES = [];
+            for (let x = 3; x <= 12; x++) PATH_TILES.push([x, 6]); // horizontal path
+            for (let y = 2; y <= 9; y++) PATH_TILES.push([8, y]); // vertical path
+            const BUILDING_TILES = [[2,1],[3,1],[2,2],[3,2],[12,1],[13,1],[12,2],[13,2],[5,9],[6,9],[5,10],[6,10]];
+
+            // Draw tiles with features
+            for (let x = 0; x < MAP_WIDTH; x++) {
+                for (let y = 0; y < MAP_HEIGHT; y++) {
+                    const px = x * TILE_SIZE;
+                    const py = y * TILE_SIZE;
+                    const isTree = TREE_TILES.some(t => t[0] === x && t[1] === y);
+                    const isPath = PATH_TILES.some(t => t[0] === x && t[1] === y);
+                    const isBuilding = BUILDING_TILES.some(t => t[0] === x && t[1] === y);
+
+                    // Base grass
+                    ctx.fillStyle = ((x + y) % 3 === 0) ? '#8bc74c' : ((x + y) % 5 === 0 ? '#78b043' : '#9ad78b');
+                    ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+                    if (isPath) {
+                        ctx.fillStyle = '#c8a96e';
+                        ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = '#b89858';
+                        ctx.fillRect(px + 2, py + 2, 4, 4);
+                        ctx.fillRect(px + TILE_SIZE - 8, py + TILE_SIZE - 8, 4, 4);
+                    } else if (isTree) {
+                        // Tree trunk
+                        ctx.fillStyle = '#8B5A2B';
+                        ctx.fillRect(px + 16, py + 24, 8, 16);
+                        // Tree top (darker green triangle)
+                        ctx.fillStyle = '#2d6e2d';
+                        ctx.beginPath();
+                        ctx.moveTo(px + 20, py + 2);
+                        ctx.lineTo(px + 6, py + 26);
+                        ctx.lineTo(px + 34, py + 26);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.fillStyle = '#3a8a3a';
+                        ctx.beginPath();
+                        ctx.moveTo(px + 20, py + 6);
+                        ctx.lineTo(px + 10, py + 22);
+                        ctx.lineTo(px + 30, py + 22);
+                        ctx.closePath();
+                        ctx.fill();
+                    } else if (isBuilding) {
+                        // Building body
+                        ctx.fillStyle = '#e8e0d0';
+                        ctx.fillRect(px + 2, py + 8, TILE_SIZE - 4, TILE_SIZE - 10);
+                        // Building roof
+                        ctx.fillStyle = '#6688bb';
+                        ctx.fillRect(px, py + 2, TILE_SIZE, 8);
+                        // Windows
+                        ctx.fillStyle = '#88ccff';
+                        ctx.fillRect(px + 6, py + 14, 10, 10);
+                        ctx.fillRect(px + 24, py + 14, 10, 10);
+                        // Window panes
+                        ctx.strokeStyle = '#555';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(px + 6, py + 14, 10, 10);
+                        ctx.strokeRect(px + 24, py + 14, 10, 10);
+                    }
+
+                    // Subtle tile border
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.06)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
+                }
+            }
+
+            // Draw guest NPCs
+            Object.values(gameState.map.guestLocations).forEach(location => {
+                if (gameState.capturedGuests.includes(location.guest.name)) return;
+
+                const px = location.x * TILE_SIZE;
+                const py = location.y * TILE_SIZE;
+                const cx = px + TILE_SIZE / 2;
+                const cy = py + TILE_SIZE / 2;
+
+                // Guest highlight glow
+                ctx.fillStyle = location.guest.color;
+                ctx.globalAlpha = 0.3;
+                ctx.beginPath();
+                ctx.arc(cx, cy, TILE_SIZE / 2 - 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                // Guest border
+                ctx.strokeStyle = location.guest.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(cx, cy, TILE_SIZE / 2 - 2, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Draw pixel art sprite (or fallback emoji)
+                const spriteSize = TILE_SIZE - 4;
+                drawSprite(ctx, location.guest.name, px + 2, py + 2, spriteSize);
+            });
+
+            // Draw player
+            const playerPx = gameState.map.playerX * TILE_SIZE;
+            const playerPy = gameState.map.playerY * TILE_SIZE;
+            const playerCx = playerPx + TILE_SIZE / 2;
+            const playerCy = playerPy + TILE_SIZE / 2;
+
+            // Player glow
+            ctx.fillStyle = 'rgba(255, 221, 0, 0.3)';
+            ctx.beginPath();
+            ctx.arc(playerCx, playerCy, TILE_SIZE / 2 - 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Player border
+            ctx.strokeStyle = '#ffdd00';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(playerCx, playerCy, TILE_SIZE / 2 - 2, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Player pixel art sprite
+            drawSprite(ctx, '_player', playerPx + 2, playerPy + 2, TILE_SIZE - 4);
+        }
+
+        function setupMapControls() {
+            document.onkeydown = (e) => {
+                if (gameState.currentScreen !== 'map') return;
+
+                const moves = {
+                    'ArrowUp': { dx: 0, dy: -1 },
+                    'ArrowDown': { dx: 0, dy: 1 },
+                    'ArrowLeft': { dx: -1, dy: 0 },
+                    'ArrowRight': { dx: 1, dy: 0 },
+                    'w': { dx: 0, dy: -1 },
+                    'W': { dx: 0, dy: -1 },
+                    's': { dx: 0, dy: 1 },
+                    'S': { dx: 0, dy: 1 },
+                    'a': { dx: -1, dy: 0 },
+                    'A': { dx: -1, dy: 0 },
+                    'd': { dx: 1, dy: 0 },
+                    'D': { dx: 1, dy: 0 }
+                };
+
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    if (gameState.encounterActive) {
+                        startBattle(gameState.currentEncounter);
+                    }
+                    return;
+                }
+
+                if (moves[e.key]) {
+                    e.preventDefault();
+                    const move = moves[e.key];
+                    const newX = gameState.map.playerX + move.dx;
+                    const newY = gameState.map.playerY + move.dy;
+
+                    if (newX >= 0 && newX < MAP_WIDTH && newY >= 0 && newY < MAP_HEIGHT) {
+                        gameState.map.playerX = newX;
+                        gameState.map.playerY = newY;
+                        drawMap();
+                        checkEncounter();
+                    }
+                }
+            };
+        }
+
+        function checkEncounter() {
+            gameState.encounterActive = false;
+            document.getElementById('encounterDialog').classList.remove('active');
+
+            // Check for guest at current location
+            Object.values(gameState.map.guestLocations).forEach(location => {
+                if (location.x === gameState.map.playerX && location.y === gameState.map.playerY) {
+                    if (!gameState.capturedGuests.includes(location.guest.name)) {
+                        showEncounter(location.guest);
+                    }
+                }
+            });
+        }
+
+        let typewriterInterval = null;
+        function showEncounter(guest) {
+            gameState.encounterActive = true;
+            gameState.currentEncounter = guest;
+
+            // Render sprite into encounter avatar
+            const avatarEl = document.getElementById('encounterAvatar');
+            const spriteUrl = getSpriteDataURL(guest.name, 80);
+            if (spriteUrl) {
+                avatarEl.innerHTML = `<img src="${spriteUrl}" style="width:64px;height:64px;image-rendering:pixelated;">`;
+            } else {
+                avatarEl.textContent = guest.emoji;
+            }
+            document.getElementById('encounterName').textContent = guest.name;
+
+            // Typewriter effect
+            const messages = ['wants to battle!', 'challenges you!', 'appears!', 'wants to quiz you!'];
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            const descEl = document.getElementById('encounterDescription');
+            descEl.textContent = '';
+            let charIdx = 0;
+            if (typewriterInterval) clearInterval(typewriterInterval);
+            typewriterInterval = setInterval(() => {
+                if (charIdx < msg.length) {
+                    descEl.textContent += msg[charIdx];
+                    charIdx++;
+                } else {
+                    clearInterval(typewriterInterval);
+                }
+            }, 40);
+
+            document.getElementById('encounterDialog').classList.add('active');
+            playSound('encounter');
+        }
+
+        // ==================== BATTLE SYSTEM ====================
+        function startBattle(guest) {
+            gameState.currentScreen = 'battle';
+            gameState.encounterActive = false;
+            document.getElementById('encounterDialog').classList.remove('active');
+
+            gameState.battleState = {
+                guest: guest,
+                guestHP: guest.hp,
+                guestMaxHP: guest.hp,
+                playerHP: gameState.playerHP,
+                currentQuestion: 0,
+                questionsAnswered: 0,
+                battleOver: false
+            };
+
+            document.getElementById('battleScreen').classList.add('active');
+            document.getElementById('statsPanel').classList.remove('active');
+            document.getElementById('actionPanel').classList.remove('active');
+            document.getElementById('infoBar').classList.remove('active');
+
+            playSound('battleStart');
+            displayNextQuestion();
+        }
+
+        function displayNextQuestion() {
+            if (gameState.battleState.questionsAnswered >= 3) {
+                endBattle();
+                return;
+            }
+
+            const guest = gameState.battleState.guest;
+            const question = guest.questions[Math.floor(Math.random() * guest.questions.length)];
+            gameState.battleState.currentQuestion = question;
+
+            document.getElementById('opponentName').textContent = guest.name;
+            // Render sprite into battle opponent avatar
+            const battleAvatarEl = document.getElementById('opponentAvatar');
+            const battleSpriteUrl = getSpriteDataURL(guest.name, 128);
+            if (battleSpriteUrl) {
+                battleAvatarEl.innerHTML = `<img src="${battleSpriteUrl}" style="width:80px;height:80px;image-rendering:pixelated;">`;
+            } else {
+                battleAvatarEl.textContent = guest.emoji;
+            }
+            document.getElementById('questionText').textContent = question.q;
+
+            const answersHtml = `
+                <button class="answer-button" onclick="answerQuestion('a')">A: ${question.a}</button>
+                <button class="answer-button" onclick="answerQuestion('b')">B: ${question.b}</button>
+                <button class="answer-button" onclick="answerQuestion('c')">C: ${question.c}</button>
+                <button class="answer-button" onclick="answerQuestion('d')">D: ${question.d}</button>
+            `;
+            document.getElementById('answersGrid').innerHTML = answersHtml;
+
+            updateBattleHPBars();
+        }
+
+        function answerQuestion(answer) {
+            const question = gameState.battleState.currentQuestion;
+            const correct = answer === question.correct;
+
+            const buttons = document.querySelectorAll('.answer-button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (correct) {
+                playSound('correct');
+                buttons.forEach(btn => {
+                    if (btn.textContent.startsWith(answer.toUpperCase())) {
+                        btn.classList.add('correct');
+                    }
+                });
+
+                // Damage to guest
+                const damage = Math.floor(Math.random() * 10) + 20;
+                gameState.battleState.guestHP = Math.max(0, gameState.battleState.guestHP - damage);
+
+                // XP to player
+                gameState.playerXP += 25;
+            } else {
+                playSound('incorrect');
+
+                // Damage to player on wrong answer
+                const damage = Math.floor(Math.random() * 10) + 20;
+                gameState.playerHP = Math.max(0, gameState.playerHP - damage);
+                gameState.battleState.playerHP = gameState.playerHP;
+
+                buttons.forEach(btn => {
+                    if (btn.textContent.startsWith(question.correct.toUpperCase())) {
+                        btn.classList.add('correct');
+                    } else if (btn.textContent.startsWith(answer.toUpperCase())) {
+                        btn.classList.add('incorrect');
+                    }
+                });
+
+                // Screen shake
+                document.getElementById('battleScreen').style.animation = 'shake 0.3s ease';
+                setTimeout(() => {
+                    document.getElementById('battleScreen').style.animation = '';
+                }, 300);
+            }
+
+            gameState.battleState.questionsAnswered++;
+            updateBattleHPBars();
+
+            setTimeout(() => {
+                if (gameState.playerHP <= 0) {
+                    endBattle(false);
+                } else if (gameState.battleState.guestHP <= 0) {
+                    endBattle(true);
+                } else {
+                    displayNextQuestion();
+                }
+            }, 1500);
+        }
+
+        function updateBattleHPBars() {
+            const guest = gameState.battleState.guest;
+            const guestPercent = (gameState.battleState.guestHP / gameState.battleState.guestMaxHP) * 100;
+            const playerPercent = (gameState.battleState.playerHP / gameState.playerMaxHP) * 100;
+
+            document.getElementById('opponentHpFill').style.width = Math.max(0, guestPercent) + '%';
+            document.getElementById('playerHpFill').style.width = Math.max(0, playerPercent) + '%';
+            document.getElementById('opponentHpText').textContent = `HP: ${Math.max(0, gameState.battleState.guestHP)}/${gameState.battleState.guestMaxHP}`;
+            document.getElementById('playerHpText').textContent = `HP: ${gameState.battleState.playerHP}/${gameState.playerMaxHP}`;
+        }
+
+        function endBattle(won) {
+            // If called without argument (from displayNextQuestion after 3 Qs)
+            if (won === undefined) {
+                won = gameState.battleState.guestHP < gameState.playerHP;
+            }
+
+            const guest = gameState.battleState.guest;
+
+            if (won && !gameState.capturedGuests.includes(guest.name)) {
+                gameState.capturedGuests.push(guest.name);
+                playSound('capture');
+            } else if (!won) {
+                playSound('incorrect');
+            }
+
+            // Show result overlay
+            const battleScreen = document.getElementById('battleScreen');
+            const resultHtml = document.createElement('div');
+            resultHtml.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:20px;z-index:300;';
+            const resultSpriteUrl = getSpriteDataURL(guest.name, 128);
+            const resultSpriteHtml = resultSpriteUrl
+                ? `<img src="${resultSpriteUrl}" style="width:96px;height:96px;image-rendering:pixelated;margin-bottom:10px;">`
+                : '';
+            resultHtml.innerHTML = `
+                <div style="font-size:36px;color:${won ? '#ffdd00' : '#ff4444'};text-shadow:2px 2px #000;">
+                    ${won ? 'VICTORY!' : 'DEFEAT!'}
+                </div>
+                ${resultSpriteHtml}
+                <div style="font-size:14px;color:#fff;text-align:center;max-width:400px;">
+                    ${won
+                        ? `You captured <span style="color:#ffdd00">${guest.name}</span>!<br><br>Guests Captured: ${gameState.capturedGuests.length}/9${gameState.capturedGuests.length === 9 ? '<br><br><span style="color:#ffdd00">YOU CAUGHT THEM ALL! YOU WIN!</span>' : ''}`
+                        : `<span style="color:#ff4444">${guest.name}</span> defeated you...<br><br>Your HP has been restored. Try again!`
+                    }
+                </div>
+                <button class="start-button" onclick="closeBattleResult(this.parentElement)" style="margin-top:10px;">CONTINUE</button>
+            `;
+            battleScreen.appendChild(resultHtml);
+
+            // Restore HP if lost
+            if (!won) {
+                gameState.playerHP = gameState.playerMaxHP;
+            }
+        }
+
+        function closeBattleResult(overlay) {
+            overlay.remove();
+            document.getElementById('battleScreen').classList.remove('active');
+            document.getElementById('statsPanel').classList.add('active');
+            document.getElementById('actionPanel').classList.add('active');
+            document.getElementById('infoBar').classList.add('active');
+
+            gameState.currentScreen = 'map';
+            gameState.battleState = null;
+            updateStats();
+            drawMap();
+        }
+
+        // ==================== COLLECTION ====================
+        function showCollection() {
+            gameState.currentScreen = 'collection';
+            document.getElementById('collectionScreen').classList.add('active');
+            document.getElementById('statsPanel').classList.remove('active');
+            document.getElementById('actionPanel').classList.remove('active');
+            document.getElementById('infoBar').classList.remove('active');
+
+            const grid = document.getElementById('collectionGrid');
+            grid.innerHTML = '';
+
+            GUESTS.forEach(guest => {
+                const captured = gameState.capturedGuests.includes(guest.name);
+                const card = document.createElement('div');
+                card.className = 'collection-card' + (captured ? '' : ' uncaptured');
+                const spriteUrl = getSpriteDataURL(guest.name, 64);
+                const avatarHtml = spriteUrl
+                    ? `<img src="${spriteUrl}" style="width:48px;height:48px;image-rendering:pixelated;">`
+                    : `<span style="font-size:40px">${guest.emoji}</span>`;
+                card.innerHTML = `
+                    <div class="card-number">#${String(guest.number).padStart(3, '0')}</div>
+                    <div class="card-avatar">${avatarHtml}</div>
+                    <div class="card-name">${guest.name}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            document.getElementById('collectionCount').textContent = gameState.capturedGuests.length;
+        }
+
+        function closeCollection() {
+            document.getElementById('collectionScreen').classList.remove('active');
+            if (gameState.currentScreen === 'collection') {
+                gameState.currentScreen = 'map';
+                document.getElementById('statsPanel').classList.add('active');
+                document.getElementById('actionPanel').classList.add('active');
+                document.getElementById('infoBar').classList.add('active');
+            }
+        }
+
+        // ==================== UI FUNCTIONS ====================
+        function startGame() {
+            initMap();
+        }
+
+        function goToTitle() {
+            gameState.currentScreen = 'title';
+            document.getElementById('titleScreen').classList.add('active');
+            document.getElementById('statsPanel').classList.remove('active');
+            document.getElementById('actionPanel').classList.remove('active');
+            document.getElementById('infoBar').classList.remove('active');
+            document.getElementById('battleScreen').classList.remove('active');
+            document.getElementById('collectionScreen').classList.remove('active');
+            document.getElementById('encounterDialog').classList.remove('active');
+            document.onkeydown = null;
+        }
+
+        function updateStats() {
+            document.getElementById('levelDisplay').textContent = gameState.playerLevel;
+            document.getElementById('xpDisplay').textContent = gameState.playerXP + '/100';
+            document.getElementById('hpDisplay').textContent = gameState.playerHP + '/' + gameState.playerMaxHP;
+            document.getElementById('capturedDisplay').textContent = gameState.capturedGuests.length + '/9';
+
+            const xpPercent = (gameState.playerXP % 100) / 100 * 100;
+            document.getElementById('xpFill').style.width = xpPercent + '%';
+
+            const hpPercent = (gameState.playerHP / gameState.playerMaxHP) * 100;
+            const hpFill = document.getElementById('hpFill');
+            hpFill.style.width = hpPercent + '%';
+
+            if (hpPercent > 50) {
+                hpFill.classList.remove('low', 'critical');
+            } else if (hpPercent > 25) {
+                hpFill.classList.add('low');
+                hpFill.classList.remove('critical');
+            } else {
+                hpFill.classList.add('critical');
+            }
+        }
+
+        function showStats() {
+            alert(`Level: ${gameState.playerLevel}\nXP: ${gameState.playerXP}\nHP: ${gameState.playerHP}/${gameState.playerMaxHP}\nCaptured: ${gameState.capturedGuests.length}/9`);
+        }
+
+        function toggleMute() {
+            gameState.muted = !gameState.muted;
+        }
+
+        // ==================== SOUND SYSTEM ====================
+        let _audioCtx = null;
+        function getAudioCtx() {
+            if (!_audioCtx) {
+                try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
+            }
+            if (_audioCtx.state === 'suspended') _audioCtx.resume();
+            return _audioCtx;
+        }
+
+        function playSound(type) {
+            if (gameState.muted) return;
+            const audioContext = getAudioCtx();
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+
+            switch(type) {
+                case 'encounter':
+                    oscillator.frequency.value = 400;
+                    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                    break;
+                case 'battleStart':
+                    oscillator.frequency.value = 600;
+                    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    break;
+                case 'correct':
+                    oscillator.frequency.value = 800;
+                    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.15);
+                    break;
+                case 'incorrect':
+                    oscillator.frequency.value = 200;
+                    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    break;
+                case 'capture':
+                    oscillator.frequency.value = 1000;
+                    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+            }
+        }
+        // ==================== PLAYER SPRITE ====================
+        SPRITES["_player"] = [
+            [null,null,null,null,null,"#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700",null,null,null,null,null],
+            [null,null,null,null,"#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700",null,null,null,null],
+            [null,null,null,"#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700","#FFD700",null,null,null],
+            [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+            [null,null,null,"#F0C8A0","#fff","#222","#F0C8A0","#F0C8A0","#F0C8A0","#fff","#222","#F0C8A0","#F0C8A0",null,null,null],
+            [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+            [null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#D4A88A","#D4A88A","#D4A88A","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null],
+            [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#c44","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+            [null,null,null,null,"#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0","#F0C8A0",null,null,null,null],
+            [null,null,null,null,null,"#333","#333","#333","#333","#333","#333",null,null,null,null,null],
+            [null,null,null,null,"#333","#333","#FFD700","#333","#FFD700","#333","#333","#333",null,null,null,null],
+            [null,null,null,"#333","#333","#333","#333","#333","#333","#333","#333","#333","#333",null,null,null],
+            [null,null,null,"#333","#F0C8A0","#F0C8A0","#333","#333","#333","#F0C8A0","#F0C8A0","#333","#333",null,null,null],
+            [null,null,null,null,"#F0C8A0","#F0C8A0",null,null,null,"#F0C8A0","#F0C8A0",null,null,null,null,null],
+            [null,null,null,null,"#444","#444",null,null,null,"#444","#444",null,null,null,null,null],
+            [null,null,null,"#444","#444",null,null,null,null,null,"#444","#444",null,null,null,null]
+        ];
+
+        // ==================== TITLE SCREEN SPRITES ====================
+        function renderTitleSprites() {
+            const container = document.getElementById('titleSprites');
+            if (!container) return;
+            container.innerHTML = '';
+            Object.keys(SPRITES).forEach(name => {
+                if (name === '_player') return;
+                const url = getSpriteDataURL(name, 64);
+                if (url) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.cssText = 'width:48px;height:48px;image-rendering:pixelated;border:2px solid #d4a000;background:#3d3d3d;padding:4px;';
+                    img.title = name;
+                    container.appendChild(img);
+                }
+            });
+        }
+
+        // Render title sprites on load
+        renderTitleSprites();
+    </script>
+</body>
+</html>

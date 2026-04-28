@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MFM Guest Profiles</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#1a1a2e;color:#eee;min-height:100vh}
+header{background:linear-gradient(135deg,#0f0f23 0%,#1a1a2e 100%);border-bottom:3px solid #d4a000;padding:20px 30px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+header h1{font-family:'Press Start 2P',cursive;font-size:18px;color:#ffdd00;text-shadow:2px 2px #000}
+header p{color:#aaa;font-size:13px}
+.controls{background:#111827;border-bottom:2px solid #2d2d4e;padding:15px 30px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:100}
+.search-box{flex:1;min-width:200px;background:#1f2937;border:2px solid #374151;border-radius:8px;padding:10px 14px;color:#fff;font-size:14px;font-family:'Inter',sans-serif}
+.search-box:focus{outline:none;border-color:#d4a000}
+.filter-btn{padding:8px 14px;border-radius:20px;border:2px solid #374151;background:transparent;color:#aaa;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{border-color:#d4a000;color:#ffdd00;background:rgba(212,160,0,.1)}
+.stats-bar{background:#0f172a;padding:10px 30px;font-size:12px;color:#6b7280;border-bottom:1px solid #1f2937}
+.stats-bar span{color:#d4a000;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;padding:25px 30px}
+.card{background:#111827;border:2px solid #1f2937;border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.card:hover{border-color:#d4a000;transform:translateY(-3px);box-shadow:0 8px 25px rgba(212,160,0,.2)}
+.card-tier{position:absolute;top:10px;right:10px;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700;text-transform:uppercase}
+.tier-host{background:#7c3aed;color:#fff}
+.tier-1{background:#d4a000;color:#000}
+.tier-2{background:#1d4ed8;color:#fff}
+.tier-3{background:#374151;color:#aaa}
+.card-header{background:linear-gradient(135deg,#1f2937,#111827);padding:20px;display:flex;align-items:center;gap:14px}
+.avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;border:3px solid}
+.card-info h3{font-size:15px;font-weight:700;color:#f9fafb;margin-bottom:4px}
+.card-info .tagline{font-size:11px;color:#9ca3af;line-height:1.4}
+.networth{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;padding:2px 8px;background:rgba(212,160,0,.15);border:1px solid #d4a000;border-radius:4px;color:#d4a000}
+.card-body{padding:15px 20px}
+.card-known{font-size:12px;color:#d1d5db;line-height:1.6;border-left:3px solid #d4a000;padding-left:10px;margin-bottom:12px}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:10px;padding:3px 8px;border-radius:10px;background:#1f2937;color:#9ca3af;border:1px solid #374151}
+.card-footer{padding:12px 20px;border-top:1px solid #1f2937;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#6b7280}
+.episode-pill{background:#1f2937;border:1px solid #374151;border-radius:10px;padding:3px 8px;color:#9ca3af}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;overflow-y:auto;padding:20px}
+.modal-overlay.open{display:flex;justify-content:center;align-items:flex-start}
+.modal{background:#111827;border:2px solid #d4a000;border-radius:16px;width:100%;max-width:900px;margin:auto;overflow:hidden}
+.modal-header{background:linear-gradient(135deg,#0f172a,#1f2937);padding:25px 30px;display:flex;gap:20px;align-items:flex-start}
+.modal-avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;flex-shrink:0;border:4px solid}
+.modal-header-info h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px}
+.modal-header-info .subtitle{color:#9ca3af;font-size:13px;margin-bottom:8px}
+.modal-header-info .nw-big{font-size:18px;font-weight:700;color:#d4a000}
+.modal-close{margin-left:auto;background:none;border:none;color:#6b7280;font-size:24px;cursor:pointer;padding:4px 8px;border-radius:6px;flex-shrink:0}
+.modal-close:hover{color:#fff;background:#374151}
+.tabs{display:flex;border-bottom:2px solid #1f2937;background:#0f172a;overflow-x:auto}
+.tab-btn{padding:14px 18px;font-size:12px;font-weight:600;cursor:pointer;color:#6b7280;border:none;background:none;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:'Inter',sans-serif}
+.tab-btn.active,.tab-btn:hover{color:#ffdd00;border-bottom-color:#d4a000}
+.tab-content{display:none;padding:25px 30px}
+.tab-content.active{display:block}
+.tab-content h4{font-size:13px;font-weight:700;color:#d4a000;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:18px}
+.tab-content h4:first-child{margin-top:0}
+.tab-content p,.tab-content li{font-size:13px;color:#d1d5db;line-height:1.7}
+.tab-content ul{padding-left:18px}
+.tab-content li{margin-bottom:6px}
+.timeline-item{display:flex;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #1f2937}
+.timeline-year{font-weight:700;color:#d4a000;font-size:12px;min-width:45px;padding-top:2px}
+.timeline-text{font-size:13px;color:#d1d5db;line-height:1.6}
+.portfolio-item{background:#1f2937;border-radius:8px;padding:12px 15px;margin-bottom:10px;border-left:4px solid #d4a000}
+.portfolio-item .company{font-weight:700;color:#f9fafb;font-size:14px}
+.portfolio-item .details{font-size:12px;color:#9ca3af;margin-top:3px}
+.portfolio-item .amount{font-size:13px;color:#10b981;font-weight:600;margin-top:4px}
+.quote-block{background:#1f2937;border-left:4px solid #7c3aed;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:12px;font-style:italic;font-size:13px;color:#e5e7eb;line-height:1.7}
+.social-link{display:inline-flex;align-items:center;gap:6px;background:#1f2937;border:1px solid #374151;border-radius:6px;padding:8px 12px;margin:4px;font-size:12px;color:#9ca3af;text-decoration:none;transition:all .2s}
+.social-link:hover{border-color:#d4a000;color:#ffdd00}
+.episode-card{background:#1f2937;border-radius:8px;padding:14px 16px;margin-bottom:10px;border-left:4px solid #2563eb}
+.episode-card .ep-num{font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:4px}
+.episode-card .ep-title{font-size:13px;font-weight:600;color:#f9fafb;margin-bottom:4px}
+.episode-card .ep-topics{font-size:12px;color:#9ca3af;line-height:1.5}
+.contrarian-item{background:linear-gradient(135deg,rgba(220,38,38,.1),rgba(220,38,38,.05));border:1px solid rgba(220,38,38,.3);border-radius:8px;padding:12px 15px;margin-bottom:10px}
+.contrarian-item .take{font-weight:700;color:#fca5a5;font-size:13px;margin-bottom:4px}
+.contrarian-item .detail{font-size:12px;color:#d1d5db;line-height:1.5}
+.no-results{text-align:center;padding:60px;color:#6b7280;font-size:14px}
+@media(max-width:600px){.grid{padding:15px;grid-template-columns:1fr}.modal{margin:10px}.tab-btn{padding:10px 12px;font-size:11px}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🎙 MFM UNIVERSE</h1>
+    <p>My First Million — Complete Guest Database &amp; Episode Intelligence</p>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap">
+    <a href="MFM_Episodes.html" style="text-decoration:none;background:rgba(212,160,0,0.15);color:#d4a000;border:1px solid #d4a000;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700">📻 EPISODES</a>
+    <a href="MFM_RPG.html" style="text-decoration:none;background:#d4a000;color:#000;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700">🎮 PLAY RPG</a>
+    <a href="Starter_Story.html" style="text-decoration:none;background:rgba(255,107,53,0.15);color:#ff8c5e;border:1px solid #ff6b35;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700">🚀 STARTER STORY</a>
+  </div>
+</header>
+<div class="controls">
+  <input class="search-box" id="searchBox" placeholder="Search guests, companies, topics..." oninput="filterGuests()">
+  <button class="filter-btn active" onclick="setFilter('all',this)">All Guests</button>
+  <button class="filter-btn" onclick="setFilter('host',this)">Hosts</button>
+  <button class="filter-btn" onclick="setFilter('1',this)">🔥 Tier 1</button>
+  <button class="filter-btn" onclick="setFilter('2',this)">⭐ Tier 2</button>
+  <button class="filter-btn" onclick="setFilter('3',this)">💡 Tier 3</button>
+</div>
+<div class="stats-bar" id="statsBar">Showing <span id="guestCount">0</span> guests · <span id="totalCount">44</span> total profiles · Updated March 2026</div>
+<div class="grid" id="guestGrid"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header" id="modalHeader"></div>
+    <div class="tabs" id="modalTabs"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const GUESTS = [
+{
+  name:"Sam Parr",tier:"host",emoji:"📰",color:"#f59e0b",
+  tagline:"Co-Host, My First Million | Founder, The Hustle & Hampton",
+  networth:"$20-30M",nwSource:"HubSpot acquisition of The Hustle (~$27M, 2021)",
+  known:"Grew The Hustle to 1.5M subscribers and sold to HubSpot; now building Hampton ($8M+ ARR), a private community for high-growth founders and CEOs.",
+  tags:["Media","Newsletter","Community","Podcast"],
+  episodes:[{num:"All episodes",title:"Co-Host of My First Million",topics:"860+ episodes alongside Shaan Puri, 1M+ monthly downloads"}],
+  origin:[
+    {year:"2012",text:"Co-founded Bunk (roommate matching), which was acquired. Ran Southern Sam's hot dog cart in Nashville."},
+    {year:"2014",text:"Started Hustle Con, a TED-style conference for entrepreneurs. First event profited $40K."},
+    {year:"2016",text:"Launched The Hustle newsletter to promote Hustle Con. Pivoted the whole company to media."},
+    {year:"2019",text:"Co-founded My First Million podcast with Shaan Puri. First episode: 60,000 downloads."},
+    {year:"2021",text:"Sold The Hustle to HubSpot for ~$27M. Stayed on to run HubSpot's media/podcast network."},
+    {year:"2023",text:"Founded Hampton — private membership community for founders/CEOs. Now at $8M+ ARR."}
+  ],
+  portfolio:[
+    {company:"The Hustle",details:"Daily business newsletter → 1.5M subscribers",amount:"Sold to HubSpot ~$27M (2021)"},
+    {company:"Hustle Con",details:"Entrepreneur conference, grew to 2,500+ attendees",amount:"Profitable, operated 2014–2019"},
+    {company:"Hampton",details:"Private CEO/founder community, specific revenue/funding minimums",amount:"$8M+ ARR (2023-present)"},
+    {company:"Moneywise Podcast",details:"Business/personal finance media",amount:"$2.5M revenue pipeline; 32× ROI"}
+  ],
+  quotes:[
+    "Success is dreaming of becoming a certain type of person and then becoming it. Nothing to do with money.",
+    "I don't care if you're in business or you're in love. Get good at persuading people.",
+    "You can wing it and I think you should wing it. I don't project five years out.",
+    "You don't need complex models or venture capital to build something big. You need a great product and smart distribution."
+  ],
+  contrarian:[
+    {take:"Flexibility beats planning",detail:"Advocates winging it over five-year projections; believes zig-zagging in real time beats rigid strategy."},
+    {take:"Distribution first, product second",detail:"Found viral Reddit threads going unanswered and wrote about them — distribution strategy before product was built."},
+    {take:"Look in dying industries",detail:"Finds success stories in industries everyone else abandons. That's where the real opportunity hides."}
+  ],
+  social:{twitter:"@thesamparr",instagram:"@thesamparr",linkedin:"parrsam",newsletter:"Hampton / Moneywise"}
+},
+{
+  name:"Shaan Puri",tier:"host",emoji:"🚀",color:"#8b5cf6",
+  tagline:"Co-Host, My First Million | Founder, Bebo (sold to Twitch $25M) & Milk Road (8-fig exit)",
+  networth:"$15-25M",nwSource:"Bebo ($25M Twitch acquisition) + Milk Road (8-figure exit)",
+  known:"Built Blab to 4M users, ran Bebo as CEO through its $25M Twitch acquisition, co-founded and sold The Milk Road crypto newsletter for 8 figures in under a year.",
+  tags:["Media","SaaS","Crypto","Podcast","Angel"],
+  episodes:[{num:"All episodes",title:"Co-Host of My First Million",topics:"860+ episodes, 200M+ YouTube views"}],
+  origin:[
+    {year:"2010",text:"Graduated Duke (Biology & Chemistry). Skipped med school. Founded Sabi Sushi — failed."},
+    {year:"2015",text:"Co-founded Blab, a live-streaming app that reached 4 million users in one year."},
+    {year:"2016",text:"Blab shut down; assets acquired by SlideShare."},
+    {year:"2017",text:"Became CEO of Bebo after Michael & Xochi Birch acquired it for $1M in 2013."},
+    {year:"2019",text:"Bebo acquired by Twitch (Amazon) for $25M. Shaan stays on as Senior Director."},
+    {year:"2022",text:"Co-founded The Milk Road crypto newsletter with Ben Levy. Grew to 250K subscribers in 10 months. Sold for 8 figures."},
+    {year:"2021",text:"Co-founded Bums and Roses (baby apparel brand) in stealth — now $25–50M annual revenue."}
+  ],
+  portfolio:[
+    {company:"Blab",details:"Live-streaming app, 4M users in year 1",amount:"Assets acquired by SlideShare (2016)"},
+    {company:"Bebo",details:"Social network pivoted to esports",amount:"Acquired by Twitch/Amazon for $25M (2019)"},
+    {company:"The Milk Road",details:"Crypto newsletter, 250K subs in 10 months",amount:"8-figure exit to Bitfo (2022)"},
+    {company:"Bums and Roses",details:"Baby apparel, built entirely in stealth",amount:"$25–50M annual revenue (ongoing)"},
+    {company:"All Access Fund",details:"Rolling fund, $2.5M raised in 21 days",amount:"40+ investments, $3–4M deployed/year"}
+  ],
+  quotes:[
+    "Work like a lion, not a cow — intense focused sprints, not all-day grazing.",
+    "Different is better than better.",
+    "No Small Boy Stuff — think big, aim for massive potential.",
+    "All it takes is one. You can fail many times but only need to be right once.",
+    "Proximity is Power — who you hang around determines your trajectory."
+  ],
+  contrarian:[
+    {take:"Hard work is overrated",detail:"What you choose to work on matters infinitely more than how hard you work."},
+    {take:"Stealth execution beats promotion",detail:"Built Bums and Roses without leveraging his 1M+ podcast audience — wanted authentic market validation."},
+    {take:"Copycat as competitive strategy",detail:"Self-described 'World's Greatest Copycat' — learns from successful founders by proximity and implements proven strategies."}
+  ],
+  social:{twitter:"@ShaanVP",instagram:"@shaanvpuri",linkedin:"shaanpuri",newsletter:"shaanpuri.com (109K+ subscribers)"}
+},
+{
+  name:"Dharmesh Shah",tier:"1",emoji:"🏢",color:"#00ff9d",
+  tagline:"Co-Founder & CTO, HubSpot | Angel in 90+ startups | Bought chat.com for $15.5M",
+  networth:"~$2B",nwSource:"HubSpot equity (HUBS, public company)",
+  known:"Co-founded HubSpot, which pioneered inbound marketing and went public in 2014. Angel investor in 90+ companies. Paid $15.5M for chat.com to build an AI-native chat product.",
+  tags:["SaaS","B2B","Angel","AI"],
+  episodes:[
+    {num:"Various",title:"Multiple MFM appearances",topics:"HubSpot founding, chat.com acquisition, inbound marketing, angel investing philosophy"}
+  ],
+  origin:[
+    {year:"1994",text:"Founded Pyramid Digital Solutions, a software company, straight out of grad school."},
+    {year:"2006",text:"Co-founded HubSpot with Brian Halligan at MIT. Coined the term 'inbound marketing'."},
+    {year:"2014",text:"HubSpot IPO on NYSE (HUBS). Company revolutionized B2B marketing software."},
+    {year:"2020s",text:"Angel invested in 90+ startups with a check size sweet spot of ~$25K. Known for contrarian, founder-first picks."},
+    {year:"2023",text:"Purchased chat.com for $15.5M to build an AI-native conversational interface."}
+  ],
+  portfolio:[
+    {company:"HubSpot (HUBS)",details:"CRM & inbound marketing platform, co-founder & CTO",amount:"IPO 2014; market cap $20B+ peak"},
+    {company:"chat.com",details:"AI chat platform",amount:"Acquired for $15.5M (2023)"},
+    {company:"90+ angel investments",details:"Check size $10K–$100K, diverse sectors",amount:"Portfolio includes multiple unicorns"}
+  ],
+  quotes:[
+    "Inbound marketing earns attention, outbound marketing buys it.",
+    "The size of your dreams must always exceed your current capacity to achieve them.",
+    "Culture eats strategy for breakfast — but only if you let it."
+  ],
+  contrarian:[
+    {take:"Inbound > Outbound",detail:"When everyone was doing cold calls and ads, Dharmesh built a $20B company on content, SEO, and permission marketing."},
+    {take:"CTO as product visionary",detail:"Stayed CTO (not CEO) intentionally — believes technical co-founders create more durable companies when they stay close to product."}
+  ],
+  social:{twitter:"@dharmesh",linkedin:"dharmesh",newsletter:"OnStartups (blog)"}
+},
+{
+  name:"Jesse Itzler",tier:"2",emoji:"🏃",color:"#00d9ff",
+  tagline:"Co-Founder, Marquis Jet (sold to Berkshire) | Owner, Atlanta Hawks | Author",
+  networth:"$200M+",nwSource:"Marquis Jet sale to Berkshire Hathaway + Hawks ownership stake",
+  known:"Co-founded Marquis Jet, which he sold to NetJets (Berkshire Hathaway). Owns a stake in the Atlanta Hawks. Married to Sara Blakely (Spanx founder). Famous for living with a Navy SEAL for 30 days.",
+  tags:["Aviation","Sports","Media","Author"],
+  episodes:[{num:"Various",title:"Jesse Itzler on MFM",topics:"Marquis Jet founding, living with a Navy SEAL, Atlanta Hawks, entrepreneurial mindset"}],
+  origin:[
+    {year:"1990s",text:"Started as a rapper (Livin' Large, 'Shake It Like a White Girl'). Pivoted to entrepreneurship after modest music success."},
+    {year:"2001",text:"Co-founded Marquis Jet — the first fractional private jet card company."},
+    {year:"2010",text:"Sold Marquis Jet to NetJets, a Berkshire Hathaway company."},
+    {year:"2015",text:"Wrote 'Living with a SEAL' — about convincing a Navy SEAL to live with his family for 30 days."},
+    {year:"Ongoing",text:"Part-owner of the Atlanta Hawks NBA franchise."}
+  ],
+  portfolio:[
+    {company:"Marquis Jet",details:"First fractional jet card company",amount:"Sold to NetJets/Berkshire Hathaway (2010)"},
+    {company:"Atlanta Hawks (stake)",details:"NBA franchise ownership group",amount:"Ongoing"},
+    {company:"100 Mile Group",details:"Event/lifestyle brand, ultramarathons",amount:"Ongoing"}
+  ],
+  quotes:[
+    "The best investment I ever made was in myself.",
+    "Don't count the days; make the days count.",
+    "Ordinary people can accomplish extraordinary things."
+  ],
+  contrarian:[
+    {take:"Discomfort as strategy",detail:"Believes voluntary discomfort (living with a SEAL, running 100 miles) builds mental toughness that translates directly to business performance."},
+    {take:"Relationships over tactics",detail:"Attributes most of his success to proximity to extraordinary people, not business tactics."}
+  ],
+  social:{twitter:"@jesseitzler",instagram:"@jesseitzler"}
+},
+{
+  name:"Andrew Wilkinson",tier:"2",emoji:"🦅",color:"#ffff00",
+  tagline:"Founder, Tiny (internet holding company) | Acquirer of Dribbble, MetaLab & 30+ companies",
+  networth:"$180M+",nwSource:"Tiny holding company portfolio (~30+ internet businesses)",
+  known:"Built Tiny into the 'Berkshire Hathaway of the internet' — acquiring and holding small profitable internet businesses. Started as a teenager running a web design studio (MetaLab).",
+  tags:["Holdco","M&A","Design","Media"],
+  episodes:[{num:"Various",title:"Andrew Wilkinson on MFM",topics:"Tiny acquisition model, buying vs building, MetaLab founding, passive income from internet businesses"}],
+  origin:[
+    {year:"2006",text:"Founded MetaLab as a web design studio as a teenager. Worked with major tech companies."},
+    {year:"2012",text:"Founded Tiny — modeled after Berkshire Hathaway, acquiring small profitable internet businesses indefinitely."},
+    {year:"2015",text:"Acquired Dribbble, the design community platform, through Tiny."},
+    {year:"Ongoing",text:"Tiny now holds 30+ companies. Andrew is the largest individual shareholder."}
+  ],
+  portfolio:[
+    {company:"Tiny",details:"Internet holding company, 30+ portfolio companies",amount:"$180M+ portfolio value"},
+    {company:"MetaLab",details:"Design studio, clients include Apple, Google, Slack",amount:"Ongoing"},
+    {company:"Dribbble",details:"Design community platform",amount:"Acquired (2017)"},
+    {company:"Flow",details:"Project management SaaS",amount:"Acquired"}
+  ],
+  quotes:[
+    "I'm a lazy person who figured out how to make money without working that hard.",
+    "Buying a business is infinitely better than starting one if you can find the right deal.",
+    "Every business is just a set of recurring decisions. You need to build systems so the decisions make themselves."
+  ],
+  contrarian:[
+    {take:"Buying beats building",detail:"Andrew's thesis: acquiring profitable businesses with no competition is safer, cheaper, and faster than starting from scratch."},
+    {take:"The Berkshire model for the internet",detail:"While everyone builds and sells, Tiny buys and holds forever — aligning incentives with long-term compounding."}
+  ],
+  social:{twitter:"@awilkinson",linkedin:"andrewwilkinson",newsletter:"Not-Boring (investor in)"}
+},
+{
+  name:"Elan Lee",tier:"2",emoji:"🎮",color:"#ff00ff",
+  tagline:"Co-Creator, Exploding Kittens | Most-Backed Kickstarter Ever | Former Xbox",
+  networth:"$50M+",nwSource:"Exploding Kittens sales ($100M+) and licensing",
+  known:"Co-created Exploding Kittens, which became the #1 most-backed Kickstarter in history ($8.7M raised from 219,000 backers). Former game designer at Microsoft Xbox.",
+  tags:["Gaming","Consumer","Crowdfunding"],
+  episodes:[{num:"Various",title:"Elan Lee on MFM",topics:"Exploding Kittens origin, Kickstarter strategy, physical games vs digital, building cult products"}],
+  origin:[
+    {year:"2000s",text:"Senior game designer at Microsoft Xbox, working on major franchise titles."},
+    {year:"2015",text:"Co-created Exploding Kittens with Matthew Inman (The Oatmeal) and Shane Small. Launched on Kickstarter."},
+    {year:"2015",text:"Kickstarter campaign raised $8.7M — the most-backed Kickstarter project in history at the time (219,000+ backers in 30 days)."},
+    {year:"Ongoing",text:"Exploding Kittens Inc. has sold millions of copies worldwide and expanded to app/streaming."}
+  ],
+  portfolio:[
+    {company:"Exploding Kittens",details:"Card game company, multiple titles",amount:"$8.7M Kickstarter; $100M+ in sales"},
+    {company:"Netflix Animated Series",details:"Exploding Kittens animated show",amount:"Netflix deal (2023)"}
+  ],
+  quotes:[
+    "The best games are the ones that bring people together in the real world.",
+    "Kickstarter isn't just fundraising — it's the most powerful marketing tool ever invented.",
+    "We didn't make a card game. We made an excuse for people to sit down and talk to each other."
+  ],
+  contrarian:[
+    {take:"Physical over digital",detail:"In an era of apps and digital games, Elan doubled down on physical card games — and created a $100M+ company."},
+    {take:"Humor as product strategy",detail:"Irreverence and absurdity (exploding kittens, laser pointer cats) isn't just branding — it's the entire product thesis."}
+  ],
+  social:{twitter:"@elanlee",instagram:"@explodingkittens"}
+},
+{
+  name:"Greg Isenberg",tier:"3",emoji:"🌐",color:"#ff6600",
+  tagline:"CEO, Late Checkout | Communities Expert | Advisor to Reddit, TikTok",
+  networth:"$10–50M",nwSource:"Late Checkout studio + advisory/investment portfolio",
+  known:"Pioneer of community-led growth strategies. Sold multiple companies and now runs Late Checkout, a startup studio focused on internet communities. Advised Reddit and TikTok on community strategy.",
+  tags:["Communities","SaaS","Media","Angel"],
+  episodes:[{num:"Various",title:"Greg Isenberg on MFM",topics:"Community-led growth, startup ideas, internet communities as moats, Late Checkout studio"}],
+  origin:[
+    {year:"2010s",text:"Founded and sold multiple companies. Became one of the internet's foremost community strategy experts."},
+    {year:"2019",text:"Advised Reddit on community and growth strategy."},
+    {year:"2020s",text:"Founded Late Checkout — a startup studio that builds community-native businesses."},
+    {year:"2024",text:"Late Checkout launches multiple ventures; Greg becomes prominent AI + community voice."}
+  ],
+  portfolio:[
+    {company:"Late Checkout",details:"Startup studio focused on community-native businesses",amount:"Active"},
+    {company:"Multiple exits",details:"Several companies founded and sold in 2010s",amount:"Undisclosed"}
+  ],
+  quotes:[
+    "The next trillion-dollar companies will be built on communities, not just products.",
+    "Find the people who care about something more than anyone else — that's your community.",
+    "Ideas are everywhere. The hard part is finding the 1000 people who desperately need your solution."
+  ],
+  contrarian:[
+    {take:"Community is the product, not the channel",detail:"Most companies treat community as marketing. Greg argues the community IS the product — the business wraps around it."},
+    {take:"Niche > mass market",detail:"Advocates building for obsessed niches rather than mass markets. The narrower the niche, the more defensible the moat."}
+  ],
+  social:{twitter:"@gregisenberg",instagram:"@gregisenberg",newsletter:"Late Checkout"}
+},
+{
+  name:"Tyler Denk",tier:"3",emoji:"📬",color:"#00ff66",
+  tagline:"CEO & Co-Founder, Beehiiv | Former Growth Lead, Morning Brew",
+  networth:"$20M+",nwSource:"Beehiiv equity ($20M+ ARR, Series B funded)",
+  known:"Co-founded Beehiiv, the newsletter platform that grew to $20M+ ARR. Previously early employee at Morning Brew, where he built their growth engine.",
+  tags:["Media","SaaS","Newsletter","Creator"],
+  episodes:[{num:"Various",title:"Tyler Denk on MFM",topics:"Beehiiv founding, newsletter business model, Morning Brew growth tactics, creator economy"}],
+  origin:[
+    {year:"2019",text:"Joined Morning Brew as one of the first employees. Built their growth and engagement systems."},
+    {year:"2021",text:"Left Morning Brew (after Business Insider acquired majority stake for ~$75M) to start Beehiiv."},
+    {year:"2022",text:"Launched Beehiiv — a newsletter platform built by newsletter people, for newsletter people."},
+    {year:"2023",text:"Beehiiv raises Series B; platform crosses $20M ARR."}
+  ],
+  portfolio:[
+    {company:"Beehiiv",details:"Newsletter platform, 20K+ active newsletters",amount:"$20M+ ARR; Series B funded"}
+  ],
+  quotes:[
+    "The newsletter is the most underrated media business model.",
+    "Build for power users first. If they love it, everyone else will follow.",
+    "Distribution is the business. Content is just a reason to distribute."
+  ],
+  contrarian:[
+    {take:"Newsletters > social media",detail:"While everyone chased TikTok and Instagram, Tyler bet on email newsletters as the most durable creator business model."}
+  ],
+  social:{twitter:"@tyler_denk",linkedin:"tylerdenk",newsletter:"Beehiiv Blog"}
+},
+{
+  name:"Alex Lieberman",tier:"3",emoji:"☕",color:"#ff3366",
+  tagline:"Co-Founder, Morning Brew (sold to Business Insider ~$75M) | Mental Health Advocate",
+  networth:"$15–25M",nwSource:"Morning Brew majority stake acquisition by Business Insider (~$75M, 2020)",
+  known:"Co-founded Morning Brew from a college newsletter into a $75M+ media company. Prominent advocate for founder mental health and ADHD awareness.",
+  tags:["Media","Newsletter","Mental Health"],
+  episodes:[{num:"Various",title:"Alex Lieberman on MFM",topics:"Morning Brew founding, newsletter media model, mental health, ADHD, content creator transition"}],
+  origin:[
+    {year:"2015",text:"Co-founded Morning Brew as a daily business newsletter at University of Michigan."},
+    {year:"2018",text:"Morning Brew hits 1M subscribers. Alex leaves college to run the company full-time."},
+    {year:"2020",text:"Business Insider acquires majority stake in Morning Brew for ~$75M."},
+    {year:"2022",text:"Alex exits Morning Brew CEO role. Becomes prolific content creator and mental health advocate."}
+  ],
+  portfolio:[
+    {company:"Morning Brew",details:"Daily business newsletter, millions of subscribers",amount:"Majority sold to Business Insider ~$75M (2020)"},
+    {company:"Storyarb",details:"Content studio",amount:"Active"}
+  ],
+  quotes:[
+    "The best founders are people who solve their own problems.",
+    "Mental health isn't a weakness — it's a competitive advantage when you address it.",
+    "Distribution is a moat that most founders completely ignore."
+  ],
+  contrarian:[
+    {take:"Be a media company, not just a company with content",detail:"Morning Brew treated itself as a media brand, not a newsletter with ads. That reframe changed everything about how they grew."}
+  ],
+  social:{twitter:"@businessbarista",instagram:"@businessbarista",linkedin:"alexlieberman"}
+},
+{
+  name:"Austin Rief",tier:"3",emoji:"📰",color:"#00ffcc",
+  tagline:"Co-Founder, Morning Brew | Investor | Operator",
+  networth:"$10–20M",nwSource:"Morning Brew majority stake acquisition by Business Insider (~$75M, 2020)",
+  known:"Co-founded Morning Brew alongside Alex Lieberman. Ran operations and monetization while Morning Brew scaled to millions of subscribers.",
+  tags:["Media","Newsletter","Operations"],
+  episodes:[{num:"Various",title:"Austin Rief on MFM",topics:"Morning Brew growth, newsletter monetization, scaling media companies"}],
+  origin:[
+    {year:"2015",text:"Co-founded Morning Brew with Alex Lieberman as a daily business newsletter at University of Michigan."},
+    {year:"2020",text:"Business Insider acquires majority stake for ~$75M. Austin transitions to investor/advisor."}
+  ],
+  portfolio:[
+    {company:"Morning Brew",details:"Daily business newsletter",amount:"Majority sold ~$75M (2020)"},
+    {company:"Angel portfolio",details:"Early-stage media and tech investments",amount:"Active"}
+  ],
+  quotes:[
+    "The sponsored newsletter model was hiding in plain sight — it just took someone to execute it at scale.",
+    "Build distribution first. Everything else is easier when you have an audience."
+  ],
+  contrarian:[
+    {take:"Bootstrapped media > VC-funded media",detail:"Morning Brew was profitable and bootstrapped before taking any outside capital — proved media companies don't need VC."}
+  ],
+  social:{twitter:"@austinrief",linkedin:"austinrief"}
+},
+{
+  name:"Jesse Cole",tier:"3",emoji:"⚾",color:"#ffdd00",
+  tagline:"Owner, Savannah Bananas | Fans First Entertainment | Yellow Tuxedo Guy",
+  networth:"$10–50M",nwSource:"Savannah Bananas brand and touring entertainment revenue",
+  known:"Transformed a failing minor league baseball team into the Savannah Bananas — a viral entertainment phenomenon now selling out stadiums worldwide with their trick shot, dance-infused 'Banana Ball' style.",
+  tags:["Sports","Entertainment","Brand","Media"],
+  episodes:[{num:"Various",title:"Jesse Cole on MFM",topics:"Savannah Bananas model, fans first philosophy, turning an audience into superfans, building a brand through entertainment"}],
+  origin:[
+    {year:"2016",text:"Purchased the Savannah Bananas (then Savannah Sand Gnats) minor league baseball team. Team was nearly bankrupt."},
+    {year:"2016",text:"Renamed team, embraced yellow tuxedo as trademark look, and introduced entertainment-first baseball (Banana Ball)."},
+    {year:"2021",text:"Banana Ball format goes viral. Tens of millions of views across TikTok and Instagram."},
+    {year:"2023",text:"Savannah Bananas transitions to a full touring entertainment company, selling out stadiums globally."}
+  ],
+  portfolio:[
+    {company:"Savannah Bananas",details:"Baseball entertainment touring company",amount:"Sells out arenas worldwide; 9-figure brand value"}
+  ],
+  quotes:[
+    "If it's been done before, I'm not interested.",
+    "Fans first, entertain always.",
+    "The moment you think you've figured it out is the moment you stop growing."
+  ],
+  contrarian:[
+    {take:"Entertainment > Sport",detail:"In an industry focused on winning games, Jesse focused on entertaining fans — and built something far more valuable than any league title."},
+    {take:"Hate is marketing",detail:"Deliberately creates polarizing content. Believes people who hate you are just as valuable as fans because they spread your name."}
+  ],
+  social:{twitter:"@jessecoleteam",instagram:"@jessecoleteam",newsletter:"Fans First Entertainment"}
+},
+{
+  name:"Noah Kagan",tier:"2",emoji:"🌮",color:"#f97316",
+  tagline:"Founder, AppSumo ($80M+ revenue) | Employee #30 at Facebook | 4th employee at Mint.com",
+  networth:"$36M–$270M",nwSource:"AppSumo equity ($80M+ ARR) + early Mint/Facebook history",
+  known:"Founded AppSumo (software deals marketplace) for $60 over a weekend in 2010 — now doing $80M+ revenue. Was employee #30 at Facebook and #4 at Mint.com (acquired by Intuit).",
+  tags:["SaaS","Marketplace","Growth","Author"],
+  episodes:[
+    {num:"84",title:"How the Founder of AppSumo Went from Facebook #30 to $100M Company",topics:"AppSumo background, customer acquisition, product frameworks"},
+    {num:"546",title:"How to Launch a Million Dollar Business in 48 Hours",topics:"Million Dollar Weekend framework"}
+  ],
+  origin:[
+    {year:"2005",text:"Employee #30 at Facebook. Worked directly with Mark Zuckerberg. Helped build Facebook Ads. Was fired."},
+    {year:"2007",text:"4th employee at Mint.com (personal finance app). Mint acquired by Intuit in 2009 for ~$170M."},
+    {year:"2010",text:"Founded AppSumo for $60 — bought developer time and a domain on a weekend. Immediate traction."},
+    {year:"2023",text:"AppSumo surpasses $80M annual revenue. Noah returns as active CEO."}
+  ],
+  portfolio:[
+    {company:"AppSumo",details:"Software deals marketplace, 1M+ customers",amount:"$80M+ ARR (2023)"},
+    {company:"Sumo.com",details:"Email capture and marketing tools",amount:"Complementary property"}
+  ],
+  quotes:[
+    "No one ever got rich checking their email more often.",
+    "Go towards the pain.",
+    "Get paying customers before you launch and then build what they want.",
+    "Success is showing up when it's NOT exciting."
+  ],
+  contrarian:[
+    {take:"Validate before you build",detail:"Get a paying customer BEFORE writing a line of code. Sounds obvious, but almost nobody does it."},
+    {take:"AppSumo should have died 10 times",detail:"Noah is brutally honest about near-failures. He believes transparency about failure is a growth lever, not a weakness."}
+  ],
+  social:{twitter:"@noahkagan",youtube:"@noahkagan (1.1M subs)",newsletter:"noahkagan.com",instagram:"@noahkagan"}
+},
+{
+  name:"Alex Hormozi",tier:"1",emoji:"💪",color:"#ef4444",
+  tagline:"Author, $100M Offers | Founder, Acquisition.com | Gym Launch ($46.2M exit)",
+  networth:"$100–200M",nwSource:"Gym Launch exit ($46.2M) + Acquisition.com portfolio ($250M+ ARR)",
+  known:"Sold Gym Launch for $46.2M at age 31. Now runs Acquisition.com (16 portfolio companies, $250M+ ARR). Author of '$100M Offers' (100K copies in week 1, $15M+ in royalties).",
+  tags:["Fitness","B2B","Author","Holdco"],
+  episodes:[
+    {num:"618",title:"I Lost Everything Twice... Then Made $26M In 18 Months",topics:"Acquisition.com playbook, Skool investment, brink of oblivion narrative"},
+    {num:"764",title:"Hiring A+ Talent, Thinking in Frameworks",topics:"People, persuasion, writing for business"}
+  ],
+  origin:[
+    {year:"2013",text:"Founded United Fitness with personal savings. Grew to 6 locations."},
+    {year:"2016",text:"Sold all 6 gyms. Founded Gym Launch — SaaS licensing for gym owners."},
+    {year:"2017",text:"Gym Launch generates $2.3M+ monthly revenue. $17M profit in first full year."},
+    {year:"2021",text:"Sold Gym Launch (majority stake) + Prestige Labs to PE for $46.2M. Age: 31."},
+    {year:"2021",text:"Published '$100M Offers'. 100K copies in week 1. $15-20M lifetime royalties."},
+    {year:"2022",text:"Founded Acquisition.com. Now 16 portfolio companies generating $250M+ ARR."}
+  ],
+  portfolio:[
+    {company:"Gym Launch + Prestige Labs",details:"SaaS gym licensing + supplements",amount:"Sold to PE for $46.2M (2021)"},
+    {company:"Acquisition.com",details:"16 portfolio companies, $250M+ combined ARR",amount:"$42M in distributions to partners"},
+    {company:"$100M Offers (book)",details:"Amazon #1 Bestseller",amount:"$15–20M lifetime royalties"}
+  ],
+  quotes:[
+    "A focused fool can accomplish more than a distracted genius.",
+    "The pain is the pitch — articulate pain accurately and they will buy.",
+    "Your offer should bleed value.",
+    "Success is doing the obvious thing longer than most people are willing to."
+  ],
+  contrarian:[
+    {take:"Give away your best stuff free",detail:"Alex publishes his most valuable frameworks on YouTube/Instagram for free. Believes radical transparency builds more trust than gating content."},
+    {take:"Acquisition beats invention",detail:"Buying and scaling existing businesses is more capital-efficient than building from zero."}
+  ],
+  social:{twitter:"@AlexHormozi",instagram:"@hormozi (4M followers)",youtube:"Alex Hormozi (major channel)"}
+},
+{
+  name:"Codie Sanchez",tier:"2",emoji:"🏪",color:"#16a34a",
+  tagline:"Founder, Contrarian Thinking | 'Boring Business' Investor | Former Wall St. & Journalist",
+  networth:"$17–20M",nwSource:"9-figure holding company portfolio (laundromats, car washes, HVAC, storage)",
+  known:"Built a 9-figure portfolio of 'boring' Main Street businesses (laundromats, car washes, HVAC, storage). Media empire teaching the acquisition playbook. NYT bestselling author.",
+  tags:["M&A","Real Estate","Media","Author"],
+  episodes:[
+    {num:"176",title:"Buying Distressed Assets, Real Estate",topics:"Boring businesses thesis, modular homes, distressed acquisition strategy"},
+    {num:"512",title:"Female-focused entrepreneurship + 4 business ideas",topics:"Main Street opportunities, contrarian business ideas"}
+  ],
+  origin:[
+    {year:"2000s",text:"Award-winning conflict journalist (RFK Award). Covered Latin America, drug cartels, human trafficking."},
+    {year:"2010s",text:"Pivoted to finance — 15+ years in private equity and Wall Street."},
+    {year:"2015",text:"Bought first laundromat for $25K. Start of the 'boring businesses' acquisition spree."},
+    {year:"2020",text:"Founded Contrarian Thinking — newsletter and media platform teaching business acquisition."},
+    {year:"2023",text:"Contrarian Thinking reaches 1M+ weekly newsletter readers. Main Street Hold Co. hits 9-figure revenue."}
+  ],
+  portfolio:[
+    {company:"Main Street Hold Co.",details:"25+ businesses: laundromats, car washes, HVAC, storage, roofing",amount:"9-figure portfolio revenue"},
+    {company:"Contrarian Thinking",details:"Media & education platform, 1M+ newsletter readers",amount:"7-figure brand (2025)"},
+    {company:"Cannabis investments",details:"Early movers in regulated cannabis markets",amount:"Undisclosed"}
+  ],
+  quotes:[
+    "Don't be afraid to be different. The world needs more contrarians.",
+    "I'm just dumb enough to believe in myself, and smart enough to execute.",
+    "The boring stuff is where the real money is. Nobody's fighting you for a car wash."
+  ],
+  contrarian:[
+    {take:"Boring = Alpha",detail:"While everyone builds SaaS, the real opportunity is in boring Main Street businesses that cash flow from day one and have zero VC competition."},
+    {take:"Cash flow > Growth",detail:"Prioritizes predictable, steady cash flow over hypergrowth and venture scale. 'Passive income beats active income.'"}
+  ],
+  social:{twitter:"@Codie_Sanchez",instagram:"@codiesanchez",youtube:"@CodieSanchezCT",newsletter:"Contrarian Thinking (1M+ readers)"}
+},
+{
+  name:"Nick Huber",tier:"2",emoji:"📦",color:"#84cc16",
+  tagline:"Founder, Bolt Storage (1.9M sq ft) | The Sweaty Startup | Sold Storage Squad for $7M",
+  networth:"$25–50M",nwSource:"Bolt Storage real estate portfolio ($150–200M assets) + Storage Squad exit ($7M)",
+  known:"Sold college storage business for $7M. Built Bolt Storage to 1.9 million sq ft across 62 locations. Author of 'The Sweaty Startup.' Runs 10+ businesses with 325+ employees.",
+  tags:["Real Estate","Storage","Media","Bootstrapped"],
+  episodes:[
+    {num:"127",title:"Building a $10M Self-Storage Business and the Opportunities in 'Sweaty Startups'",topics:"Storage business, unsexy businesses, wealth building"},
+    {num:"420",title:"Service company exit, self-storage ops, motivation",topics:"Saving money abroad, Sweaty Startup philosophy"}
+  ],
+  origin:[
+    {year:"College",text:"Founded Storage Squad — student storage service. Scaled to 25 college towns."},
+    {year:"2021",text:"Sold Storage Squad for $7M after 10 years. Pivoted to real estate private equity."},
+    {year:"2021+",text:"Built Bolt Storage — self-storage REPE firm. Now 1.9M sq ft, 62 locations, 11 states."},
+    {year:"Ongoing",text:"Runs 10+ businesses total, 325+ employees, $150–200M real estate portfolio."}
+  ],
+  portfolio:[
+    {company:"Storage Squad",details:"Student storage, 25 college towns",amount:"Sold for $7M (2021)"},
+    {company:"Bolt Storage",details:"1.9M sq ft, 62 locations, 11 states",amount:"$150–200M portfolio value"},
+    {company:"RE Cost Seg",details:"Tax strategy consulting",amount:"Profitable"},
+    {company:"Somewhere",details:"Real estate/business operations",amount:"Active"}
+  ],
+  quotes:[
+    "Execution is a thousand times more important than your idea. The boring stuff — that's what the winners get right.",
+    "A lot of games that are glamorized by society aren't actually worth winning.",
+    "Every single business, when operated at a high level, is fundamentally the same. The owner is not doing the thing — they are operating the company."
+  ],
+  contrarian:[
+    {take:"Unsexy markets win",detail:"Fight in markets without VC hype. Nobody's building a self-storage unicorn pitch deck — that's exactly the point."},
+    {take:"Execution > Ideas",detail:"Ideas are worthless. The market is flooded with good ideas. Execution is everything."}
+  ],
+  social:{twitter:"@nhuber",newsletter:"Sweaty Startup (100K+ subscribers)",podcast:"The Sweaty Startup"}
+},
+{
+  name:"Naval Ravikant",tier:"1",emoji:"⚓",color:"#a78bfa",
+  tagline:"Co-Founder, AngelList | Philosopher-Investor | 200+ Angel Investments",
+  networth:"~$120M",nwSource:"AngelList equity + 70+ exits including 10+ unicorns (Uber, Twitter, Notion)",
+  known:"Co-founded AngelList (democratizing startup investing). Made early investments in Uber, Twitter, Notion, and 200+ others. Created the influential 'How to Get Rich' tweetstorm. Renowned for philosophy on wealth and happiness.",
+  tags:["Angel","VC","Philosophy","Crypto"],
+  episodes:[
+    {num:"212",title:"Why You Shouldn't Be A Slave to a 40 Hour Work Week",topics:"Naval's origin story, future of work, happiness vs. wealth"}
+  ],
+  origin:[
+    {year:"1995",text:"Graduated Dartmouth (Computer Science & Economics). Moved to Silicon Valley."},
+    {year:"2007",text:"Co-founded AngelList with Babak Hodjat — the LinkedIn for startups, democratizing angel investing."},
+    {year:"2010s",text:"Made early investments in Uber, Twitter, Notion, Opendoor, Poshmark, and 190+ others."},
+    {year:"2014",text:"Co-founded MetaStable Capital (crypto hedge fund, $69M AUM by 2017)."},
+    {year:"2022",text:"AngelList Venture raises at $4B valuation."}
+  ],
+  portfolio:[
+    {company:"AngelList",details:"Startup fundraising & talent platform",amount:"$4B valuation (2022)"},
+    {company:"Uber (early)",details:"Series A/B angel investment",amount:"$100M+ return"},
+    {company:"Notion (2013 seed)",details:"$2M seed round participation",amount:"10,000x+ return"},
+    {company:"MetaStable Capital",details:"Crypto hedge fund",amount:"$69M AUM (2017)"},
+    {company:"200+ angel investments",details:"70+ exits, 10+ unicorns",amount:"Estimated $120M+ net proceeds"}
+  ],
+  quotes:[
+    "You're not going to get rich renting out your time. You must own equity to gain financial freedom.",
+    "Specific knowledge is not taught in school. You have to find it yourself.",
+    "Happiness is a state where nothing is missing.",
+    "Desire is a contract you make with yourself to be unhappy until you get what you want."
+  ],
+  contrarian:[
+    {take:"Wealth requires ownership, not salary",detail:"Naval's core thesis: no one gets wealthy working a job. You need equity in a business or asset."},
+    {take:"Happiness is the goal, not wealth",detail:"After a certain point, wealth doesn't increase happiness. Happiness is a skill you can practice independent of money."}
+  ],
+  social:{twitter:"@naval",blog:"nav.al",podcast:"Naval Podcast"}
+},
+{
+  name:"Tim Ferriss",tier:"1",emoji:"⏱",color:"#06b6d4",
+  tagline:"Author, 4-Hour Workweek | The Tim Ferriss Show (1B+ downloads) | Uber early investor",
+  networth:"$50–100M",nwSource:"$25K investment in Uber ($100M+ return) + book royalties + podcast",
+  known:"Wrote 'The 4-Hour Workweek' (global lifestyle design movement). His $25K investment in Uber returned $100M+. The Tim Ferriss Show has 1B+ downloads. Pioneer of remote work and lifestyle design.",
+  tags:["Author","Podcast","Angel","Lifestyle"],
+  episodes:[
+    {num:"395",title:"Tim Ferriss Money & Life Advice",topics:"NFT projects, investment philosophy, life design"},
+    {num:"576",title:"What I Do In A Day, Unfair Advantages & The Barbell Strategy",topics:"Daily lifestyle, investment philosophy, perfect 24-hour design"}
+  ],
+  origin:[
+    {year:"2001",text:"Founded BrainQUICKEN (nutritional supplements e-commerce). Bootstrapped while working in sales."},
+    {year:"2007",text:"Published 'The 4-Hour Workweek.' Became a global phenomenon. #1 NYT bestseller."},
+    {year:"2009",text:"Invested $25K in Uber at a $3.7M valuation. Investment now worth $100M+."},
+    {year:"2010",text:"Sold BrainQUICKEN to London PE firm. Published '4-Hour Body.'"},
+    {year:"2014",text:"Launched The Tim Ferriss Show podcast. Now 1B+ downloads."}
+  ],
+  portfolio:[
+    {company:"BrainQUICKEN",details:"Nutritional supplements e-commerce",amount:"Sold to London PE (2010)"},
+    {company:"Uber (2009)",details:"$25K angel investment at $3.7M valuation",amount:"$100M+ return"},
+    {company:"Twitter, Shopify, others",details:"Early-stage angel portfolio",amount:"50+ investments"}
+  ],
+  quotes:[
+    "There's never been anybody in history who changed anything and was liked by everybody. Get over people liking you.",
+    "Doing less is not being lazy. Don't give in to a culture that values personal sacrifice over personal productivity.",
+    "A person's success in life can usually be measured by the number of uncomfortable conversations they're willing to have."
+  ],
+  contrarian:[
+    {take:"Lifestyle design > career building",detail:"Designing your ideal life first, then building the business to fund it, is the inverse of how most people operate — and it works better."},
+    {take:"Barbell strategy",detail:"Extreme risk on one side + extreme safety on the other. Avoid the middle entirely."}
+  ],
+  social:{twitter:"@tferriss",instagram:"@timferriss",newsletter:"5-Bullet Friday",blog:"tim.blog"}
+},
+{
+  name:"Scott Galloway",tier:"2",emoji:"📊",color:"#f59e0b",
+  tagline:"NYU Professor | Sold L2 for $155M | 'No Mercy No Malice' Newsletter (500K readers)",
+  networth:"$40–100M",nwSource:"L2 Inc. acquisition by Gartner ($155M, 2017) + Prophet + media",
+  known:"Serial entrepreneur and NYU Stern professor. Sold L2 Inc. to Gartner for $155M. Author of 'The Four' (tech critic bible). No Mercy/No Malice newsletter read by 500K+ weekly.",
+  tags:["VC","Media","Author","Tech Critic"],
+  episodes:[
+    {num:"511",title:"Scott Galloway Tells All — $100M Net Worth, $4T Business Opp",topics:"Scarcity mindset at $100M, wealth building for young people"},
+    {num:"581",title:"Do This In Your 20s To Make Millions In Your 30s",topics:"Get-rich formula, hard career advice"}
+  ],
+  origin:[
+    {year:"1987",text:"Graduated UCLA (Business). Worked at Morgan Stanley as fixed income analyst."},
+    {year:"1992",text:"Founded Prophet — brand and marketing consultancy."},
+    {year:"1997",text:"Founded RedEnvelope (e-commerce gifts). IPO 2003. Bankruptcy 2008."},
+    {year:"2002",text:"Hired as clinical professor at NYU Stern. Donates 100% of NYU salary back."},
+    {year:"2010",text:"Founded L2 Inc. — digital intelligence and brand analytics firm."},
+    {year:"2017",text:"L2 acquired by Gartner for $155M. Same year published 'The Four.'"},
+    {year:"2020",text:"Launched No Mercy/No Malice newsletter and The Prof G Show podcast."}
+  ],
+  portfolio:[
+    {company:"RedEnvelope",details:"E-commerce gift company",amount:"IPO 2003; Bankruptcy 2008"},
+    {company:"L2 Inc.",details:"Digital intelligence/analytics",amount:"Acquired by Gartner for $155M (2017)"},
+    {company:"Prophet",details:"Brand consultancy",amount:"Ongoing since 1992"},
+    {company:"No Mercy/No Malice",details:"Newsletter + podcast empire",amount:"500K+ subscribers"}
+  ],
+  quotes:[
+    "These companies avoid taxes, invade privacy and destroy jobs to increase profits ... because they can.",
+    "We think these companies are progressive, when their behavior is more like Darth Vader crossed with Ayn Rand.",
+    "Passive income must exceed your burn rate. That's the algebra of wealth."
+  ],
+  contrarian:[
+    {take:"Break up Big Tech",detail:"Has called for breaking up Google, Amazon, Apple, and Facebook since 2017 — when nobody in Silicon Valley would say it publicly."},
+    {take:"Failure as credential",detail:"RedEnvelope went bankrupt. Galloway talks about it constantly. Believes visible failure is a leadership credential, not a liability."}
+  ],
+  social:{twitter:"@profgalloway",newsletter:"No Mercy/No Malice (500K+)",podcast:"The Prof G Pod + Pivot"}
+},
+{
+  name:"Sahil Bloom",tier:"3",emoji:"📖",color:"#818cf8",
+  tagline:"Author, The 5 Types of Wealth | Curiosity Chronicle (500K) | SRB Ventures",
+  networth:"$8–12M",nwSource:"SRB Ventures fund + newsletter revenue + 40+ startup investments",
+  known:"Grew The Curiosity Chronicle to 500K+ subscribers. Founded SRB Ventures ($10M fund). Author of 'The 5 Types of Wealth' (NYT Bestseller, endorsed by Tim Cook and Andrew Huberman).",
+  tags:["Media","Angel","Author","Creator"],
+  episodes:[
+    {num:"384",title:"Left Private Equity To Make Millions As A Content Creator",topics:"PE to content, business ideas, newsletter strategy, mobile podcast studios"}
+  ],
+  origin:[
+    {year:"2013",text:"Graduated Stanford (Economics). Joined Altamont Capital (PE). Worked to VP."},
+    {year:"2021",text:"Left Altamont. Launched Curiosity Chronicle newsletter and built to 500K+ subscribers."},
+    {year:"2022",text:"Founded SRB Ventures ($10M fund, $100-250K checks) and SRB Holdings (10+ operating businesses)."},
+    {year:"2025",text:"Published 'The 5 Types of Wealth' — instant NYT, USA Today, Sunday Times bestseller."}
+  ],
+  portfolio:[
+    {company:"SRB Ventures",details:"Pre-seed/seed fund, 40+ investments",amount:"$10M deployed"},
+    {company:"SRB Holdings",details:"10 cash-flowing business assets",amount:"Active"},
+    {company:"The Curiosity Chronicle",details:"500K+ subscribers",amount:"$70K/month revenue"}
+  ],
+  quotes:[
+    "Curiosity is the fountain of youth.",
+    "Motivation is a natural byproduct of movement. When in doubt, just start moving.",
+    "Life is hard — fortunately, you get to choose your hard.",
+    "Identity is the real thing we're all searching for. Everyone thinks they want money, but they want identity."
+  ],
+  contrarian:[
+    {take:"Five types of wealth (most aren't financial)",detail:"Sahil's framework: Time wealth, Social wealth, Mental wealth, Physical wealth, Financial wealth — in roughly that order of importance."},
+    {take:"Audience first, revenue second",detail:"Grows the newsletter without constantly selling. Believes you grow faster when you're not always trying to monetize your audience."}
+  ],
+  social:{twitter:"@SahilBloom",instagram:"@sahilbloom",newsletter:"The Curiosity Chronicle (Substack)"}
+},
+{
+  name:"MrBeast",tier:"1",emoji:"🎬",color:"#22c55e",
+  tagline:"YouTube's Most Subscribed Creator | Beast Industries (~$5.2B valuation)",
+  networth:"~$2.6B",nwSource:"Beast Industries raised at $5.2B valuation (2024); Fortune 2026",
+  known:"Largest YouTube channel in the world (472M+ subscribers). Built Feastables to $250M revenue. Beast Industries valued at $5.2B. Known for massive production-value videos and philanthropy.",
+  tags:["Media","Consumer","Creator","Food"],
+  episodes:[
+    {num:"676",title:"MrBeast Shares His Best Business Advice",topics:"Mindset of biggest entertainer on earth, business philosophy"}
+  ],
+  origin:[
+    {year:"2012",text:"Uploaded first YouTube video at age 13. Spent 5-6 years obsessively studying the algorithm."},
+    {year:"2017",text:"Viral breakthrough counting to 100,000. Hit 1M subscribers same year."},
+    {year:"2020",text:"Launched MrBeast Burger. Generated $100M in first year."},
+    {year:"2022",text:"Launched Feastables chocolate. Reached 100M YouTube subscribers."},
+    {year:"2024",text:"Surpassed T-Series — most subscribed YouTube channel. $100M Amazon deal (Beast Games)."},
+    {year:"2025",text:"Beast Industries raises $450M+ at $5.2B valuation. Feastables: $250M revenue."}
+  ],
+  portfolio:[
+    {company:"MrBeast YouTube",details:"472M+ subscribers, primary revenue driver",amount:"$250M+ annual revenue (2024)"},
+    {company:"Feastables",details:"Chocolate brand",amount:"$250M revenue; $500M+ valuation"},
+    {company:"Beast Games",details:"Amazon Prime original series",amount:"$100M Amazon deal"},
+    {company:"Step",details:"Teen banking app (acquired 2025)",amount:"Undisclosed acquisition price"}
+  ],
+  quotes:[
+    "You're crazy until you're successful, then you are a genius.",
+    "All I do is wake up every day and obsess over how to make the best videos possible.",
+    "It's easier to get 10M views on one video than 100K views on 100 videos.",
+    "Your probability of being a billionaire is higher if you don't make that your goal."
+  ],
+  contrarian:[
+    {take:"Reinvest everything",detail:"Every dollar MrBeast earned went back into production. For years he had no personal income. Quality compounds."},
+    {take:"One viral video > 100 mediocre ones",detail:"Concentration of effort. Fewer, better videos beat the content-mill approach that kills most creators."}
+  ],
+  social:{twitter:"@MrBeast",instagram:"@mrbeast",youtube:"@MrBeast (472M+ subs)"}
+},
+{
+  name:"Gary Vaynerchuk",tier:"2",emoji:"🍷",color:"#6366f1",
+  tagline:"CEO, VaynerMedia | VeeFriends | Wine Library ($3M → $60M)",
+  networth:"$200–220M",nwSource:"VaynerX equity + early Facebook/Uber investments + speaking fees",
+  known:"Grew family wine business from $3M to $60M with YouTube. Co-founded VaynerMedia (social media agency, $200M+ revenue). Pioneer of personal branding via daily content across every platform.",
+  tags:["Media","Agency","NFT","Author"],
+  episodes:[
+    {num:"209",title:"Why NFTs Are the Future",topics:"NFTs, VaynerX, VeeFriends launch"},
+    {num:"588",title:"How Gary Vee Predicts The Next Facebook Every Time",topics:"Investments, Logan Paul, Zuckerberg, MrBeast analysis"}
+  ],
+  origin:[
+    {year:"1998",text:"Took over family liquor store, renamed it Wine Library. Grew from $3M to $60M via online expansion."},
+    {year:"2006",text:"Launched Wine Library TV — daily YouTube wine webcast. Pioneered long-form episodic content."},
+    {year:"2009",text:"Co-founded VaynerMedia with brother AJ. No outside capital. Now $200M+ revenue, 600+ employees."},
+    {year:"2021",text:"Launched VeeFriends NFT collection. $91M in 90 days."}
+  ],
+  portfolio:[
+    {company:"VaynerMedia / VaynerX",details:"Social media agency + holding company",amount:"$200M+ annual revenue"},
+    {company:"VeeFriends",details:"NFT collection + community",amount:"$240M+ total sales volume"},
+    {company:"Gallery Media Group",details:"Acquired PureWow magazine",amount:"Active"}
+  ],
+  quotes:[
+    "Ideas are shit. Execution is the game.",
+    "If you don't enjoy what you're doing, you're going to quit when shit gets hard.",
+    "Not worrying about what people think frees you to do things, and doing things allows you to win or learn from your loss."
+  ],
+  contrarian:[
+    {take:"Document don't create",detail:"Gary's content philosophy: just document what you're already doing. Authenticity beats polished production."},
+    {take:"Patience as competitive advantage",detail:"Gary thinks in 50-year horizons. Most people think in 50-day horizons. That mismatch is the edge."}
+  ],
+  social:{twitter:"@garyvee",instagram:"@garyvee",youtube:"@GaryVee",linkedin:"garyvee"}
+},
+{
+  name:"Ben Horowitz",tier:"1",emoji:"🦁",color:"#dc2626",
+  tagline:"Co-Founder, a16z ($46B AUM) | Sold Opsware to HP for $1.6B | Author",
+  networth:"~$6.1B",nwSource:"a16z general partnership (Forbes 2025)",
+  known:"Co-founded Andreessen Horowitz with Marc Andreessen. Sold Loudcloud/Opsware to HP for $1.6B in 2007. Author of 'The Hard Thing About Hard Things' — the definitive book on startup leadership.",
+  tags:["VC","Enterprise","Author","Leadership"],
+  episodes:[
+    {num:"Dec 2025",title:"How To Lead",topics:"Leadership strategies, opportunities for young people, Tupac analysis"}
+  ],
+  origin:[
+    {year:"1990",text:"MS in Computer Science from UCLA. Joined Silicon Graphics. Later VP at Netscape."},
+    {year:"1999",text:"Co-founded Loudcloud with Marc Andreessen (later renamed Opsware)."},
+    {year:"2007",text:"Sold Opsware to HP for $1.6B. Managed $2.8B revenue division with 3,000 employees."},
+    {year:"2009",text:"Co-founded Andreessen Horowitz (a16z) with $300M. Now $46B+ AUM."},
+    {year:"2014",text:"Published 'The Hard Thing About Hard Things' — NYT bestseller."}
+  ],
+  portfolio:[
+    {company:"Loudcloud / Opsware",details:"Enterprise cloud infrastructure",amount:"Sold to HP for $1.6B (2007)"},
+    {company:"Andreessen Horowitz",details:"Leading VC firm, $46B+ AUM",amount:"Investments in Airbnb, Lyft, Skype, Instagram, crypto"},
+    {company:"Notable a16z investments",details:"Facebook, Twitter, GitHub, Coinbase, Robinhood",amount:"Multiple billion-dollar outcomes"}
+  ],
+  quotes:[
+    "Life is struggle. Within that quote lies the most important lesson in entrepreneurship.",
+    "The hard thing isn't setting a big, hairy, audacious goal. The hard thing is laying people off when you miss it.",
+    "Hard things are hard because there are no easy answers or recipes.",
+    "The great CEOs all say, 'I didn't quit.'"
+  ],
+  contrarian:[
+    {take:"Contrarian investing is mathematically necessary",detail:"It is mathematically impossible to follow the crowd and perform better than it. a16z's early bets (Skype, Airbnb, crypto) defined the firm."},
+    {take:"Culture is defined by your worst behavior you tolerate",detail:"Culture isn't posters and ping pong. It's what you accept when things get hard."}
+  ],
+  social:{twitter:"@bhorowitz",linkedin:"benhorowitz",blog:"a16z.com/author/ben-horowitz"}
+},
+{
+  name:"Palmer Luckey",tier:"1",emoji:"🥽",color:"#7c3aed",
+  tagline:"Founder, Oculus VR (sold to Facebook $2.7B) | Founder, Anduril Industries ($60B valuation)",
+  networth:"~$3.5B",nwSource:"Anduril Industries stake (valued at $60B, March 2026)",
+  known:"Built Oculus VR from scratch as a teenager and sold it to Facebook for $2.7B at age 21. Founded Anduril Industries (defense/AI), now valued at $60B with $1B+ in government contracts.",
+  tags:["Defense","VR/AR","AI","Hardware"],
+  episodes:[
+    {num:"378",title:"Oculus & Anduril: From Flipping iPhones to Selling to Facebook for $2B",topics:"Oculus origin, spending post-exit, crypto investments, national security, flying coach despite being a billionaire"}
+  ],
+  origin:[
+    {year:"2009",text:"Age 16: started building custom VR headsets in his parents' garage."},
+    {year:"2012",text:"Founded Oculus VR. John Carmack demo'd Rift at E3. Dropped out of university."},
+    {year:"2014",text:"Facebook acquired Oculus VR for $2.7B. Palmer earned ~$600M."},
+    {year:"2017",text:"Founded Anduril Industries with a team of ex-SpaceX, Palantir, and defense engineers."},
+    {year:"2020",text:"Anduril wins $967M Air Force contract + $1B SOCOM contract."},
+    {year:"2026",text:"Anduril valued at $60B after Series C (Nvidia, Intel, Qualcomm, T-Mobile investors)."}
+  ],
+  portfolio:[
+    {company:"Oculus VR",details:"VR headset pioneer",amount:"Sold to Facebook for $2.7B (2014)"},
+    {company:"Anduril Industries",details:"Autonomous defense systems + AI",amount:"$60B valuation (March 2026)"},
+    {company:"Hark AI Lab",details:"AI research lab",amount:"$100M war chest (2025)"}
+  ],
+  quotes:[
+    "If I'm going to ask my employees to do it, I need to do it too. (On flying coach despite $3B net worth)",
+    "The idea behind Anduril was to build not a defense contractor, but a defense products company.",
+    "If you wait until the war starts to work on these problems, you're just part of the killing, not the stopping."
+  ],
+  contrarian:[
+    {take:"Defense is the highest-leverage tech problem",detail:"While Silicon Valley avoided defense (Google canceled Project Maven), Luckey ran toward it. Anduril is now more valuable than most unicorns."},
+    {take:"Government moves faster than people think",detail:"Anduril proved you can go from founding to $1B+ government contracts in 5 years with the right product approach."}
+  ],
+  social:{twitter:"@PalmerLuckey"}
+},
+{
+  name:"Balaji Srinivasan",tier:"2",emoji:"🌐",color:"#3b82f6",
+  tagline:"Co-Founder, AngelList | Former CTO, Coinbase | Author, The Network State",
+  networth:"~$150M",nwSource:"Counsyl exit ($375M to Myriad Genetics) + Earn.com ($120M to Coinbase) + crypto",
+  known:"Co-founded AngelList. CTO of Coinbase. Founded Counsyl (sold for $375M) and Earn.com (sold for $120M to Coinbase). Author of 'The Network State' — WSJ #2 bestselling e-book.",
+  tags:["Crypto","Biotech","AngelList","Author"],
+  episodes:[
+    {num:"178",title:"How to Fix the Media, Cloud Communities & Crypto",topics:"Decentralization, media reform, crypto investment philosophy"}
+  ],
+  origin:[
+    {year:"2006",text:"Stanford PhD in Electrical Engineering. Also MS in Chemical Engineering."},
+    {year:"2008",text:"Co-founded Counsyl — pre-pregnancy genetic testing. Grew to major scale."},
+    {year:"2013",text:"Joined a16z as General Partner. Helped firm move into biotech and crypto."},
+    {year:"2013",text:"Co-founded Earn.com (started as 21 Inc, Bitcoin micropayments)."},
+    {year:"2018",text:"Earn.com acquired by Coinbase for $120M. Balaji becomes first CTO of Coinbase."},
+    {year:"2018",text:"Counsyl acquired by Myriad Genetics for $375M."},
+    {year:"2022",text:"Published 'The Network State.' WSJ #2 bestselling e-book."}
+  ],
+  portfolio:[
+    {company:"Counsyl",details:"Pre-pregnancy genetic testing",amount:"Sold to Myriad Genetics for $375M (2018)"},
+    {company:"Earn.com / 21 Inc",details:"Bitcoin micropayments",amount:"Sold to Coinbase for $120M (2018)"},
+    {company:"Angel portfolio",details:"50+ investments: Alchemy, Anduril, OpenSea, Perplexity, Replit",amount:"Undisclosed valuations"}
+  ],
+  quotes:[
+    "Only those assets that can't be frozen or seized are your assets. Bitcoin has a root system outside the United States.",
+    "A network state is a social network with a moral innovation, a sense of national consciousness, a recognized founder, and a capacity for collective action.",
+    "The conflict between the Network and the State will define this century."
+  ],
+  contrarian:[
+    {take:"Network States > Nation States",detail:"Believes digital communities can crowdfund territory, build governance, and eventually achieve diplomatic recognition — supplanting traditional nations."},
+    {take:"Crypto is personal sovereignty",detail:"Frames Bitcoin not as an investment but as the only way to have assets that a government cannot freeze or seize."}
+  ],
+  social:{twitter:"@balajis",newsletter:"balajis.com (Substack)"}
+},
+{
+  name:"Robert Greene",tier:"2",emoji:"⚔️",color:"#dc2626",
+  tagline:"Author: 48 Laws of Power, Mastery, Laws of Human Nature | 7 international bestsellers",
+  networth:"~$10M",nwSource:"Book royalties (1.2M+ US copies sold) + speaking engagements",
+  known:"Author of 7 international bestsellers including 'The 48 Laws of Power' (1.2M+ US copies, 24 languages) and 'Mastery.' Studied by presidents, CEOs, and rappers equally. 3M+ Instagram followers.",
+  tags:["Author","Psychology","Strategy","Philosophy"],
+  episodes:[
+    {num:"740",title:"How To Reinvent Yourself at Any Age & Become Successful",topics:"Specialists vs generalists, deep work, silence, boldness, applying Laws of Power"}
+  ],
+  origin:[
+    {year:"1959",text:"Born. Held 60+ jobs including translator, editor, construction worker, Hollywood screenwriter."},
+    {year:"1995",text:"Pitched book on 'power' to a packager while at an Italian art school. Spent 3 years writing it."},
+    {year:"1998",text:"Published 'The 48 Laws of Power.' Became a NYT bestseller. 1.2M+ US copies."},
+    {year:"2009",text:"Published 'The 50th Law' co-authored with 50 Cent."},
+    {year:"2012",text:"Published 'Mastery.' Followed by 'Laws of Human Nature' (2018)."},
+    {year:"2021",text:"Published 'The Daily Laws.' 95K+ newsletter subscribers."}
+  ],
+  portfolio:[
+    {company:"48 Laws of Power",details:"1998, 24 languages, 1.2M+ US copies",amount:"$10M+ estimated lifetime royalties"},
+    {company:"Mastery",details:"2012 bestseller",amount:"Significant royalties"},
+    {company:"The 50th Law",details:"Co-authored with 50 Cent, 2009",amount:"Bestseller"},
+    {company:"Daily Newsletter",details:"95K+ subscribers",amount:"Active"}
+  ],
+  quotes:[
+    "Be the master of your own image rather than letting others define it for you.",
+    "Powerful people impress and intimidate by saying less. The more you say, the more likely you are to say something foolish.",
+    "Mastery is not a function of genius or talent. It is a function of time and intense focus applied to a particular field."
+  ],
+  contrarian:[
+    {take:"Power is neutral, not evil",detail:"Most people avoid studying power dynamics because it feels manipulative. Greene argues that ignorance of power just makes you a victim of it."},
+    {take:"Mastery takes 10,000 focused hours",detail:"Success isn't talent — it's time and intensity applied to a specific domain. Greene dismisses the 'natural genius' myth entirely."}
+  ],
+  social:{twitter:"@RobertGreene",instagram:"@robertgreeneofficial (3M followers)",tiktok:"@robertgreene (1.9M followers)"}
+},
+{
+  name:"Morgan Housel",tier:"3",emoji:"💰",color:"#10b981",
+  tagline:"Author, Psychology of Money (11M copies sold) | Collaborative Fund Partner",
+  networth:"~$1–5M",nwSource:"Book royalties (11M+ copies, 60+ languages) + Collaborative Fund partnership",
+  known:"Wrote 'The Psychology of Money' — one of the best-selling personal finance books ever (11M+ copies, 60 languages). Partner at Collaborative Fund. Board member of Markel.",
+  tags:["Finance","Author","Investing","Psychology"],
+  episodes:[
+    {num:"533",title:"The Investment Strategy To Build Generational Wealth",topics:"Psychology of generational wealth building"},
+    {num:"787",title:"The Art of Spending Money",topics:"Latest book discussion, spending philosophy"}
+  ],
+  origin:[
+    {year:"2005",text:"BA Economics from USC. Joined The Motley Fool as columnist."},
+    {year:"2008",text:"Began contributing to Wall Street Journal. Won first SABEW Best in Business Award."},
+    {year:"2016",text:"Joined The Collaborative Fund as partner."},
+    {year:"2020",text:"Published 'The Psychology of Money.' NYT bestseller."},
+    {year:"2023",text:"Published 'Same As Ever: Timeless Lessons on Risk, Opportunity and Living a Good Life.'"},
+    {year:"2025",text:"Published 'The Art of Spending Money.'"}
+  ],
+  portfolio:[
+    {company:"The Psychology of Money",details:"11M+ copies, 60 languages",amount:"$5M+ estimated royalties"},
+    {company:"Collaborative Fund",details:"VC/growth investing partnership",amount:"Active partner"},
+    {company:"Markel Corporation",details:"Board member since 2021",amount:"$667K in stock holdings"}
+  ],
+  quotes:[
+    "Money's greatest intrinsic value is its ability to give you control over your time.",
+    "Saving money is the gap between your ego and your income.",
+    "Doing well with money isn't about what you know. It's about how you behave.",
+    "Luck and risk are both the reality that every outcome is guided by forces other than individual effort."
+  ],
+  contrarian:[
+    {take:"Savings rate > investment returns",detail:"Most people obsess over finding the best stock or investment. Morgan argues your savings rate matters far more than any return."},
+    {take:"Enough is profound",detail:"Defining 'enough' is more important than maximizing wealth. The richest people Morgan knows are miserable because they never defined enough."}
+  ],
+  social:{twitter:"@morganhousel",newsletter:"morganhousel.com"}
+},
+{
+  name:"Pieter Levels",tier:"3",emoji:"🌍",color:"#06b6d4",
+  tagline:"Nomad List & Remote OK Founder | $3M/year, zero employees | 'MAKE' author",
+  networth:"$40–60M",nwSource:"$3M+ annual revenue from bootstrapped SaaS portfolio (12+ years compounding)",
+  known:"Runs a $3M/year bootstrapped SaaS business entirely alone. Founded Nomad List and Remote OK. Author of 'MAKE.' Pioneered the solopreneur/indie hacker movement. Has never taken venture capital.",
+  tags:["SaaS","Bootstrapped","Nomad","Creator"],
+  episodes:[
+    {num:"Ep 2025",title:"Pieter Levels: Making $2.7M A Year With No Employees",topics:"$3M ARR solopreneur lifestyle, nomadic work, indie philosophy"},
+    {num:"544",title:"Pieter's investment portfolio and startup exits",topics:"Portfolio valuation, SaaS multiples"}
+  ],
+  origin:[
+    {year:"2013",text:"Left Netherlands with a laptop and backpack. Flew to Asia. Started '12 Startups in 12 Months.'"},
+    {year:"2014",text:"Founded Nomad List (7th startup in the challenge). $600 revenue on day one."},
+    {year:"2015",text:"Founded Remote OK — remote job listings platform. Now $2M+ ARR."},
+    {year:"2018",text:"Published 'MAKE: Bootstrapper's Handbook.' 10,000+ copies sold."},
+    {year:"2025",text:"Total revenue across all ventures: ~$3M/year. Still solo. No employees."}
+  ],
+  portfolio:[
+    {company:"Nomad List",details:"City rankings for digital nomads",amount:"~$700K ARR"},
+    {company:"Remote OK",details:"Remote job listings platform",amount:"~$2M+ ARR"},
+    {company:"PhotoAI.com",details:"AI photo editing",amount:"Active"},
+    {company:"InteriorAI.com",details:"AI interior design",amount:"Active"}
+  ],
+  quotes:[
+    "Have fun, ship things, and keep learning.",
+    "I realized I was working all the time because I was lonely.",
+    "Don't optimize for money beyond a point — it stops making you happy."
+  ],
+  contrarian:[
+    {take:"No employees is a feature, not a bug",detail:"Every employee adds complexity, overhead, and responsibility. Pieter deliberately stays solo to maintain speed and autonomy."},
+    {take:"Ship before it's ready",detail:"Pieter's entire model is iterative public shipping. A live product with 5 users beats a perfect product that doesn't exist."}
+  ],
+  social:{twitter:"@levelsio",blog:"levels.io"}
+},
+{
+  name:"Tommy Mello",tier:"2",emoji:"🚗",color:"#f97316",
+  tagline:"Founder, A1 Garage Door Service ($200M+ revenue, $1B+ valuation) | Home Services Empire",
+  networth:"~$1B",nwSource:"A1 Garage Door (estimated $1B+ valuation at 20x EBITDA) + 14 adjacent businesses",
+  known:"Built A1 Garage Door from $50K in debt to $200M+ annual revenue operating in 22 states. Wrote 'Home Service Millionaire' and 'Elevate.' Runs 14+ businesses with 700+ employees.",
+  tags:["Home Services","Operations","Author","Franchising"],
+  episodes:[
+    {num:"789",title:"How I Built a $1.7B Business Repairing Garage Doors",topics:"Origin story, employee training like Navy SEALs, persuasion, home services masterclass"}
+  ],
+  origin:[
+    {year:"2006",text:"Started A1 Garage Door with a roommate in Phoenix."},
+    {year:"2010",text:"Became sole owner of a single debt-ridden location carrying $50K in debt."},
+    {year:"2017",text:"Scaled to $30M revenue in 7 years. Expanding to multiple states."},
+    {year:"2022",text:"Company crosses $200M+ annual revenue, 700+ employees, 19–22 states."},
+    {year:"2026",text:"Targets $1B+ valuation. 26,000 calls/month, 20,000 new customers monthly."}
+  ],
+  portfolio:[
+    {company:"A1 Garage Door Service",details:"America's largest garage door company",amount:"$200M+ revenue; $1B+ target valuation"},
+    {company:"14 adjacent businesses",details:"Christmas lights, real estate, apps, other home services",amount:"Active"}
+  ],
+  quotes:[
+    "Without discipline and consistency, nothing else matters.",
+    "You won't be ready, and that's OK. Patience is a competitive advantage.",
+    "Train your team like Navy SEALs. The standard is the standard."
+  ],
+  contrarian:[
+    {take:"Home services as a tech business",detail:"Uses AI in call centers, dispatch algorithms, and customer tracking. Garage door repair is as sophisticated as any SaaS operation."},
+    {take:"Culture beats strategy in blue-collar businesses",detail:"A1 has far more competition than any SaaS product. The only sustainable moat is culture — people who genuinely care about the work."}
+  ],
+  social:{twitter:"@realtommymello",instagram:"@officialtommymello",youtube:"Tommy Mello"}
+},
+{
+  name:"Jesse Pujji",tier:"3",emoji:"📈",color:"#8b5cf6",
+  tagline:"Founder, Ampush (8-fig exit to Tinuiti) | Gateway X | Bootstrapped Giants",
+  networth:"$50–100M",nwSource:"8-figure Ampush exit (2023) + Gateway X portfolio",
+  known:"Bootstrapped Ampush (performance marketing, $30M+ ARR) for 13 years without VC, then sold to Tinuiti for 8 figures. Now building Gateway X — a venture studio targeting $1B through bootstrapped companies.",
+  tags:["Marketing","Bootstrapped","DTC","Studio"],
+  episodes:[
+    {num:"622",title:"Bootstrapping a $1B Business + Selling To The Ultra Rich",topics:"Ampush story, digital marketing 4 levers, Red Ventures playbook, ultra-HNW sales"}
+  ],
+  origin:[
+    {year:"2009",text:"Left Goldman Sachs. Identified Facebook advertising as early opportunity."},
+    {year:"2010",text:"Founded Ampush with $100K pooled capital + credit cards. Focused on Facebook ads."},
+    {year:"2015",text:"Raised minority stake from Red Ventures. Managing $500M+ in annual ad spend."},
+    {year:"2020",text:"Stepped down as CEO. Moved family to St. Louis to pursue bigger mission."},
+    {year:"2023",text:"Ampush acquired by Tinuiti for 8 figures (13 years post-founding)."},
+    {year:"2024",text:"Founded Gateway X (venture studio) and Bootstrapped Giants newsletter. 25K subscribers in months."}
+  ],
+  portfolio:[
+    {company:"Ampush",details:"Performance marketing agency, $30M+ ARR",amount:"8-figure exit to Tinuiti (2023)"},
+    {company:"Gateway X",details:"Venture studio, multiple operating companies",amount:"7-figure revenue in 2024"},
+    {company:"Bootstrapped Giants",details:"Newsletter + community, 25K subscribers",amount:"Active"}
+  ],
+  quotes:[
+    "Being a Bootstrapped Giant means you figure out your unfair advantages and pour them into your business.",
+    "Don't let their business become YOUR business. VCs play a different game than entrepreneurs.",
+    "Once you have cash flow, there's a lot you can do with it. That became the dream."
+  ],
+  contrarian:[
+    {take:"Bootstrapping to $30M+ is harder and better than raising VC",detail:"Jesse proved you can build a $30M ARR business and exit for 8 figures without a single dollar of venture capital."},
+    {take:"EVERYTHING is sales",detail:"Bootstrapping means selling to your customers, employees, and suppliers simultaneously — all the time."}
+  ],
+  social:{twitter:"@jspujji",linkedin:"jessepujji"}
+},
+{
+  name:"Rob Dyrdek",tier:"2",emoji:"🛹",color:"#ec4899",
+  tagline:"Founder, Dyrdek Machine ($450M+ exits) | Ridiculousness Host | Skateboarder-Entrepreneur",
+  networth:"$100–200M",nwSource:"Dyrdek Machine exits ($450M+ across 5 companies) + Ridiculousness royalties",
+  known:"Professional skateboarder turned venture studio founder. Dyrdek Machine has created 18 brands with 5 exits totaling $450M+. Ridiculousness is MTV's longest-running show.",
+  tags:["Sports","Media","Venture Studio","Entertainment"],
+  episodes:[
+    {num:"224",title:"How Tracking Every Second of His Life Took Rob from 0 to $405M in Exits",topics:"Life tracking system, Dyrdek Machine, wealth structure, athletics to venture capital"},
+    {num:"2023 ep",title:"Rob Dyrdek Tells All: Net Worth, Houses, Investment Portfolio & Health",topics:"Full financial picture, personal philosophy"}
+  ],
+  origin:[
+    {year:"1990s",text:"Professional skateboarder. Sponsored by DC Shoes and others. Major figure in global skate culture."},
+    {year:"2006",text:"MTV's 'Rob & Big' launches. First taste of media business."},
+    {year:"2009",text:"'Fantasy Factory' — 70 episodes on MTV at $100K per episode."},
+    {year:"2011",text:"'Ridiculousness' premieres on MTV. Still running. $150K/episode, tens of millions/year."},
+    {year:"2016",text:"Founded Dyrdek Machine — venture creation studio. Built 18 brands, 5 exits, $450M+ total."}
+  ],
+  portfolio:[
+    {company:"Dyrdek Machine",details:"18 brands created; 5 exits",amount:"$450M+ total exit value"},
+    {company:"Street League Skateboarding",details:"Pro competition circuit, $1.6M prize pool",amount:"Sold"},
+    {company:"Ridiculousness (MTV)",details:"Longest-running MTV comedy",amount:"$150K/episode; $10M+/year"},
+    {company:"Fantasy Factory (MTV)",details:"70 episodes",amount:"$100K/episode"}
+  ],
+  quotes:[
+    "A Do-Or-Dier is an entrepreneur with grit, determination, fortitude, ambition, and unwavering self-belief.",
+    "I was raised by entrepreneur wolves.",
+    "Track every second of your life if you want to optimize it. What gets measured gets managed."
+  ],
+  contrarian:[
+    {take:"Life as a designed system",detail:"Rob tracks every waking minute to optimize joy-to-productivity ratio. Most people let life happen to them; Rob engineered his from scratch."},
+    {take:"Athletes make great entrepreneurs",detail:"Sports trained Rob to lose, analyze, and improve systematically. Most founders lack this emotional operating system."}
+  ],
+  social:{twitter:"@robdyrdek",instagram:"@robdyrdek (8M followers)",tiktok:"@robdyrdek"}
+},
+{
+  name:"Brett Adcock",tier:"1",emoji:"🤖",color:"#14b8a6",
+  tagline:"Founder, Figure AI ($39B valuation) | Sold Vettery for $110M | Archer Aviation ($2.7B)",
+  networth:"Billionaire",nwSource:"Figure AI Series C at $39B valuation (Sept 2025); Vettery exit $110M (2018)",
+  known:"Built Vettery (recruiting marketplace) and sold for $110M. Built Archer Aviation (eVTOL aircraft) to $2.7B public valuation. Now building Figure AI — humanoid robots — valued at $39B with investors including Bezos, Microsoft, Nvidia.",
+  tags:["Robotics","Aerospace","AI","Hardware"],
+  episodes:[
+    {num:"499",title:"Near-bankruptcy after $100M+ exit and what I learned",topics:"Post-Vettery lessons, Figure AI thesis, serial founder mindset"}
+  ],
+  origin:[
+    {year:"2012",text:"Co-founded Vettery — recruiting marketplace connecting employers and job seekers."},
+    {year:"2018",text:"Sold Vettery to Adecco Group for $110M."},
+    {year:"2018",text:"Co-founded Archer Aviation — electric vertical takeoff aircraft (eVTOL)."},
+    {year:"2021",text:"Archer goes public via SPAC at $2.7B valuation (NYSE: ACHR). $1.5B United Airlines deal."},
+    {year:"2022",text:"Founded Figure AI — general-purpose humanoid robotics."},
+    {year:"2024",text:"Figure AI raises $675M Series B from Bezos, Microsoft, Nvidia, Intel, Amazon, OpenAI at $2.6B."},
+    {year:"2025",text:"Figure AI raises $1B Series C at $39B valuation."}
+  ],
+  portfolio:[
+    {company:"Vettery",details:"Recruiting marketplace",amount:"Sold for $110M (2018)"},
+    {company:"Archer Aviation",details:"eVTOL aircraft; $1.5B United Airlines deal",amount:"$2.7B public valuation (NYSE: ACHR)"},
+    {company:"Figure AI",details:"General-purpose humanoid robots",amount:"$39B valuation (Sept 2025)"}
+  ],
+  quotes:[
+    "The world was built for humans. If we can create a robot that interacts with it the same way, we can automate a huge range of tasks.",
+    "Every home will have a humanoid within 10 years.",
+    "Things are evolving so fast. It feels like we're living in a blur."
+  ],
+  contrarian:[
+    {take:"Autonomy-first robots",detail:"While other robotics companies focused on teleoperation, Brett bet on fully autonomous systems from day one. That bet is now worth $39B."},
+    {take:"The humanoid form factor wins",detail:"Skeptics said robots don't need to look human. Brett's thesis: the world is already built for humans, so human-shaped robots integrate without rebuilding everything."}
+  ],
+  social:{twitter:"@adcock_brett",linkedin:"brettadcock",website:"brettadcock.com"}
+},
+{
+  name:"Steph Smith",tier:"3",emoji:"📡",color:"#a3e635",
+  tagline:"Podcast Host, a16z | Scaled Trends newsletter to $MM ARR | Senior Advisor, Nvidia",
+  networth:"Undisclosed",nwSource:"Multiple senior roles in tech + newsletter exits",
+  known:"Scaled The Hustle's Trends newsletter to millions in ARR. Led HubSpot's creator network. Hosted the a16z podcast. Wrote 'Doing Content Right.' Now Senior Advisor at Nvidia.",
+  tags:["Media","Content","Creator","AI"],
+  episodes:[
+    {num:"208",title:"Why You Need a Chief Automation Officer",topics:"Automation, companies of one, future of work"},
+    {num:"633",title:"This Opportunity Is Totally Overlooked",topics:"Silver Tsunami business opportunity"}
+  ],
+  origin:[
+    {year:"2018",text:"Joined The Hustle. Built Trends product (newsletter + research) to millions in ARR."},
+    {year:"2021",text:"HubSpot acquires The Hustle. Steph leads HubSpot's creator program and podcast network."},
+    {year:"2022",text:"Wrote 'Doing Content Right' — comprehensive guide to starting and scaling content businesses."},
+    {year:"2023",text:"Joined Andreessen Horowitz as host of the a16z podcast."},
+    {year:"2025",text:"Joined Groq AI (Growth lead), then Senior Advisor at Nvidia."}
+  ],
+  portfolio:[
+    {company:"Trends (The Hustle)",details:"Research newsletter product",amount:"Millions in ARR at exit"},
+    {company:"Doing Content Right",details:"Book on content creation",amount:"3,000+ community members"},
+    {company:"Internet Pipes",details:"Toolkit for surfacing online insights",amount:"Active"}
+  ],
+  quotes:[
+    "People think if it's good, 'they' will come. Without intentional distribution, content just takes up memory online.",
+    "Saturation is not the sheer number of people in a space — it's the likelihood you can out-innovate what already exists.",
+    "Solve problems, but without a market or a way to reach it, you're toast."
+  ],
+  contrarian:[
+    {take:"Distribution is the actual product",detail:"Most people obsess over content quality. Steph argues intentional distribution is the real skill — and almost nobody prioritizes it."}
+  ],
+  social:{twitter:"@stephsmithio",linkedin:"stephaniesmith93",website:"stephsmith.io"}
+},
+{
+  name:"Nik Sharma",tier:"3",emoji:"📦",color:"#fb7185",
+  tagline:"'The DTC Guy' | Sharma Brands | Forbes 30 Under 30 | Feastables + Roc Nation advisor",
+  networth:"$5–20M",nwSource:"Sharma Brands advisory/agency revenue + Masala Capital rolling fund",
+  known:"Started managing social media for Priyanka Chopra and Pitbull at age 15. Built 8-figure DTC businesses before 26. Founded Sharma Brands (advises Feastables, Caraway, Roc Nation). Forbes 30 Under 30 (2019).",
+  tags:["DTC","Marketing","eCommerce","Angel"],
+  episodes:[
+    {num:"Various",title:"Nik Sharma on MFM",topics:"DTC growth strategies, customer acquisition playbook, first 1K customers without paid ads"}
+  ],
+  origin:[
+    {year:"Age 15",text:"Started managing social media for celebrities: Priyanka Chopra, Pitbull, MAGIC!. Chose not to attend college."},
+    {year:"2018",text:"Led D2C at Hint Water and VaynerMedia. Built expertise in DTC marketing."},
+    {year:"2019",text:"Forbes 30 Under 30 (Marketing & Advertising). AdWeek Young & Influential."},
+    {year:"2020",text:"Founded Sharma Brands — strategic agency for fast-growing consumer brands."},
+    {year:"2022",text:"Co-founded HOOX and Masala Capital (rolling fund focused on DTC/commerce)."}
+  ],
+  portfolio:[
+    {company:"Sharma Brands",details:"Agency for Feastables, Caraway, Roc Nation, GXVE Beauty",amount:"Active"},
+    {company:"Masala Capital",details:"Rolling fund, DTC/commerce focus, 13 investments",amount:"2 known exits"}
+  ],
+  quotes:[
+    "Rather than looking to others for ideas, see the world as a museum — the answers are right in front of you.",
+    "Get your first 1,000 customers without paid ads. That forces you to understand your real messaging.",
+    "Focus on outcomes (what consumers think is cool), not value props (what brands think is cool)."
+  ],
+  contrarian:[
+    {take:"Organic before paid",detail:"Get 1,000 customers without paid advertising first. If you can't do that, paid won't save you — it'll just burn your budget."},
+    {take:"DTC is a distribution strategy, not a business model",detail:"Most DTC founders think they're building brands. Nik argues DTC is just a distribution channel — you still need a real business underneath."}
+  ],
+  social:{twitter:"@mrsharma",linkedin:"mrniksharma",newsletter:"Nik's DTC Newsletter (100K+ readers)"}
+},
+{
+  name:"Justin Kan",tier:"2",emoji:"📺",color:"#f59e0b",
+  tagline:"Co-Founder, Twitch (sold to Amazon $970M) | Founder, Atrium | Goat Capital",
+  networth:"~$100M",nwSource:"Twitch sale to Amazon for $970M (2014); ~12.5% stake",
+  known:"Co-founded Justin.tv, which spun off Twitch — sold to Amazon for $970M in 2014. Also co-founded Atrium (legal tech, raised $75M, later shut down) and Goat Capital (seed fund).",
+  tags:["Gaming","Media","Venture","Legal Tech"],
+  episodes:[
+    {num:"Various",title:"Justin Kan on MFM",topics:"Twitch founding story, Atrium failure, Goat Capital thesis"}
+  ],
+  origin:[
+    {year:"2005",text:"Graduated Yale (Physics & Philosophy). Founded Kiko Software (failed when Google Calendar launched)."},
+    {year:"2007",text:"Co-founded Justin.tv with Emmett Shear, Michael Seibel, Kyle Vogt. 24/7 lifecasting."},
+    {year:"2011",text:"Spun off gaming content into Twitch.tv."},
+    {year:"2012",text:"Socialcam (mobile social video) sold to Autodesk for $60M."},
+    {year:"2014",text:"Amazon acquires Twitch for $970M."},
+    {year:"2017",text:"Founded Atrium (legal-tech). Raised $75M from a16z and others. Shut down March 2020."},
+    {year:"2020",text:"Co-founded Goat Capital with Robin Chan. $25M hybrid seed fund."},
+    {year:"2021",text:"Founded Fractal (gaming NFT marketplace on Solana, $35M raise). Rebranded to Stash (2024)."}
+  ],
+  portfolio:[
+    {company:"Twitch",details:"Gaming livestream platform",amount:"Sold to Amazon for $970M (2014)"},
+    {company:"Socialcam",details:"Mobile social video",amount:"Sold to Autodesk for $60M (2012)"},
+    {company:"Atrium",details:"Legal tech, $75M raised",amount:"Shut down 2020 (failed)"},
+    {company:"Goat Capital",details:"Seed fund, $25M",amount:"Active"},
+    {company:"Fractal/Stash",details:"Gaming tools",amount:"$35M Series A"}
+  ],
+  quotes:[
+    "Surround yourself with people who do what you want to do, and eventually you'll wake up to find yourself doing the same.",
+    "Having a start-up is about seeing what works and changing your idea.",
+    "If you want something to be part of your identity, talk about it. If you want to learn something, teach it.",
+    "Behavior is a virus. We spread our behavior to those around us."
+  ],
+  contrarian:[
+    {take:"Failure is a credential",detail:"Justin talks about Atrium's shutdown constantly and openly. His willingness to fail big (Kiko, Atrium) is what eventually produced Twitch."},
+    {take:"Buddhism as entrepreneurship philosophy",detail:"All suffering comes from attachment and aversion. Applied to business: don't be attached to your original idea, and don't avoid hard pivots."}
+  ],
+  social:{twitter:"@justinkan",linkedin:"justinkan",website:"justinkan.com"}
+},
+{
+  name:"Pat Walls",tier:"3",emoji:"🎥",color:"#a78bfa",
+  tagline:"Founder, Starter Story (sold to HubSpot 2025) | $1M+ ARR bootstrapped media",
+  networth:"Undisclosed",nwSource:"Starter Story sold to HubSpot (2024/2025); terms undisclosed",
+  known:"Bootstrapped Starter Story from a side project to $1.1M ARR, 1.6M monthly visitors, 800K YouTube subscribers, and 275K newsletter subscribers — then sold to HubSpot.",
+  tags:["Media","Creator","YouTube","Bootstrapped"],
+  episodes:[
+    {num:"799",title:"Selling Startup Story & New Business Ideas",topics:"Selling the company, YouTube production systems, TikTok-validated launches, AI app building, B2B video services"}
+  ],
+  origin:[
+    {year:"2017",text:"Launched Starter Story as a side project. Former SE at Dia&Co, Anaplan, Deloitte."},
+    {year:"2018",text:"Side project hits $3K/month. Quit full-time job. All-in on Starter Story."},
+    {year:"2022",text:"Starter Story reaches 1.1M ARR, 1.6M monthly visitors, 10K+ paid community members."},
+    {year:"2023",text:"YouTube channel grows to 800K subscribers. Pat posts on X: 'HubSpot should acquire Starter Story.'"},
+    {year:"2025",text:"HubSpot acquires Starter Story. Terms undisclosed."}
+  ],
+  portfolio:[
+    {company:"Starter Story",details:"Entrepreneurship media: blog, newsletter, YouTube, paid community",amount:"Sold to HubSpot (2025)"}
+  ],
+  quotes:[
+    "Most overnight successes take about 8 years.",
+    "Every YouTube video is a cash-flowing property — treat it like real estate.",
+    "Show the world exactly how regular people build life-changing million-dollar businesses."
+  ],
+  contrarian:[
+    {take:"Bootstrapped media can beat VC-funded media",detail:"Starter Story competed against VC-funded media companies and won — by being lean, authentic, and distribution-obsessed."},
+    {take:"YouTube is the most undervalued distribution channel for B2B content",detail:"Pat built 800K YouTube subscribers in a space (entrepreneurship content) everyone said was saturated."}
+  ],
+  social:{twitter:"@thepatwalls",linkedin:"patrickwalls",youtube:"Starter Story (800K+ subs)"}
+},
+
+// ── NEW GUESTS ────────────────────────────────────────────────────────────
+
+{
+  name:"Ryan Petersen",tier:"1",emoji:"✈️",color:"#2E7D32",
+  tagline:"Logistics visionary who built Flexport into a freight unicorn by applying software thinking to shipping",
+  networth:"$750m+",nwSource:"Forbes, secondary market valuations",
+  known:"Flexport founder/CEO, supply chain expert, Charlie Munger mentee, logistics disruptor",
+  tags:["logistics","freight","B2B","supply chain","VC-backed"],
+  episodes:[{num:648,title:"Unicorn Founder on Unseen Arbitrages, the Paradox of Wealth + Charlie Munger Wisdom",topics:["arbitrage","negotiation","paradox of wealth"]}],
+  origin:[
+    {year:2006,text:"Co-founded ImportGenius with his brother, scraping shipping manifests and selling data to importers"},
+    {year:2013,text:"Founded Flexport and received U.S. Customs & Border Protection license"},
+    {year:2014,text:"Flexport accepted into Y Combinator"},
+    {year:2017,text:"Raised $110M Series C; revenue growing toward $3.3B"},
+    {year:2022,text:"Became one of the most recognized names in supply chain during COVID logistics chaos"}
+  ],
+  portfolio:[
+    {company:"Flexport",details:"Global freight and logistics platform, valued at $8B+",amount:"Majority stake"},
+    {company:"Angel investments",details:"SpaceX, Robinhood, Anduril and others",amount:"undisclosed"}
+  ],
+  quotes:[
+    "The freight business is brilliant because of dumb competition — there are obvious inefficiencies most people overlook.",
+    "Charlie Munger taught me the paradox of wealth: more money doesn't solve deeper existential questions."
+  ],
+  contrarian:[
+    {take:"Billion-dollar opportunities hide in boring regulated industries",detail:"While everyone chases SaaS or consumer apps, massive arbitrages sit uncontested in logistics, freight, and customs."},
+    {take:"Speed without direction is worse than slow",detail:"Moving fast in the wrong direction costs everything. Consistent, directional movement beats frantic hustle."}
+  ],
+  social:{twitter:"@typesfast"}
+},
+
+{
+  name:"Sheel Mohnot",tier:"2",emoji:"💳",color:"#1E88E5",
+  tagline:"Fintech-obsessed VC who built Better Tomorrow Ventures into a $300M fund with the thesis that everything is fintech",
+  networth:"$50m+ (est.)",nwSource:"VC compensation and fund performance estimates",
+  known:"Better Tomorrow Ventures GP, fintech investor, ex-fintech founder, podcast regular",
+  tags:["fintech","VC","investing","founder-operator","community"],
+  episodes:[
+    {num:18,title:"The Big Business of Wacky Domains",topics:["internet business","auctions"]},
+    {num:769,title:"$10M Business Ideas with the Most Interesting Guy in Tech",topics:["business ideas","opportunities"]},
+    {num:801,title:"Life Lessons from Investing & AI-Proof Business Ideas",topics:["investing","AI impact"]}
+  ],
+  origin:[
+    {year:2010,text:"Started fintech career at Kiva, the non-profit peer-to-peer lender"},
+    {year:2013,text:"Consulted at BCG in financial services"},
+    {year:2015,text:"Built and exited two fintech companies"},
+    {year:2019,text:"Co-founded Better Tomorrow Ventures with Jake Gibson"},
+    {year:2025,text:"Closed $140M third fund; BTV manages $300M+ across 3 funds"}
+  ],
+  portfolio:[
+    {company:"Better Tomorrow Ventures",details:"Pre-seed/seed fintech fund; $500K-$3M checks",amount:"$300M AUM"},
+    {company:"Ramp, Mercury, Albert",details:"Among notable BTV portfolio companies",amount:"early investor"}
+  ],
+  quotes:[
+    "At pre-seed and seed, the founder is the most critical factor.",
+    "Everything is fintech — the most valuable companies at scale are always fintech-enabled."
+  ],
+  contrarian:[
+    {take:"Founder quality beats idea quality at seed stage",detail:"Speed, tenacity, and caliber trump the specific business idea in early investing. Wrong founder, wrong outcome."},
+    {take:"Everything is fintech",detail:"The most valuable companies across healthcare, logistics, and retail will all eventually have a financial services layer — that's the real prize."}
+  ],
+  social:{twitter:"@pitdesi"}
+},
+
+{
+  name:"Peter Rahal",tier:"1",emoji:"💪",color:"#FF6B9D",
+  tagline:"Built RXBAR from a basement with $10K and sold to Kellogg for $600M in five years using radical transparency",
+  networth:"$100m-200m",nwSource:"RXBAR $600M acquisition; significant equity stake",
+  known:"RXBAR co-founder, clean label CPG pioneer, fast-scaling consumer brand builder",
+  tags:["CPG","consumer brands","exit","clean label","food"],
+  episodes:[{num:639,title:"The $600M Protein Bar Founder is Back Again",topics:["RXBAR journey","CPG","exit strategy"]}],
+  origin:[
+    {year:2012,text:"Brainstormed RXBAR concept with co-founder Jared Smith; both had family background in food"},
+    {year:2013,text:"First bars manufactured in his parents' basement with a $10K investment"},
+    {year:2014,text:"Generated $2M in sales in year one through CrossFit and health store channels"},
+    {year:2017,text:"Reached $160M in estimated annual sales; caught attention of Kellogg's"},
+    {year:2017,text:"Kellogg acquired RXBAR for $600M; Rahal stayed on as CEO for the transition"}
+  ],
+  portfolio:[
+    {company:"RXBAR",details:"Minimalist protein bar with ingredients listed on the front of the package",amount:"$600M acquisition"},
+    {company:"David Protein",details:"New protein bar brand; positioned differently from RXBAR",amount:"Active (2025)"}
+  ],
+  quotes:[
+    "Simplicity isn't the absence of innovation — it's the result of smart decisions stacked together.",
+    "Strip away the noise, focus on real ingredients, and build trust with consumers."
+  ],
+  contrarian:[
+    {take:"Your packaging IS your marketing",detail:"Listing just the ingredients on the front of the box — nothing else — was a radical constraint that became RXBAR's entire brand identity."},
+    {take:"Consumer disgust at ingredient lists is a massive market signal",detail:"Built a $600M company by being the opposite of every other protein bar on the shelf."}
+  ],
+  social:{twitter:"@Peter_RXBAR"}
+},
+
+{
+  name:"Nick Gray",tier:"2",emoji:"🍸",color:"#9B59B6",
+  tagline:"Sold Museum Hack for millions, then wrote the playbook on how introverts can host parties that build real wealth",
+  networth:"$5m-15m",nwSource:"Museum Hack ~$3M revenue at exit plus investments",
+  known:"Museum Hack founder, author of The 2-Hour Cocktail Party, networking expert for introverts",
+  tags:["networking","events","community","books","relationships"],
+  episodes:[{num:627,title:"Life Hacks From The King of Introverts + 7 Business Ideas",topics:["networking","party hosting","business ideas"]}],
+  origin:[
+    {year:2013,text:"Founded Museum Hack, offering renegade museum tours led by comedians and storytellers"},
+    {year:2015,text:"Expanded to multiple cities with 50+ employees and ~$3M in revenue"},
+    {year:2019,text:"Sold Museum Hack to the employees and transitioned to teaching his social methods"},
+    {year:2022,text:"Published The 2-Hour Cocktail Party based on his hosting methodology"},
+    {year:2023,text:"Launched Friends Newsletter with 20K+ subscribers"}
+  ],
+  portfolio:[
+    {company:"Museum Hack",details:"Renegade museum tours in major US cities; sold to employees 2019",amount:"~$3M ARR at exit"},
+    {company:"The 2-Hour Cocktail Party",details:"Bestselling book on hosting and networking",amount:"Ongoing revenue"}
+  ],
+  quotes:[
+    "The best opportunities come from weak ties and loose connections.",
+    "Host your own events rather than attending other people's."
+  ],
+  contrarian:[
+    {take:"Hosting beats attending for network-building",detail:"Rather than going to other people's events and being lost in the crowd, hosting puts you at the center of every relationship in the room — permanently."},
+    {take:"Weak ties create more opportunity than deep relationships",detail:"Your next big break is more likely to come from a distant acquaintance than a best friend. Nick's system is designed to cultivate those weak ties systematically."}
+  ],
+  social:{twitter:"@nickgraynews",newsletter:"Friends Newsletter"}
+},
+
+{
+  name:"Thomas Tull",tier:"1",emoji:"🎬",color:"#2C3E50",
+  tagline:"Went from managing laundromats to building Legendary Pictures into a $3.5B empire by applying Moneyball analytics to Hollywood",
+  networth:"$1B+",nwSource:"Wanda acquisition $3.5B + retained stake; Tulco Holdings investments",
+  known:"Legendary Pictures founder/CEO, data-driven film producer, Pittsburgh Steelers owner, Tulco Holdings",
+  tags:["entertainment","films","data analytics","sports","M&A"],
+  episodes:[{num:577,title:"The Wild Story Of Mr. Tull — From Laundromats To $3.5B Hollywood Production Company",topics:["Moneyball for movies","business building","diversification"]}],
+  origin:[
+    {year:2000,text:"Conceptualized Legendary Entertainment with a thesis: apply data analytics to movie greenlight decisions"},
+    {year:2005,text:"Secured major partnership with Warner Bros; began building analytics division"},
+    {year:2008,text:"Produced The Dark Knight; data strategy validated with $1B+ box office"},
+    {year:2010,text:"Portfolio reached $13B+ in worldwide box office (Dark Knight trilogy, The Hangover, Inception, Godzilla)"},
+    {year:2016,text:"Wanda Group acquired Legendary for $3.5B; Tull retained equity"}
+  ],
+  portfolio:[
+    {company:"Legendary Pictures",details:"Production company behind Dark Knight, Inception, The Hangover, Dune, Godzilla",amount:"$3.5B acquisition"},
+    {company:"Tulco Holdings",details:"Pittsburgh-based holding company investing in large industries with AI and predictive analytics",amount:"Active"},
+    {company:"Pittsburgh Steelers",details:"NFL team ownership stake",amount:"Owner"}
+  ],
+  quotes:[
+    "View your slate of films as a diversified portfolio of bets.",
+    "Data analytics can improve both marketing decisions and creative decisions.",
+    "The world is a multiplayer game; you have leverage with information."
+  ],
+  contrarian:[
+    {take:"Hollywood can be Moneyball'd",detail:"Everyone said movies were pure art and gut instinct. Tull applied quant analysis to greenlight decisions and generated $13B+ in box office over a decade."},
+    {take:"Boring businesses fund exciting ones",detail:"His wealth trajectory: laundromats → tax prep → auto repair → Hollywood. Boring cash flows financed the glamorous bets."}
+  ],
+  social:{twitter:"N/A",website:"thomastull.group"}
+},
+
+{
+  name:"George Mack",tier:"2",emoji:"🧠",color:"#E74C3C",
+  tagline:"Writer who coined 'high agency' and became required reading for founders and billionaires seeking mental edge",
+  networth:"$1m-3m (est.)",nwSource:"Multiply agency revenue and creator income",
+  known:"High agency author and educator, Multiply marketing agency founder, Lindy Library newsletter",
+  tags:["mental models","marketing","creator","thought leader","agency"],
+  episodes:[
+    {num:703,title:"Agency — The Most Valuable Skill For Any Founder",topics:["high agency","entrepreneurial mindset","founder skills"]},
+    {num:625,title:"The Top 0.1% Of Ideas I've Stumbled Upon On The Internet",topics:["idea discovery","mental models"]}
+  ],
+  origin:[
+    {year:2018,text:"Worked at Social Chain marketing agency; began developing marketing frameworks"},
+    {year:2020,text:"Started Lindy Library newsletter sharing the 0.1% of best internet ideas"},
+    {year:2021,text:"Co-founded Multiply marketing agency serving VC-backed startups"},
+    {year:2022,text:"Published the 'high agency' framework; went viral among founders and VCs"},
+    {year:2024,text:"267K+ Twitter followers; launched High Agency course"}
+  ],
+  portfolio:[
+    {company:"Multiply Agency",details:"Marketing agency for VC-backed startups including Stripe and YC portfolio companies",amount:"Active"},
+    {company:"Lindy Library",details:"Newsletter sharing time-tested, durable ideas",amount:"Free"},
+    {company:"High Agency course",details:"Educational content on taking control of your own destiny",amount:"Paid"}
+  ],
+  quotes:[
+    "Low agency people are passengers in their own lives. High agency people are the drivers.",
+    "Life punishes the vague wish and rewards the specific ask.",
+    "High agency is the most under-discussed and most important idea in the 21st century."
+  ],
+  contrarian:[
+    {take:"Agency matters more than information access",detail:"Most people don't lack information — they lack the conviction and methodology to act on what they already know. High agency is the unlock."},
+    {take:"Specificity beats broad networking",detail:"Detailed, specific asks to specific people yield dramatically better results than generic networking. The more precise the request, the higher the hit rate."}
+  ],
+  social:{twitter:"@george__mack",newsletter:"Lindy Library"}
+},
+
+{
+  name:"Bill Gurley",tier:"1",emoji:"💰",color:"#27AE60",
+  tagline:"Benchmark legend who turned an $11M Uber bet into over $1B — by believing in contrarian bets others laughed at",
+  networth:"$1B+",nwSource:"Uber stake alone valued over $1B at IPO; Benchmark fund returns",
+  known:"Benchmark Capital GP, early Uber investor, legendary contrarian VC, tech industry thought leader",
+  tags:["venture capital","investing","contrarian","startups","board member"],
+  episodes:[{num:803,title:"Bill Gurley: How to Avoid the Biggest Mistake You Can Make in Life",topics:["investing","life philosophy","career advice","regret"]}],
+  origin:[
+    {year:1989,text:"Graduated University of Florida with engineering degree; worked at Compaq"},
+    {year:1993,text:"Earned MBA from UT McCombs; became Wall Street research analyst at CS First Boston"},
+    {year:1999,text:"Joined Benchmark Capital as general partner"},
+    {year:2011,text:"Led $11M Series A investment in Uber — the bet that defined his career"},
+    {year:2015,text:"Published contrarian warnings about Silicon Valley burn rates and valuation excess"}
+  ],
+  portfolio:[
+    {company:"Uber",details:"Led $11M Series A; stake value exceeded $1B at IPO",amount:"$1B+ estimated"},
+    {company:"OpenTable",details:"Early investor; acquired by Priceline for $2.6B",amount:"$100M+ estimated"},
+    {company:"Zillow, GrubHub",details:"Early board-level investments in real estate and food delivery",amount:"$50M+ each"}
+  ],
+  quotes:[
+    "The way to make really good money is to have contrarian, non-consensus predictions that are right versus wrong.",
+    "Missing Google costs you 10,000x your money. You must orient toward 'What could go right?'",
+    "Have strong opinions, but loosely held."
+  ],
+  contrarian:[
+    {take:"Consensus correctness makes poor returns",detail:"Being right when everyone else is also right doesn't generate outsized gains. You need non-consensus views — and you need to be right about them."},
+    {take:"High burn rates in VC became dangerously normalized",detail:"In 2015 he publicly flagged that the $20M annual burn rate had become normalized in Silicon Valley — historically reckless behavior that nobody was willing to say out loud."}
+  ],
+  social:{twitter:"@bgurley"}
+},
+
+{
+  name:"Cathie Wood",tier:"1",emoji:"🚀",color:"#8E44AD",
+  tagline:"ARK Invest founder who built the most controversial fund in history by betting the farm on AI, robotics, and genomics",
+  networth:"$230m-250m",nwSource:"2025 estimates; down from $400M peak in 2021 after ARK drawdown",
+  known:"ARK Investment Management founder/CEO, disruptive innovation investor, Bitcoin bull, contrarian mega-thesis fund manager",
+  tags:["investing","innovation","ETFs","AI","robotics","crypto"],
+  episodes:[{num:760,title:"Cathie Wood: Answering The Hardest Investing Questions",topics:["ARK performance","AI investments","contrarian bets"]}],
+  origin:[
+    {year:1981,text:"Graduated USC summa cum laude with finance and economics degree"},
+    {year:1985,text:"Began career as assistant economist at Capital Group"},
+    {year:2002,text:"Became chief economist and research analyst at AllianceBernstein"},
+    {year:2014,text:"Founded ARK Invest after AllianceBernstein rejected her disruptive innovation ETF idea as 'too risky'"},
+    {year:2020,text:"ARK Innovation ETF gained 150%+; became one of the most discussed fund managers in the world"}
+  ],
+  portfolio:[
+    {company:"ARK Innovation ETF (ARKK)",details:"Flagship innovation fund focusing on disruptive technology companies",amount:"$50B+ AUM at peak"},
+    {company:"ARK Bitcoin Trust",details:"Bitcoin investment vehicle; Wood has 25% of personal net worth in Bitcoin",amount:"Active"},
+    {company:"ARK Genomics, ARK Robotics",details:"Sector-specific ETFs focused on gene editing and autonomous systems",amount:"Active"}
+  ],
+  quotes:[
+    "The big ideas in the early stages of growth are controversial, so to capitalize on them, you must have the courage of your convictions.",
+    "Innovation is the primary driver of long-term growth and value creation.",
+    "We're looking at companies in the early stages of disruptive innovation."
+  ],
+  contrarian:[
+    {take:"Conviction investing requires holding through painful periods",detail:"ARK's massive losses in 2021-2023 didn't change her thesis. She doubled down. Most investors capitulate at exactly the wrong time — that's the alpha."},
+    {take:"Bitcoin is an essential portfolio allocation",detail:"25% of her personal net worth is in Bitcoin. She advocates for 5-10% institutional allocation — still a radical position for a traditional fund manager."}
+  ],
+  social:{twitter:"@CathieWood",newsletter:"ARK research reports"}
+},
+
+{
+  name:"Demis Hassabis",tier:"1",emoji:"🤖",color:"#2980B9",
+  tagline:"Chess prodigy who built DeepMind, cracked protein folding, won the Nobel Prize, and is quietly building AGI at Google",
+  networth:"$500m-650m",nwSource:"2024-2025 estimates based on Google DeepMind equity and investments",
+  known:"DeepMind co-founder/CEO, AlphaFold creator, Nobel Prize in Chemistry 2024, AGI researcher",
+  tags:["AI research","deep learning","neuroscience","Nobel Prize","AGI","scientific discovery"],
+  episodes:[{num:786,title:"The Most Important Founder You've Never Heard Of",topics:["DeepMind","AlphaGo","protein folding","AGI"]}],
+  origin:[
+    {year:1997,text:"Graduated Cambridge with Computer Science degree at age 20; prior chess prodigy and game designer"},
+    {year:1997,text:"Worked as lead AI programmer at Lionhead Studios, designing games including Theme Park at age 17"},
+    {year:2009,text:"Completed PhD in Cognitive Neuroscience at UCL, combining computer science and neuroscience"},
+    {year:2011,text:"Co-founded DeepMind with Shane Legg and Mustafa Suleyman; Google acquired the lab in 2014"},
+    {year:2016,text:"AlphaGo defeated world Go champion Lee Sedol 4-1 — a defining moment in AI history"},
+    {year:2024,text:"Awarded Nobel Prize in Chemistry for AlphaFold, which predicted the structure of all known proteins"}
+  ],
+  portfolio:[
+    {company:"Google DeepMind",details:"AI research lab that created AlphaGo, AlphaFold, and now Gemini models",amount:"Part of Alphabet"},
+    {company:"Isomorphic Labs",details:"Drug discovery AI company built on DeepMind research",amount:"Co-founder"}
+  ],
+  quotes:[
+    "Step one: solve intelligence. Step two: use it to solve everything else.",
+    "AI could lead to radical abundance — but only if we apply it in the right way.",
+    "We're not trying to build AI that mimics humans. We're trying to build AI that solves problems humans haven't solved."
+  ],
+  contrarian:[
+    {take:"General intelligence first, applications second",detail:"Most AI researchers built specialized tools for specific problems. Hassabis insisted on solving general intelligence first — a 15-year bet that turned out to be right."},
+    {take:"Neuroscience and AI must be integrated",detail:"Most AI researchers kept the fields separate. Hassabis combined a PhD in cognitive neuroscience with AI engineering — and it gave DeepMind a fundamental edge."}
+  ],
+  social:{twitter:"@demishassabis",website:"deepmind.com"}
+}
+
+];
+
+// ===================== RENDER LOGIC =====================
+let currentFilter = 'all';
+let currentSearch = '';
+
+function setFilter(tier, btn) {
+  currentFilter = tier;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function filterGuests() {
+  currentSearch = document.getElementById('searchBox').value.toLowerCase();
+  renderGrid();
+}
+
+function matchesFilter(g) {
+  if (currentFilter === 'all') return true;
+  if (currentFilter === 'host') return g.tier === 'host';
+  return g.tier === currentFilter;
+}
+
+function matchesSearch(g) {
+  if (!currentSearch) return true;
+  const haystack = [g.name, g.tagline, g.known, ...(g.tags||[]),
+    ...(g.origin||[]).map(o=>o.text),
+    ...(g.episodes||[]).map(e=>e.title+' '+e.topics)
+  ].join(' ').toLowerCase();
+  return currentSearch.split(' ').every(w => haystack.includes(w));
+}
+
+function renderGrid() {
+  const filtered = GUESTS.filter(g => matchesFilter(g) && matchesSearch(g));
+  document.getElementById('guestCount').textContent = filtered.length;
+  document.getElementById('totalCount').textContent = GUESTS.length;
+  const grid = document.getElementById('guestGrid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="no-results">No guests match your search. Try different keywords.</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(g => `
+    <div class="card" onclick="openModal('${g.name.replace(/'/g,"\\'")}')">
+      <div class="card-tier tier-${g.tier}">${g.tier === 'host' ? '🎙 HOST' : g.tier === '1' ? '🔥 TIER 1' : g.tier === '2' ? '⭐ TIER 2' : '💡 TIER 3'}</div>
+      <div class="card-header">
+        <div class="avatar" style="background:${g.color}22;color:${g.color};border-color:${g.color}">${g.emoji}</div>
+        <div class="card-info">
+          <h3>${g.name}</h3>
+          <div class="tagline">${g.tagline.substring(0,70)}${g.tagline.length>70?'…':''}</div>
+          ${g.networth ? `<div class="networth">${g.networth}</div>` : ''}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-known">${g.known.substring(0,150)}${g.known.length>150?'…':''}</div>
+        <div class="card-tags">${(g.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="card-footer">
+        <span>${(g.episodes||[]).length} episode${(g.episodes||[]).length!==1?'s':''} on MFM</span>
+        <span style="color:#d4a000">View Profile →</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openModal(name) {
+  const g = GUESTS.find(x => x.name === name);
+  if (!g) return;
+
+  document.getElementById('modalHeader').innerHTML = `
+    <div class="modal-avatar" style="background:${g.color}22;color:${g.color};border-color:${g.color};font-size:36px">${g.emoji}</div>
+    <div class="modal-header-info">
+      <h2>${g.name}</h2>
+      <div class="subtitle">${g.tagline}</div>
+      ${g.networth ? `<div class="nw-big">💰 ${g.networth}</div>` : ''}
+      ${g.nwSource ? `<div style="font-size:11px;color:#6b7280;margin-top:4px">${g.nwSource}</div>` : ''}
+    </div>
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+  `;
+
+  const tabs = ['Origin Story','Portfolio','Philosophy','Best Quotes','Contrarian Takes','Social & Episodes'];
+  document.getElementById('modalTabs').innerHTML = tabs.map((t,i) =>
+    `<button class="tab-btn${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`
+  ).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="tab-content active" id="tab0">${renderOrigin(g)}</div>
+    <div class="tab-content" id="tab1">${renderPortfolio(g)}</div>
+    <div class="tab-content" id="tab2">${renderPhilosophy(g)}</div>
+    <div class="tab-content" id="tab3">${renderQuotes(g)}</div>
+    <div class="tab-content" id="tab4">${renderContrarian(g)}</div>
+    <div class="tab-content" id="tab5">${renderSocial(g)}</div>
+  `;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function switchTab(idx, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab'+idx).classList.add('active');
+}
+
+function renderOrigin(g) {
+  let html = `<h4>Overview</h4><p>${g.known}</p>`;
+  if (g.origin && g.origin.length) {
+    html += '<h4>Career Timeline</h4>';
+    g.origin.forEach(o => {
+      html += `<div class="timeline-item"><div class="timeline-year">${o.year}</div><div class="timeline-text">${o.text}</div></div>`;
+    });
+  }
+  return html;
+}
+
+function renderPortfolio(g) {
+  if (!g.portfolio || !g.portfolio.length) return '<p style="color:#6b7280">Portfolio details not available.</p>';
+  return g.portfolio.map(p => `
+    <div class="portfolio-item">
+      <div class="company">${p.company}</div>
+      <div class="details">${p.details}</div>
+      ${p.amount ? `<div class="amount">💰 ${p.amount}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderPhilosophy(g) {
+  let html = '';
+  if (g.contrarian && g.contrarian.length) {
+    html += '<h4>Core Philosophies & Frameworks</h4>';
+    g.contrarian.forEach(c => {
+      html += `<div class="contrarian-item"><div class="take">→ ${c.take}</div><div class="detail">${c.detail}</div></div>`;
+    });
+  }
+  if (g.quotes && g.quotes.length) {
+    html += '<h4>On Approach & Mindset</h4>';
+    g.quotes.slice(0,3).forEach(q => {
+      html += `<div class="quote-block">"${q}"</div>`;
+    });
+  }
+  return html || '<p style="color:#6b7280">Philosophy details not available.</p>';
+}
+
+function renderQuotes(g) {
+  if (!g.quotes || !g.quotes.length) return '<p style="color:#6b7280">Quotes not available.</p>';
+  return g.quotes.map(q => `<div class="quote-block">"${q}"</div>`).join('');
+}
+
+function renderContrarian(g) {
+  if (!g.contrarian || !g.contrarian.length) return '<p style="color:#6b7280">No contrarian takes documented.</p>';
+  return '<h4>Contrarian Takes & Unpopular Opinions</h4>' + g.contrarian.map(c => `
+    <div class="contrarian-item">
+      <div class="take">🔴 ${c.take}</div>
+      <div class="detail">${c.detail}</div>
+    </div>
+  `).join('');
+}
+
+function renderSocial(g) {
+  let html = '';
+  if (g.social) {
+    html += '<h4>Social & Web</h4><div>';
+    Object.entries(g.social).forEach(([k,v]) => {
+      html += `<a class="social-link" href="#" onclick="return false">${k.charAt(0).toUpperCase()+k.slice(1)}: ${v}</a>`;
+    });
+    html += '</div>';
+  }
+  if (g.episodes && g.episodes.length) {
+    html += '<h4>MFM Episode Appearances</h4>';
+    g.episodes.forEach(e => {
+      html += `<div class="episode-card">
+        <div class="ep-num">Episode #${e.num}</div>
+        <div class="ep-title">${e.title}</div>
+        <div class="ep-topics">${e.topics}</div>
+      </div>`;
+    });
+  }
+  return html || '<p style="color:#6b7280">Social details not available.</p>';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+
+// Init
+renderGrid();
+</script>
+</body>
+</html>
