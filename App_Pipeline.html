@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Pipeline — MFM Universe</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d1a; --card: #141428; --card2: #1a1a35; --border: #2a2a4a;
+    --gold: #d4a000; --gold2: #f0c040; --orange: #ff6b35; --orange2: #ff8c5e;
+    --teal: #00d4aa; --teal2: #5fffd4; --purple: #c44dff; --blue: #5fb3ff;
+    --text: #e8e8f0; --muted: #8888aa; --green: #4ade80; --red: #ff6b6b;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+  a { color: inherit; }
+  header {
+    background: linear-gradient(135deg, #0a1a2a 0%, #0a2a35 50%, #0a3540 100%);
+    border-bottom: 2px solid var(--teal);
+    padding: 28px 32px 20px; position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,212,170,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-nav { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .nav-btn {
+    background: rgba(0,212,170,0.08); border: 1px solid var(--border);
+    color: var(--muted); text-decoration: none; padding: 6px 14px;
+    border-radius: 20px; font-size: 12px; transition: all .2s;
+  }
+  .nav-btn:hover { border-color: var(--teal); color: var(--teal2); }
+  .nav-btn.active { border-color: var(--teal); color: var(--teal2); background: rgba(0,212,170,0.15); }
+  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 2.6vw, 22px); color: var(--teal2);
+    text-shadow: 0 0 30px rgba(0,212,170,0.5); line-height: 1.4;
+  }
+  .header-sub { color: var(--muted); font-size: 14px; margin-top: 8px; max-width: 760px; line-height: 1.6; }
+  .stage-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(13,13,26,0.97); border-bottom: 1px solid var(--border);
+    padding: 14px 32px; backdrop-filter: blur(12px);
+  }
+  .stage-nav-inner {
+    max-width: 1200px; margin: 0 auto; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+  }
+  .stage-pill {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: 8px 16px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .stage-pill:hover { border-color: var(--teal); color: var(--text); }
+  .stage-pill.active { background: var(--teal); border-color: var(--teal); color: #000; }
+  .stage-num {
+    background: rgba(0,0,0,0.2); width: 20px; height: 20px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800;
+  }
+  .stage-pill.active .stage-num { background: rgba(0,0,0,0.3); }
+  .section-wrap { max-width: 1200px; margin: 0 auto; padding: 32px; }
+  .stage-section { display: none; }
+  .stage-section.active { display: block; }
+  .section-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px; color: var(--teal2); margin-bottom: 8px;
+  }
+  .section-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 24px; line-height: 1.6; max-width: 800px; }
+  .pipeline-overview {
+    background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
+    border: 1px solid var(--border); border-radius: 16px;
+    padding: 24px; margin-bottom: 24px;
+  }
+  .flow-diagram {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px;
+  }
+  .flow-step {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px; text-align: center; position: relative;
+  }
+  .flow-step::after {
+    content: '→'; position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+    color: var(--teal); font-size: 18px; font-weight: 800; z-index: 2;
+  }
+  .flow-step:last-child::after { display: none; }
+  .flow-step-icon { font-size: 22px; margin-bottom: 6px; }
+  .flow-step-title { font-weight: 700; font-size: 13px; color: var(--teal2); margin-bottom: 4px; }
+  .flow-step-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .source-paths {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 16px; margin-bottom: 28px;
+  }
+  .path-card {
+    background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
+    border: 2px solid var(--border); border-radius: 16px;
+    padding: 22px; cursor: pointer; transition: all .2s; position: relative;
+  }
+  .path-card.path-clone { border-left: 3px solid var(--orange); }
+  .path-card.path-trend { border-left: 3px solid var(--teal); }
+  .path-card:hover { transform: translateY(-2px); border-color: var(--teal); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+  .path-icon { font-size: 28px; margin-bottom: 10px; }
+  .path-label { font-size: 11px; font-weight: 700; color: var(--teal2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .path-title { font-weight: 800; font-size: 18px; margin-bottom: 8px; }
+  .path-desc { color: #ccc; font-size: 13.5px; line-height: 1.55; margin-bottom: 12px; }
+  .path-eg { font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 10px; }
+  .path-eg strong { color: var(--orange2); }
+  .trend-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;
+  }
+  .trend-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; transition: all .2s; cursor: pointer;
+    position: relative; overflow: hidden;
+  }
+  .trend-card.featured { border-color: var(--teal); background: linear-gradient(135deg, rgba(0,212,170,0.06) 0%, var(--card) 100%); }
+  .trend-card.featured::before {
+    content: 'WORKED EXAMPLE'; position: absolute; top: 12px; right: -32px;
+    background: var(--teal); color: #000; font-size: 9px; font-weight: 800;
+    padding: 3px 36px; transform: rotate(35deg); letter-spacing: 1px;
+  }
+  .trend-card:hover { border-color: var(--teal); transform: translateY(-2px); }
+  .trend-rank { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .trend-rank .rank-num { color: var(--teal2); font-weight: 800; }
+  .trend-tag {
+    font-family: 'Press Start 2P', monospace; font-size: 13px;
+    color: var(--orange2); margin-bottom: 8px; word-break: break-word;
+  }
+  .trend-stats {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;
+    border-bottom: 1px solid var(--border); padding-bottom: 8px;
+  }
+  .trend-stat { font-size: 11px; color: var(--muted); }
+  .trend-stat strong { color: var(--text); }
+  .trend-industry {
+    background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3);
+    color: var(--teal2); font-size: 10px; padding: 3px 8px; border-radius: 10px;
+    display: inline-block; font-weight: 600;
+  }
+  .trend-direction { font-size: 11px; font-weight: 700; }
+  .trend-direction.up { color: var(--green); }
+  .trend-direction.down { color: var(--red); }
+  .clone-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px;
+  }
+  .clone-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; transition: all .2s;
+    position: relative; overflow: hidden;
+  }
+  .clone-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--orange);
+  }
+  .clone-card:hover { border-color: var(--orange); }
+  .clone-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .clone-name { font-size: 18px; font-weight: 800; color: var(--orange2); }
+  .clone-revenue {
+    background: var(--orange); color: #000; font-weight: 800;
+    padding: 3px 9px; border-radius: 10px; font-size: 12px; margin-left: auto;
+  }
+  .clone-meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  .clone-meta strong { color: var(--gold2); }
+  .clone-what { color: #ccc; font-size: 13px; line-height: 1.55; margin-bottom: 10px; }
+  .clone-why {
+    background: rgba(255,107,53,0.06); border-left: 2px solid var(--orange);
+    padding: 8px 11px; border-radius: 0 6px 6px 0;
+    font-size: 12.5px; color: #cdd; line-height: 1.5; margin-bottom: 12px; font-style: italic;
+  }
+  .clone-niches { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
+  .clone-niches-lbl {
+    font-size: 10px; font-weight: 700; color: var(--teal2);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .niche-row {
+    background: rgba(0,212,170,0.04); border: 1px solid rgba(0,212,170,0.15);
+    border-radius: 8px; padding: 8px 11px; margin-bottom: 6px;
+    display: flex; align-items: flex-start; gap: 10px; font-size: 12px;
+  }
+  .niche-name { color: var(--teal2); font-weight: 700; flex-shrink: 0; min-width: 130px; }
+  .niche-angle { color: #ccc; line-height: 1.5; }
+  .niche-channel { color: var(--muted); font-size: 11px; margin-top: 3px; font-style: italic; }
+  .prom-walkthrough {
+    background: linear-gradient(135deg, rgba(0,212,170,0.04) 0%, var(--card2) 100%);
+    border: 1px solid var(--teal); border-radius: 16px;
+    padding: 24px; margin-bottom: 28px;
+  }
+  .prom-step {
+    border-left: 3px solid var(--teal); padding: 14px 18px;
+    background: rgba(255,255,255,0.02); margin-bottom: 14px; border-radius: 0 10px 10px 0;
+  }
+  .prom-step-num {
+    display: inline-block; background: var(--teal); color: #000;
+    font-weight: 800; font-size: 11px; padding: 2px 9px; border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .prom-step-title { font-weight: 800; font-size: 16px; margin-bottom: 10px; color: var(--teal2); }
+  .prom-step ul { margin: 8px 0 0 0; padding-left: 18px; }
+  .prom-step li { color: #ccc; font-size: 13.5px; line-height: 1.6; margin-bottom: 4px; }
+  .prom-step p { color: #ccc; font-size: 13.5px; line-height: 1.6; margin-bottom: 8px; }
+  .gaps-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  .gaps-table th, .gaps-table td {
+    text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .gaps-table th { color: var(--teal2); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+  .gaps-table tr:hover { background: rgba(0,212,170,0.03); }
+  .apps-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;
+  }
+  .app-row {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px; font-size: 13px;
+  }
+  .app-row-name { font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .app-row-line { color: #cdd; line-height: 1.5; margin-bottom: 4px; font-size: 12.5px; }
+  .app-row-line.weakness { color: #f8b; }
+  .app-row-line.weakness::before { content: '⚠ '; }
+  .app-row-line.strength::before { content: '✓ '; }
+  .cat-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px;
+  }
+  .cat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px;
+  }
+  .cat-card:hover { border-color: var(--teal); }
+  .cat-icon { font-size: 24px; margin-bottom: 8px; }
+  .cat-name { font-weight: 800; font-size: 15px; margin-bottom: 12px; color: var(--teal2); }
+  .sub-row {
+    display: flex; align-items: center; gap: 8px; padding: 6px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.05); font-size: 12.5px;
+  }
+  .sub-row:last-child { border-bottom: none; }
+  .sub-name { color: var(--blue); font-weight: 600; min-width: 130px; }
+  .sub-count { color: var(--muted); font-size: 11px; min-width: 40px; }
+  .sub-fit { color: #ccc; line-height: 1.4; flex: 1; font-size: 12px; }
+  .cat-channels {
+    border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px;
+    font-size: 12px; color: var(--muted);
+  }
+  .cat-channels strong { color: var(--gold2); }
+  .cat-apps { margin-top: 8px; font-size: 11px; color: var(--orange2); }
+  .worksheet {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+  }
+  .ws-section { margin-bottom: 24px; }
+  .ws-section h3 {
+    font-size: 11px; font-weight: 800; color: var(--teal2);
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;
+    border-bottom: 1px solid var(--border); padding-bottom: 6px;
+  }
+  .ws-input, .ws-textarea {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 12px; border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: border .2s;
+    resize: vertical;
+  }
+  .ws-textarea { min-height: 70px; }
+  .ws-input:focus, .ws-textarea:focus { border-color: var(--teal); }
+  .ws-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ws-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: block; }
+  .ws-help { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .ws-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .ws-btn {
+    background: var(--teal); border: none; color: #000;
+    padding: 10px 18px; border-radius: 8px; font-size: 13px;
+    font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s;
+  }
+  .ws-btn:hover { background: var(--teal2); transform: translateY(-1px); }
+  .ws-btn.secondary {
+    background: var(--card); color: var(--text); border: 1px solid var(--border);
+  }
+  .ws-btn.secondary:hover { border-color: var(--teal); }
+  .ws-output {
+    background: #050510; border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 12px; color: var(--text); white-space: pre-wrap;
+    max-height: 500px; overflow-y: auto; margin-top: 14px; line-height: 1.6;
+  }
+  @media (max-width: 768px) {
+    .flow-diagram { grid-template-columns: 1fr 1fr; }
+    .ws-grid-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    header, .section-wrap, .stage-nav { padding-left: 16px; padding-right: 16px; }
+    .clone-grid, .cat-grid, .source-paths { grid-template-columns: 1fr; }
+    .niche-row { flex-direction: column; }
+    .niche-name { min-width: 0; }
+  }
+
+  /* PATH A METHOD TABS */
+  .method-tabs {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-bottom: 20px;
+  }
+  .method-tab {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; cursor: pointer;
+    transition: all .2s; text-align: center; position: relative;
+  }
+  .method-tab:hover { border-color: var(--orange); }
+  .method-tab.active {
+    background: linear-gradient(135deg, rgba(255,107,53,0.12) 0%, var(--card2) 100%);
+    border-color: var(--orange);
+  }
+  .mt-num {
+    background: var(--orange); color: #000; font-weight: 800;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; margin-bottom: 6px;
+  }
+  .mt-label {
+    font-weight: 700; font-size: 13px; color: var(--text);
+    margin-bottom: 2px;
+  }
+  .mt-count { font-size: 10px; color: var(--muted); }
+  .method-body { display: none; }
+  .method-body.active { display: block; }
+  .method-intro {
+    background: rgba(255,107,53,0.05); border-left: 3px solid var(--orange);
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 18px;
+    font-size: 13px; line-height: 1.55; color: #ccc;
+  }
+
+  /* CHARTS TAB */
+  .chart-toggle {
+    display: flex; gap: 8px; margin-bottom: 14px;
+  }
+  .chart-tab {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: 8px 14px; border-radius: 20px;
+    font-size: 13px; cursor: pointer; transition: all .2s; font-weight: 600;
+  }
+  .chart-tab:hover { border-color: var(--orange); color: var(--text); }
+  .chart-tab.active { background: var(--orange); border-color: var(--orange); color: #000; }
+  .charts-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    background: var(--card); border-radius: 10px; overflow: hidden;
+  }
+  .charts-table th {
+    background: var(--card2); color: var(--orange2); font-weight: 700;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .charts-table td {
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .charts-table tr:hover td { background: rgba(255,107,53,0.03); }
+  .charts-table tr.clonable td:first-child { border-left: 3px solid var(--green); }
+  .clonable-badge {
+    display: inline-block; background: rgba(74,222,128,0.15);
+    color: var(--green); border: 1px solid rgba(74,222,128,0.3);
+    padding: 2px 8px; border-radius: 8px; font-size: 10px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .skip-badge {
+    display: inline-block; background: rgba(136,136,170,0.1);
+    color: var(--muted); padding: 2px 8px; border-radius: 8px;
+    font-size: 10px; font-weight: 600;
+  }
+  .chart-app-name { font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .chart-app-cat { color: var(--muted); font-size: 11px; }
+  .chart-angle { color: #cdd; font-size: 12px; line-height: 1.5; }
+  .chart-why-now { color: var(--gold2); font-size: 11px; font-style: italic; margin-top: 4px; }
+
+  /* LTV VERTICAL CARDS */
+  .ltv-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 16px;
+  }
+  .ltv-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; transition: all .2s;
+    position: relative; overflow: hidden;
+  }
+  .ltv-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--gold);
+  }
+  .ltv-card:hover { border-color: var(--gold); }
+  .ltv-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .ltv-icon { font-size: 32px; }
+  .ltv-name { font-weight: 800; font-size: 17px; color: var(--gold2); margin-bottom: 2px; }
+  .ltv-bands {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+    font-size: 11px;
+  }
+  .ltv-band-pill {
+    background: rgba(212,160,0,0.1); border: 1px solid rgba(212,160,0,0.3);
+    color: var(--gold2); padding: 2px 8px; border-radius: 8px;
+    font-weight: 600;
+  }
+  .ltv-why {
+    background: rgba(212,160,0,0.05); border-left: 2px solid var(--gold);
+    padding: 8px 11px; border-radius: 0 6px 6px 0;
+    font-size: 12.5px; color: #cdd; line-height: 1.5;
+    margin-bottom: 14px; font-style: italic;
+  }
+  .ltv-section-lbl {
+    font-size: 10px; font-weight: 700; color: var(--teal2);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .ltv-keywords {
+    display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px;
+  }
+  .ltv-keyword {
+    background: rgba(196,77,255,0.08); border: 1px solid rgba(196,77,255,0.2);
+    color: #d47fff; font-size: 11px; padding: 3px 8px; border-radius: 8px;
+    font-family: monospace;
+  }
+  .incumbent-row {
+    display: flex; gap: 8px; padding: 6px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.05); font-size: 12px;
+  }
+  .incumbent-row:last-child { border-bottom: none; }
+  .incumbent-name { color: var(--blue); font-weight: 600; min-width: 110px; }
+  .incumbent-size { color: var(--muted); font-size: 11px; min-width: 60px; }
+  .incumbent-weak { color: #f8b; flex: 1; line-height: 1.4; font-size: 11.5px; }
+  .ltv-niche-row {
+    background: rgba(0,212,170,0.04); border: 1px solid rgba(0,212,170,0.15);
+    border-radius: 8px; padding: 8px 11px; margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .ltv-niche-name { color: var(--teal2); font-weight: 700; margin-bottom: 3px; }
+  .ltv-niche-tam { color: #ccc; font-size: 11.5px; line-height: 1.5; }
+
+  /* UNDERSERVED METHODOLOGY */
+  .meth-step {
+    border-left: 2px solid var(--teal); padding: 10px 14px;
+    background: rgba(255,255,255,0.02); margin-bottom: 8px;
+    border-radius: 0 8px 8px 0;
+  }
+  .meth-step-num {
+    display: inline-block; background: var(--teal); color: #000;
+    font-weight: 800; font-size: 10px; padding: 2px 8px; border-radius: 10px;
+    margin-bottom: 6px;
+  }
+  .meth-step-title { font-weight: 700; font-size: 14px; color: var(--teal2); margin-bottom: 6px; }
+  .meth-step ul { margin: 0; padding-left: 16px; }
+  .meth-step li { color: #ccc; font-size: 12.5px; line-height: 1.55; margin-bottom: 3px; }
+
+  .niche-examples-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 12px;
+  }
+  .niche-ex-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; transition: all .2s;
+    border-left: 3px solid var(--teal);
+  }
+  .niche-ex-card:hover { border-color: var(--teal); transform: translateY(-2px); }
+  .niche-ex-name {
+    font-weight: 800; font-size: 14px; color: var(--teal2); margin-bottom: 8px;
+    line-height: 1.35;
+  }
+  .niche-ex-row {
+    display: flex; gap: 8px; padding: 5px 0; font-size: 11.5px;
+    border-bottom: 1px dashed rgba(255,255,255,0.04);
+  }
+  .niche-ex-row:last-child { border-bottom: none; }
+  .niche-ex-lbl {
+    color: var(--orange2); font-weight: 700; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.5px; min-width: 80px;
+  }
+  .niche-ex-val { color: #cdd; line-height: 1.5; flex: 1; }
+
+  @media (max-width: 768px) {
+    .method-tabs { grid-template-columns: repeat(2, 1fr); }
+    .ltv-grid { grid-template-columns: 1fr; }
+    .niche-examples-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-nav">
+      <a href="index.html" class="nav-btn">🏠 Home</a>
+      <a href="MFM_Episodes.html" class="nav-btn">📻 MFM Episodes</a>
+      <a href="MFM_Guest_Profiles.html" class="nav-btn">👤 Guests</a>
+      <a href="Starter_Story.html" class="nav-btn">🚀 Starter Story</a>
+      <a href="App_Pipeline.html" class="nav-btn active">⚡ App Pipeline</a>
+      <a href="MFM_RPG.html" class="nav-btn">🎮 MFM RPG</a>
+    </div>
+    <div class="header-title">⚡ APP PIPELINE</div>
+    <div class="header-sub">A reusable framework for sourcing, validating, building, and launching apps. Synthesizes the two highest-signal Starter Story playbooks (clone-existing-app + Reddit-first-100-users) with live trend data from your trend-detector. Pre-loaded with a worked example: <strong>#prom</strong> — a Top-1 TikTok trend right now.</div>
+  </div>
+</header>
+
+<div class="stage-nav">
+  <div class="stage-nav-inner" id="stageNav"></div>
+</div>
+
+<div class="section-wrap stage-section active" id="stage-1">
+  <div class="section-title">🎯 STAGE 1 — SOURCE THE IDEA</div>
+  <div class="section-sub">Two repeatable paths. Pick one based on whether you have a trend in mind or want to clone something proven.</div>
+
+  <div class="pipeline-overview">
+    <div style="font-weight: 800; font-size: 16px; margin-bottom: 4px;">The 4-stage pipeline</div>
+    <div style="color: var(--muted); font-size: 13px; line-height: 1.5;">Every successful Starter Story founder follows roughly the same arc. Move sequentially — don't skip Stage 2.</div>
+    <div class="flow-diagram">
+      <div class="flow-step"><div class="flow-step-icon">🎯</div><div class="flow-step-title">1. SOURCE</div><div class="flow-step-desc">Clone an existing app OR mine a trend.</div></div>
+      <div class="flow-step"><div class="flow-step-icon">✅</div><div class="flow-step-title">2. VALIDATE</div><div class="flow-step-desc">Define launch + first 10 users BEFORE writing code.</div></div>
+      <div class="flow-step"><div class="flow-step-icon">⚡</div><div class="flow-step-title">3. BUILD</div><div class="flow-step-desc">14–21 day vibe-code time-box. Cursor + Claude.</div></div>
+      <div class="flow-step"><div class="flow-step-icon">🚀</div><div class="flow-step-title">4. LAUNCH</div><div class="flow-step-desc">Execute the pre-defined plan. Track signals.</div></div>
+    </div>
+  </div>
+
+  <div class="source-paths">
+    <div class="path-card path-clone" onclick="document.getElementById('pathA-section').scrollIntoView({behavior:'smooth'})">
+      <div class="path-icon">🧬</div>
+      <div class="path-label">Path A · 4 methods</div>
+      <div class="path-title">Existing-app driven sourcing</div>
+      <div class="path-desc">Four ways to find proven apps to clone or improve. <strong>A1</strong> Starter Story founders. <strong>A2</strong> App Store top charts. <strong>A3</strong> High-LTV verticals + keywords. <strong>A4</strong> Underserved niches with proven demand but no good app. Pick the method that matches your starting point.</div>
+      <div class="path-eg">Examples: <strong>David Attias</strong> cloned a $200K/mo app for $5K month-1 (A1). <strong>Pickleball court finder</strong> — 8M players, 70% YoY growth, no good app (A4).</div>
+    </div>
+    <div class="path-card path-trend" onclick="document.getElementById('prom-section').scrollIntoView({behavior:'smooth'})">
+      <div class="path-icon">📈</div>
+      <div class="path-label">Path B</div>
+      <div class="path-title">Trend → Existing Apps → Gap → Differentiate</div>
+      <div class="path-desc">Start from a hot trend (TikTok hashtag, X topic, AI model release). Survey what apps already serve that audience. Find what's missing. Build the differentiated version. Pre-loaded example: <strong>#prom</strong> — 179K posts, 766M views, Top-1 TikTok trend.</div>
+      <div class="path-eg">Example below uses your live trend-detector data + a worked-out gap analysis for #prom.</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top: 32px;">🔥 LIVE TRENDS — from your trend-detector</div>
+  <div class="section-sub" id="trendsTimestamp"></div>
+  <div class="trend-grid" id="trendsGrid"></div>
+
+  <div id="prom-section" style="margin-top: 40px;"></div>
+  <div class="section-title">👗 WORKED EXAMPLE — Path B: from #prom to a launchable app</div>
+  <div class="section-sub">A complete trace of the trend-driven path. Each step shows reasoning + decisions — follow this template for any new trend.</div>
+
+  <div class="prom-walkthrough" id="promWalk"></div>
+
+  <div id="pathA-section" style="margin-top: 40px;"></div>
+  <div class="section-title">🧬 PATH A — EXISTING-APP DRIVEN SOURCING (4 METHODS)</div>
+  <div class="section-sub">Four complementary ways to find what to build. Each tab below has its own data + methodology. The downstream stages (Validate → Build → Launch) work the same regardless of which method sourced the idea.</div>
+
+  <div class="method-tabs" id="methodTabs">
+    <div class="method-tab active" onclick="setMethod('a1', this)">
+      <div class="mt-num">A1</div>
+      <div class="mt-label">Starter Story founders</div>
+      <div class="mt-count" id="mtCountA1">10 apps</div>
+    </div>
+    <div class="method-tab" onclick="setMethod('a2', this)">
+      <div class="mt-num">A2</div>
+      <div class="mt-label">App Store top charts</div>
+      <div class="mt-count" id="mtCountA2">50 apps</div>
+    </div>
+    <div class="method-tab" onclick="setMethod('a3', this)">
+      <div class="mt-num">A3</div>
+      <div class="mt-label">High-LTV verticals</div>
+      <div class="mt-count" id="mtCountA3">10 verticals</div>
+    </div>
+    <div class="method-tab" onclick="setMethod('a4', this)">
+      <div class="mt-num">A4</div>
+      <div class="mt-label">Underserved niches</div>
+      <div class="mt-count" id="mtCountA4">10 examples</div>
+    </div>
+  </div>
+
+  <!-- A1: Starter Story -->
+  <div class="method-body active" id="method-a1">
+    <div class="method-intro">
+      <strong style="color: var(--orange2)">When to use:</strong> You want to start from a known-good template. Each card below is a real founder's app with documented revenue ($20K–$400K/mo). Re-niche their playbook.
+    </div>
+    <div class="clone-grid" id="cloneGrid"></div>
+  </div>
+
+  <!-- A2: App Store top charts -->
+  <div class="method-body" id="method-a2">
+    <div class="method-intro">
+      <strong style="color: var(--orange2)">When to use:</strong> You want to study what's currently winning at scale. Live US App Store data from <code>trend-detector</code>. Apps marked "clonable" have niche-clone potential — the green badge tells you which.
+    </div>
+
+    <div class="chart-toggle" id="chartToggle">
+      <div class="chart-tab active" onclick="setChartTab('grossing', this)">💰 Top Grossing (revenue)</div>
+      <div class="chart-tab" onclick="setChartTab('free', this)">⬇ Top Free (downloads)</div>
+    </div>
+
+    <table class="charts-table" id="chartsTable"></table>
+  </div>
+
+  <!-- A3: High-LTV verticals -->
+  <div class="method-body" id="method-a3">
+    <div class="method-intro">
+      <strong style="color: var(--orange2)">When to use:</strong> You want to start from <em>economics</em> rather than a specific app. Pick a vertical where users have high LTV and pay quickly. Each shows incumbents (so you know what to differentiate from) + niche gaps where the incumbent is bad.
+    </div>
+    <div class="ltv-grid" id="ltvGrid"></div>
+  </div>
+
+  <!-- A4: Underserved niches -->
+  <div class="method-body" id="method-a4">
+    <div class="method-intro">
+      <strong style="color: var(--orange2)">When to use:</strong> You want to OWN a niche from day 1 with no incumbent fight. The hard part is verifying demand without an existing competitor to point at. Follow the 5-step methodology, then study the worked examples.
+    </div>
+
+    <div class="pipeline-overview" style="margin-bottom: 18px;">
+      <div style="font-weight: 800; font-size: 15px; margin-bottom: 12px; color: var(--teal2);">📋 The 5-step underserved-niche methodology</div>
+      <div id="methodologySteps"></div>
+    </div>
+
+    <div class="section-title" style="font-size: 12px; margin-top: 28px;">🌱 EXAMPLE NICHES — proven demand, no good app</div>
+    <div class="section-sub" style="font-size: 12.5px;">Each is a real opportunity I stress-tested against the methodology. Pick one or use as a template for your own niche hunt.</div>
+    <div class="niche-examples-grid" id="nicheExamples"></div>
+  </div>
+
+  <div style="background: var(--card); border: 1px dashed var(--border); border-radius: 12px; padding: 18px; margin-top: 20px;">
+    <div style="font-weight: 700; color: var(--gold2); margin-bottom: 8px;">🔍 How to find more across all 4 methods</div>
+    <ul style="color: #ccc; padding-left: 20px; font-size: 13px; line-height: 1.7;">
+      <li><strong>A1 sources:</strong> Starter Story YouTube (weekly), MFM podcast, Indie Hackers milestones, Twitter/X "$X MRR" search.</li>
+      <li><strong>A2 sources:</strong> App Figures Top Grossing (filter by category + indie publisher), Sensor Tower revenue estimates, App Store "Top Charts" (refreshes weekly), <code>trend-detector</code> raw data.</li>
+      <li><strong>A3 sources:</strong> Google Keyword Planner (free) for CPC by vertical, Ahrefs free trial, ProductHunt category pages, Y Combinator launch pages by category.</li>
+      <li><strong>A4 sources:</strong> r/all/top weekly + filter for "complaint" or "wish there was an app". Google "<code>&lt;niche&gt; reddit best app</code>" — recurring "nothing exists" answers signal opportunity. Etsy + Amazon for adjacent paid products in niche.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section-wrap stage-section" id="stage-2">
+  <div class="section-title">✅ STAGE 2 — VALIDATE BEFORE BUILDING</div>
+  <div class="section-sub">Most founders skip this. They build, then scramble to find users. Inverting that order is the single highest-leverage habit. Fill in this worksheet BEFORE writing a line of code. If you can't fill it in, you don't have an idea — you have a feeling.</div>
+
+  <div class="worksheet">
+    <div class="ws-section">
+      <h3>1. Idea statement (one sentence, no jargon)</h3>
+      <span class="ws-label">"X is a [thing] for [specific person] that [does this thing] better than [incumbent]."</span>
+      <input type="text" class="ws-input" id="ws-statement" placeholder="e.g. PromQ is an AI dress try-on app for high-school girls that lets them virtually wear any Pinterest dress before ordering.">
+    </div>
+
+    <div class="ws-section">
+      <h3>2. Category match — pick the closest</h3>
+      <select class="ws-input" id="ws-category"></select>
+      <div class="ws-help">This auto-loads the right launch communities below.</div>
+    </div>
+
+    <div class="ws-section">
+      <h3>3. First 10 paying customers — named</h3>
+      <textarea class="ws-textarea" id="ws-first10" placeholder="List 10 specific people you can pitch this to.&#10;e.g.&#10;1. Sarah K (high-school junior, my niece)&#10;2. Reply to TikTok creator @abc who posted 'I can't decide on a dress' 3 days ago&#10;..."></textarea>
+      <div class="ws-help">If you can't name 10, you don't understand who you're building for. Stop and find them.</div>
+    </div>
+
+    <div class="ws-section">
+      <h3>4. Launch communities — auto-loaded by category</h3>
+      <div id="autoCommunities" style="background: rgba(0,212,170,0.04); border: 1px solid rgba(0,212,170,0.15); border-radius: 8px; padding: 14px; font-size: 13px; min-height: 60px; line-height: 1.6;">Pick a category above to load the launch map.</div>
+    </div>
+
+    <div class="ws-section">
+      <h3>5. Reddit launch post — draft now</h3>
+      <textarea class="ws-textarea" id="ws-redditpost" style="min-height: 120px;" placeholder="Title: [I made a thing] [specific outcome] for [your problem]&#10;&#10;Body: [your hook] [what you built] [free for community / promo code] [link] [ask for feedback]&#10;&#10;Examples that worked: 'I built a $400K/mo fitness app — here's the Reddit post that got me PMF' (Gravl, ep #44)"></textarea>
+    </div>
+
+    <div class="ws-section">
+      <h3>6. Paid ad creative — plan the test</h3>
+      <div class="ws-grid-2">
+        <div><span class="ws-label">Channel + budget</span><input type="text" class="ws-input" id="ws-adchannel" placeholder="e.g. Meta Ads $30/day for 14 days"></div>
+        <div><span class="ws-label">Creative concept (1 line)</span><input type="text" class="ws-input" id="ws-adcreative" placeholder="e.g. Before/after AI try-on, target US ages 16-19"></div>
+      </div>
+    </div>
+
+    <div class="ws-section">
+      <h3>7. Kill criteria — define them upfront</h3>
+      <div class="ws-grid-2">
+        <div><span class="ws-label">Pre-launch DM positive reply rate</span><input type="text" class="ws-input" id="ws-killdm" placeholder="e.g. <40% = pivot"></div>
+        <div><span class="ws-label">Day-14 waitlist size</span><input type="text" class="ws-input" id="ws-killwait" placeholder="e.g. <100 = pivot"></div>
+        <div><span class="ws-label">Month-1 MRR floor</span><input type="text" class="ws-input" id="ws-killmrr" placeholder="e.g. <$500 = kill or restart"></div>
+        <div><span class="ws-label">Month-3 MRR target</span><input type="text" class="ws-input" id="ws-targetmrr" placeholder="e.g. $15,000"></div>
+      </div>
+    </div>
+
+    <div class="ws-actions">
+      <button class="ws-btn" onclick="generatePlan()">📝 Generate launch plan</button>
+      <button class="ws-btn secondary" onclick="loadPromExample()">👗 Load #prom example</button>
+      <button class="ws-btn secondary" onclick="clearWorksheet()">🧹 Clear</button>
+    </div>
+
+    <div class="ws-output" id="planOutput" style="display:none"></div>
+  </div>
+</div>
+
+<div class="section-wrap stage-section" id="stage-3">
+  <div class="section-title">⚡ STAGE 3 — BUILD (14–21 DAY TIME-BOX)</div>
+  <div class="section-sub">From the Starter Story data: <strong>17 founders mentioned Cursor</strong>, <strong>13 said "vibe coding"</strong>, and <strong>Connor Burd built a $20K/mo app in 14 days</strong>. The skill is now compressed. Here's the default stack.</div>
+
+  <div class="pipeline-overview">
+    <div style="font-weight: 800; font-size: 16px; margin-bottom: 14px;">The default vibe-coding stack</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">
+      <div class="trend-card"><div class="trend-tag" style="font-size: 11px; color: var(--purple);">IDE</div><div style="font-weight: 700;">Cursor</div><div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Default IDE in 17 of 50 episodes. Use composer + agent mode.</div></div>
+      <div class="trend-card"><div class="trend-tag" style="font-size: 11px; color: var(--purple);">REASONING MODEL</div><div style="font-weight: 700;">Claude Sonnet 4.6 / Opus 4.6</div><div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Best for code reasoning. Mentioned in 8 episodes.</div></div>
+      <div class="trend-card"><div class="trend-tag" style="font-size: 11px; color: var(--purple);">PAYWALL</div><div style="font-weight: 700;">Superwall + RevenueCat</div><div style="color: var(--muted); font-size: 12px; margin-top: 4px;">A/B test paywalls without code changes.</div></div>
+      <div class="trend-card"><div class="trend-tag" style="font-size: 11px; color: var(--purple);">BACKEND</div><div style="font-weight: 700;">Supabase or Firebase</div><div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Auth + DB + storage. Free tier covers MVP.</div></div>
+      <div class="trend-card"><div class="trend-tag" style="font-size: 11px; color: var(--purple);">AI INFERENCE</div><div style="font-weight: 700;">Replicate / Fal.ai / Anthropic API</div><div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Image gen, virtual try-on, LLM — pay-per-use.</div></div>
+      <div class="trend-card"><div class="trend-tag" style="font-size: 11px; color: var(--purple);">DEPLOY</div><div style="font-weight: 700;">Vercel / Expo / TestFlight</div><div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Web in 30 sec, mobile to TestFlight in a day.</div></div>
+    </div>
+  </div>
+
+  <div class="pipeline-overview">
+    <div style="font-weight: 800; font-size: 16px; margin-bottom: 14px;">The 14-day sprint plan</div>
+    <table class="gaps-table" style="margin-top: 0;">
+      <thead><tr><th>Days</th><th>Focus</th><th>Deliverable</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1–2</strong></td><td>Spec + screens</td><td>Wireframes (Figma or drawn). Schema. List of API endpoints.</td></tr>
+        <tr><td><strong>3–7</strong></td><td>Core flow</td><td>Login + the one thing that defines the product (the AI try-on, the journal entry, the bus tracker).</td></tr>
+        <tr><td><strong>8–11</strong></td><td>Monetization + polish</td><td>Subscription paywall + free trial wired up. RevenueCat integrated. Onboarding flow.</td></tr>
+        <tr><td><strong>12–14</strong></td><td>Polish + ship</td><td>App Store submission + landing page + waitlist email setup.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background: rgba(255,107,53,0.05); border-left: 3px solid var(--orange); padding: 14px 18px; border-radius: 0 10px 10px 0;">
+    <strong style="color: var(--orange2);">⚠️ Time-box rule:</strong>
+    <span style="color: #ccc;">If you're not done at day 21, ship what you have. Polish kills more apps than bugs do.</span>
+  </div>
+</div>
+
+<div class="section-wrap stage-section" id="stage-4">
+  <div class="section-title">🚀 STAGE 4 — LAUNCH & TEST</div>
+  <div class="section-sub">Execute the plan you wrote in Stage 2. Track signals. Compare against your kill criteria. The launch you defined upfront is now a script you follow — no improvising.</div>
+
+  <div class="pipeline-overview">
+    <div style="font-weight: 800; font-size: 16px; margin-bottom: 14px;">Launch sequence (week-by-week)</div>
+    <table class="gaps-table" style="margin-top: 0;">
+      <thead><tr><th>Week</th><th>Action</th><th>Signal</th></tr></thead>
+      <tbody>
+        <tr><td>−1</td><td>Pre-launch DMs to your 10 named users (Stage 2)</td><td>>40% positive reply rate or pivot</td></tr>
+        <tr><td>0</td><td>Launch posts in 3 niche subreddits (Stage 2)</td><td>Comment count + DM count</td></tr>
+        <tr><td>1</td><td>Show on r/SideProject + ProductHunt soft launch</td><td>Upvotes, signups</td></tr>
+        <tr><td>2</td><td>Start paid ads ($30/day Meta + $20/day TikTok)</td><td>CAC, install → paid conversion</td></tr>
+        <tr><td>3</td><td>UGC TikTok push (3 videos/week, native style)</td><td>Views → installs (organic)</td></tr>
+        <tr><td>4+</td><td>Iterate paywall (Superwall A/B), localize listing</td><td>MRR vs Stage 2 target</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title" style="margin-top: 24px;">🎯 SUBREDDIT LAUNCH MAP — by category</div>
+  <div class="section-sub">Hard-coded mapping. Pick your category, get the 3–5 best subs to launch into, plus paid ad recommendations and example apps from Starter Story.</div>
+
+  <div class="cat-grid" id="catGrid"></div>
+
+  <div style="background: rgba(255,107,53,0.06); border-left: 3px solid var(--orange); padding: 14px 18px; border-radius: 0 10px 10px 0; margin-top: 20px;">
+    <strong style="color: var(--orange2);">⚠️ Reddit launch rules</strong>
+    <ul style="color: #ccc; padding-left: 20px; margin-top: 8px; font-size: 13px; line-height: 1.7;">
+      <li>Read each subreddit's rules first — most ban self-promo without flair or wait period</li>
+      <li>Don't pretend to be a user. Be transparent: "I built this." Honesty converts higher anyway.</li>
+      <li>First post: free promo codes for the first 50 commenters. This converts launch-day buzz into paying users.</li>
+      <li>Avoid r/SaaS, r/Entrepreneur, r/SideProject as primary launch — those are peer audiences, not customers.</li>
+      <li>One post per subreddit. Cross-posting too aggressively = ban.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const DATA = {"subreddit_map":{"Fitness & Workout":{"icon":"💪","subreddits":[{"name":"r/fitness","subscribers":"12M","fit":"general lifters, evidence-based"},{"name":"r/loseit","subscribers":"4M","fit":"weight loss, beginners, high engagement"},{"name":"r/bodybuilding","subscribers":"2.5M","fit":"serious lifters"},{"name":"r/xxfitness","subscribers":"750K","fit":"women-focused, very supportive"},{"name":"r/AdvancedFitness","subscribers":"200K","fit":"intermediate+ technique-focused"}],"ad_channels":["Meta (highest LTV for fitness)","TikTok (UGC transformation videos)","YouTube Shorts"],"starter_story_apps":["Gravl ($400K/mo)","CutCoach ($20K/mo)"]},"Productivity & Time Management":{"icon":"⏱","subreddits":[{"name":"r/productivity","subscribers":"2M","fit":"broad productivity discussion"},{"name":"r/getdisciplined","subscribers":"1.7M","fit":"habit & accountability"},{"name":"r/notion","subscribers":"350K","fit":"tool-power-users, high-spend"},{"name":"r/PKMS","subscribers":"60K","fit":"knowledge workflow nerds"},{"name":"r/zettelkasten","subscribers":"70K","fit":"second-brain practitioners"}],"ad_channels":["Google Ads (search intent)","Meta","Twitter/X (founder audience)"],"starter_story_apps":["Postiz","Subscribr"]},"Mental Health & Journaling":{"icon":"🧠","subreddits":[{"name":"r/journaling","subscribers":"180K","fit":"core target for journal apps"},{"name":"r/Anxiety","subscribers":"650K","fit":"high-intent, sensitive launch"},{"name":"r/selfimprovement","subscribers":"2.5M","fit":"habit+journal overlap"},{"name":"r/Meditation","subscribers":"1.5M","fit":"mindfulness-adjacent"},{"name":"r/getdisciplined","subscribers":"1.7M","fit":"habit-forming"}],"ad_channels":["Meta (very high LTV)","Google (mental health keywords)","TikTok"],"starter_story_apps":["Journable ($100K/mo Android)"]},"Notes & Knowledge":{"icon":"📝","subreddits":[{"name":"r/notion","subscribers":"350K","fit":"tool-switchers"},{"name":"r/obsidianmd","subscribers":"200K","fit":"power users, plugin economy"},{"name":"r/Roamresearch","subscribers":"30K","fit":"high-intent, willing to pay"},{"name":"r/PKMS","subscribers":"60K","fit":"method-focused"}],"ad_channels":["Twitter/X","Reddit Ads (cheap for niche)","ProductHunt launch"],"starter_story_apps":["Letterly ($250K/mo, voice notes)"]},"Voice & Audio":{"icon":"🎙","subreddits":[{"name":"r/podcasts","subscribers":"2M","fit":"creators + listeners"},{"name":"r/audioengineering","subscribers":"300K","fit":"pro audio"},{"name":"r/podcasting","subscribers":"180K","fit":"podcast creators"},{"name":"r/voiceacting","subscribers":"120K","fit":"voice talent"}],"ad_channels":["YouTube (audio-content audience)","Twitter/X","Meta"],"starter_story_apps":["Letterly ($250K/mo)"]},"Habits & Self-Improvement":{"icon":"🎯","subreddits":[{"name":"r/getdisciplined","subscribers":"1.7M","fit":"core habit audience"},{"name":"r/selfimprovement","subscribers":"2.5M","fit":"broad reach"},{"name":"r/decidingtobebetter","subscribers":"550K","fit":"high-engagement"},{"name":"r/productivity","subscribers":"2M","fit":"habit+productivity overlap"}],"ad_channels":["TikTok (transformation content)","Meta","YouTube Shorts"],"starter_story_apps":[]},"Sleep & Recovery":{"icon":"😴","subreddits":[{"name":"r/sleep","subscribers":"200K","fit":"sleep optimization"},{"name":"r/insomnia","subscribers":"300K","fit":"high-intent, struggling users"},{"name":"r/biohackers","subscribers":"200K","fit":"willing-to-pay biohackers"},{"name":"r/Nootropics","subscribers":"1M","fit":"supplement+sleep crossover"}],"ad_channels":["Meta (sleep tracking high LTV)","Google (insomnia keywords)"],"starter_story_apps":[]},"Diet & Nutrition":{"icon":"🥗","subreddits":[{"name":"r/loseit","subscribers":"4M","fit":"weight loss + diet"},{"name":"r/intermittentfasting","subscribers":"1M","fit":"method-specific"},{"name":"r/keto","subscribers":"3.5M","fit":"diet community"},{"name":"r/MealPrepSunday","subscribers":"2M","fit":"planning-focused"},{"name":"r/EatCheapAndHealthy","subscribers":"2M","fit":"budget-conscious"}],"ad_channels":["Meta (very strong LTV)","TikTok (UGC recipes)","Pinterest"],"starter_story_apps":[]},"Photography & Video":{"icon":"📸","subreddits":[{"name":"r/photography","subscribers":"5.5M","fit":"broad photo community"},{"name":"r/Lightroom","subscribers":"200K","fit":"tool-power-users"},{"name":"r/AskPhotography","subscribers":"100K","fit":"beginner questions"},{"name":"r/videography","subscribers":"550K","fit":"video creators"}],"ad_channels":["Instagram (visual)","YouTube (tutorials)","Meta"],"starter_story_apps":[]},"Travel & Nomad":{"icon":"✈️","subreddits":[{"name":"r/solotravel","subscribers":"2.5M","fit":"high-intent solo travelers"},{"name":"r/digitalnomad","subscribers":"1.5M","fit":"remote workers, app-friendly"},{"name":"r/expats","subscribers":"500K","fit":"long-term, high-LTV"},{"name":"r/travel","subscribers":"10M","fit":"broad audience"}],"ad_channels":["Meta (travel+app combo strong)","Google (search intent)"],"starter_story_apps":["Momego ($30K/mo, transit tracker)"]},"Personal Finance":{"icon":"💰","subreddits":[{"name":"r/personalfinance","subscribers":"20M","fit":"broad finance"},{"name":"r/financialindependence","subscribers":"2.5M","fit":"FIRE community"},{"name":"r/Fire","subscribers":"650K","fit":"high-intent savers"},{"name":"r/Frugal","subscribers":"2.5M","fit":"budget-conscious"}],"ad_channels":["Meta","Google (very high CPC but high LTV)","Twitter/X"],"starter_story_apps":["MonAI ($35K/mo)","Subscribr"]},"Parenting":{"icon":"👶","subreddits":[{"name":"r/parenting","subscribers":"5M","fit":"broad parent audience"},{"name":"r/toddlers","subscribers":"300K","fit":"specific stage targeting"},{"name":"r/Mommit","subscribers":"1M","fit":"mom-focused"},{"name":"r/Daddit","subscribers":"550K","fit":"dad-focused"},{"name":"r/beyondthebump","subscribers":"350K","fit":"postpartum"}],"ad_channels":["Meta (highest converting for parents)","Pinterest"],"starter_story_apps":[]},"Pets & Animals":{"icon":"🐶","subreddits":[{"name":"r/dogs","subscribers":"3.5M","fit":"broad dog community"},{"name":"r/dogtraining","subscribers":"2M","fit":"high-intent training"},{"name":"r/cats","subscribers":"9M","fit":"broad cat community"},{"name":"r/AskVet","subscribers":"350K","fit":"high-intent health questions"}],"ad_channels":["Meta (pet owners convert well)","Instagram","TikTok"],"starter_story_apps":[]},"Language Learning":{"icon":"🗣","subreddits":[{"name":"r/languagelearning","subscribers":"2.5M","fit":"core community"},{"name":"r/duolingo","subscribers":"350K","fit":"tool-adjacent"},{"name":"r/Spanish","subscribers":"550K","fit":"language-specific"},{"name":"r/ChineseLanguage","subscribers":"200K","fit":"language-specific"}],"ad_channels":["Meta","TikTok","YouTube (long-form lessons)"],"starter_story_apps":[]},"Creator & Content":{"icon":"🎬","subreddits":[{"name":"r/NewTubers","subscribers":"650K","fit":"small creators, high engagement"},{"name":"r/youtubers","subscribers":"200K","fit":"creator community"},{"name":"r/CreatorServices","subscribers":"60K","fit":"monetization focus"},{"name":"r/podcasting","subscribers":"180K","fit":"podcast creators"}],"ad_channels":["Twitter/X (creator audience)","TikTok","YouTube"],"starter_story_apps":["Postiz (social media scheduling)"]},"Indie Hacking & SaaS (research only — do not launch here)":{"icon":"🛠","subreddits":[{"name":"r/SaaS","subscribers":"300K","fit":"RESEARCH ONLY — peers not customers"},{"name":"r/Entrepreneur","subscribers":"4M","fit":"research only"},{"name":"r/SideProject","subscribers":"300K","fit":"research only — Show HN equivalent"},{"name":"r/indiehackers","subscribers":"75K","fit":"research only"}],"ad_channels":["DO NOT LAUNCH HERE — these are peer audiences, not customers"],"starter_story_apps":[]}},"clones":[{"name":"Letterly","category":"Voice & Audio","revenue":"$250K/mo","platform":"iOS","ep":40,"founder":"Anton Samarsky","url":"https://letterly.app","what_it_does":"Speech-to-text app focused on simplicity and design — turn voice into well-written text","why_it_works":"Obsessive simplicity. The original players (chatGPT-wrappers) overloaded with features. Letterly does ONE thing better.","clone_into_niches":[{"niche":"Legal dictation","channel":"r/Lawyertalk, r/LegalAdvice (don't post — research)","angle":"Compliance + privacy-first transcription"},{"niche":"Medical / clinical notes","channel":"Medical Twitter, r/medicalschool","angle":"HIPAA-compliant + EMR-pasteable"},{"niche":"Sermon / pastor notes","channel":"Christian creator Twitter, niche FB groups","angle":"Spiritual reflection + scripture-aware"},{"niche":"Customer service log","channel":"r/CustomerService","angle":"Auto-summary of phone calls into ticket text"},{"niche":"Therapy session notes (clinician-side)","channel":"Therapist twitter","angle":"DAP-format auto-templates"}]},{"name":"Gravl","category":"Fitness & Workout","revenue":"$400K/mo","platform":"iOS","ep":44,"founder":"Julian Gargicevich","url":null,"what_it_does":"Fitness app — built MVP in 2 months, launched on Reddit, almost immediate PMF","why_it_works":"Translated app to Spanish + ran ads from day 1 of subscription. Reddit launch validated PMF before paid.","clone_into_niches":[{"niche":"Senior fitness (50+)","channel":"r/AskAnOldPerson, FB groups","angle":"Joint-friendly progressions"},{"niche":"Postpartum recovery","channel":"r/beyondthebump","angle":"Pelvic floor + diastasis-aware"},{"niche":"Calisthenics-only","channel":"r/bodyweightfitness","angle":"No-equipment progressions"},{"niche":"Sport-specific (climbing, surfing, running)","channel":"r/climbharder, r/running","angle":"Cross-training for one sport"},{"niche":"Bulking-specific (weight gain)","channel":"r/gainit","angle":"Anti-cutting, focus on adding mass"}]},{"name":"Stoppr","category":"Habits & Self-Improvement","revenue":"$12K/mo","platform":"iOS","ep":47,"founder":"David Attias","url":null,"what_it_does":"Habit-stopping app — David CLONED a $200K/mo English app for a different niche, ZERO coding background, vibe-coded with Rocket","why_it_works":"THIS IS THE CANONICAL CLONE STORY. He saw a YouTube interview about an app making $200K/mo, rebuilt it 1% different in a different niche, and made $5K month-1.","clone_into_niches":[{"niche":"Quit-doomscrolling","channel":"r/digitalminimalism, r/nosurf","angle":"Break specific platform habits"},{"niche":"Quit-vape / smoke","channel":"r/QuitVaping, r/stopsmoking","angle":"Day-counter + cravings tracker"},{"niche":"Quit-porn","channel":"r/NoFap (sensitive — observe rules)","angle":"Streak + accountability"},{"niche":"Quit-alcohol","channel":"r/stopdrinking","angle":"Sober tracking + community"},{"niche":"Quit-sugar","channel":"r/sugarfree","angle":"Diet-aligned habit"}]},{"name":"Journable","category":"Mental Health & Journaling","revenue":"$100K/mo (92% Android)","platform":"Android","ep":8,"founder":"Steve Hoyek","url":"https://www.journable.com","what_it_does":"Simple journaling app — Steve realized most are sleeping on Android. Tested both, Android performed better every time.","why_it_works":"Android-first — lower competition, stronger AdSense + banner ad RPMs, way better for bootstrapping. The thesis you flagged.","clone_into_niches":[{"niche":"Gratitude journal (specific)","channel":"r/Gratitude","angle":"3-things-daily nudge"},{"niche":"Parenting / kids journal","channel":"r/parenting, r/toddlers","angle":"Track kid milestones for them"},{"niche":"Recovery / sobriety journal","channel":"r/stopdrinking, r/recovery","angle":"Step-aware journaling"},{"niche":"Dream journal","channel":"r/Dreams, r/LucidDreaming","angle":"Sleep-tracker integration"},{"niche":"ADHD brain dump","channel":"r/ADHD, r/adhdwomen","angle":"Stream-of-consciousness, no structure"}]},{"name":"Momego","category":"Travel & Nomad","revenue":"$30K/mo (5M downloads)","platform":"Android+iOS","ep":50,"founder":"John McEvoy","url":null,"what_it_does":"Bus tracking app for Edinburgh, Scotland. Hyper-local app store optimization grew to 400K MAU.","why_it_works":"Hyper-local SEO + ASO. Translated listing for 30+ languages. Solo founder. Solved his own problem (where's the bus?).","clone_into_niches":[{"niche":"Subway tracker (specific city)","channel":"Local subreddits (r/nyc, r/london)","angle":"City-specific real-time"},{"niche":"Ferry tracker (specific route)","channel":"Local FB groups, transit Twitter","angle":"Route-specific schedule + alerts"},{"niche":"Uni shuttle tracker","channel":"Campus-specific subs","angle":"School-specific, low competition"},{"niche":"Train delay tracker (regional)","channel":"Commuter subreddits","angle":"Region-specific reliability data"},{"niche":"Bike share status","channel":"r/cycling, city subs","angle":"Per-station availability + routing"}]},{"name":"MonAI","category":"Personal Finance","revenue":"$35K/mo","platform":"iOS","ep":5,"founder":"Flo","url":"https://www.get-monai.app","what_it_does":"Personal finance AI — figured out hard paywall + free trial works best","why_it_works":"Hard paywall + free trial monetization tuning. AI as the differentiator vs incumbent finance apps.","clone_into_niches":[{"niche":"Freelancer accounting","channel":"r/freelance, r/Etsy","angle":"1099-aware tax tracking"},{"niche":"Small biz expense","channel":"r/smallbusiness","angle":"Mileage + receipt OCR"},{"niche":"Student loan tracker","channel":"r/StudentLoans","angle":"Payoff strategy + refi alerts"},{"niche":"Couple finance (joint+separate)","channel":"r/personalfinance","angle":"Shared budgets without merging"},{"niche":"Crypto-aware budgeting","channel":"r/CryptoCurrency","angle":"Track crypto + fiat together"}]},{"name":"CutCoach","category":"Fitness & Workout","revenue":"$20K/mo","platform":"iOS","ep":4,"founder":"Ethan","url":"https://www.cutcoach.app","what_it_does":"Niche cutting (weight loss + fitness) coach app","why_it_works":"Tight niche (cutting specifically, not general fitness) + Cursor-built + Superwall paywall A/B testing.","clone_into_niches":[{"niche":"Marathon-specific training","channel":"r/running, r/Marathon_Training","angle":"Race-prep cycle"},{"niche":"Recomp (cut + bulk hybrid)","channel":"r/leangains, r/fitness","angle":"Gain muscle while losing fat"},{"niche":"Pre-wedding fitness","channel":"r/weddingplanning","angle":"Time-bound aesthetic prep"},{"niche":"Postpartum cut","channel":"r/beyondthebump","angle":"Safe weight-loss while nursing"}]},{"name":"Postiz","category":"Creator & Content","revenue":"Portfolio (Tibo, $100K+/mo combined)","platform":"Web SaaS","ep":36,"founder":"Tibo","url":null,"what_it_does":"Social media scheduling — part of Tibo's portfolio of micro-SaaS","why_it_works":"Pick a category that's been done before, do it 1% better in a niche. Lifetime deal early to fund development.","clone_into_niches":[{"niche":"LinkedIn-only scheduler","channel":"r/LinkedIn, LinkedIn itself","angle":"B2B-specific features"},{"niche":"Niche-platform schedulers (Bluesky, Threads)","channel":"Platform-specific subs","angle":"Where Postiz/Buffer don't yet support"},{"niche":"Newsletter cross-poster","channel":"r/Substack, r/Newsletters","angle":"Send same content across all platforms"}]},{"name":"Subscribr","category":"Personal Finance","revenue":"Portfolio piece (Tibo)","platform":"Web SaaS","ep":36,"founder":"Tibo","url":null,"what_it_does":"Subscription tracker / manager","why_it_works":"Solved-already idea — that's the point. New ideas need validation; old ideas come pre-validated.","clone_into_niches":[{"niche":"Family shared subscriptions","channel":"r/personalfinance, parent groups","angle":"Who pays what + auto-rotate"},{"niche":"Business SaaS audit","channel":"r/smallbusiness, r/sysadmin","angle":"Find unused enterprise SaaS"},{"niche":"Student subscription tracker","channel":"r/college","angle":"Free trials about to convert + edu discounts"}]},{"name":"Tibo's Portfolio Pattern (4 SaaS at $100K+ MRR each)","category":"Productivity & Time Management","revenue":"$200K+/mo combined","platform":"Web SaaS","ep":36,"founder":"Tibo","url":null,"what_it_does":"Build multiple small SaaS — each $100K+/mo. Audience SaaS + SEO SaaS + niche tools.","why_it_works":"Don't bet on one idea. Pick 4 niches you understand, ship one quarterly, lifetime-deal early.","clone_into_niches":[{"niche":"Shaped to your audience size","channel":"Wherever your existing audience is","angle":"Audience-led product picks"}]}],"prom":{"trend_signal":{"hashtag":"#prom","platform":"TikTok","posts":179872,"video_views":766182036,"rank":1,"industry":"Apparel & Accessories","geography":"United States","period":"7 days","trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/prom","why_interesting":"Massive volume (179K posts in 7 days, 766M views), heavy commercial intent, time-bound (peaks April-May annually = recurring TAM), and emotionally loaded (high willingness to pay)"},"existing_apps_landscape":[{"name":"Pinterest","what_it_does":"Outfit/hair inspiration boards","strength":"Visual discovery, massive corpus","weakness":"No purchase flow, no event coordination, no AI try-on"},{"name":"Lulus / Princess Polly / SHEIN apps","what_it_does":"Dress retail","strength":"Inventory + checkout","weakness":"No AI try-on, no group coordination (matching with friends), no fit guarantees"},{"name":"StyleSeat / Booksy","what_it_does":"Hair / makeup booking","strength":"Local discovery + booking","weakness":"Generic — not prom-specific, no pricing transparency for prom day premium"},{"name":"Generic photo apps (FaceApp, AI try-on)","what_it_does":"Photo-edit / AI face apps","strength":"Generally good face quality","weakness":"Not focused on dress/outfit try-on, no integration with retail catalog"},{"name":"Prom Spot (small player)","what_it_does":"Promposal idea collection","strength":"Niche-specific","weakness":"Old, low engagement, no monetization, no AI"}],"gap_analysis":[{"gap":"AI dress try-on across multiple retailers","evidence":"Pinterest shows the dress, the retailer app sells the dress, but nothing lets you SEE the dress on you. Prom-buying is high anxiety + non-returnable for many stores.","monetization":"Affiliate commissions + premium subscription for unlimited try-ons"},{"gap":"Group outfit coordination","evidence":"Friend groups want to match or coordinate (similar palettes, no-clash) — but they share screenshots over iMessage. No tool exists.","monetization":"Freemium with paid group features (price alerts, pinned coordination)"},{"gap":"Promposal idea generator + AR templates","evidence":"Promposals are a TikTok genre — 50%+ of #prom content. No AI tool targeting this with templates, scripts, or AR overlay videos.","monetization":"One-time premium unlock per promposal ($4.99 sweet spot for Gen Z teens)"},{"gap":"Prom budget split between parent + teen","evidence":"Parents pay, teens spend — friction point in EVERY family. Currently solved with Venmo + arguments.","monetization":"Parent-pays subscription model — $9.99/mo April-only. Teens get the app, parents get the controls."},{"gap":"Prom day timeline + logistics","evidence":"Hair → makeup → photos → dinner → dance → after-party. Currently coordinated via group chat chaos.","monetization":"Free app, sponsored partnerships with photographers/limos/restaurants"}],"differentiated_app_spec":{"name":"PromQ (placeholder)","thesis":"AI dress try-on + group coordination, monetized via affiliate + premium try-ons. Hits two of the strongest gaps simultaneously.","core_features_v1":["Photo-upload → AI try-on of any dress from Pinterest/retailer link","Group chat with shared dress board + auto-clash detection (color palette overlap warning)","Affiliate-linked retailer search (1 tap → buy)","Save unlimited try-ons (paywall: free=3/day, premium=unlimited)"],"tech_stack":["Cursor + Claude Sonnet for build","Replicate or Fal.ai for AI try-on (existing virtual-try-on models)","RevenueCat for subscriptions","Superwall for paywall A/B tests","Supabase or Firebase for group storage"],"time_box":"21 days (3 weeks). Stage 1: 7 days for try-on flow. Stage 2: 7 days for group coordination. Stage 3: 7 days for paywall + polish."},"pre_build_validation_plan":{"first_10_paying_customers":["DM 5 high-school girls who posted #prom dress dilemma TikToks in last 7 days","Post in r/PromAdvice (4K) before building — gauge interest with mockup","Ask 3 girls in Kyle's network with high-school-age relatives","TikTok myself: 'I'm building this thing, would you use it?' → reply DMs"],"kill_criteria":["If <40% of 10 outreach DMs reply positively → pivot","If pre-launch waitlist <100 by day 14 → pivot","If first month MRR <$500 → kill or restart"],"month_1_revenue_target":"$2,000 (200 users × $10/mo paid tier OR 1000 users × $2/mo lite tier)","month_3_revenue_target":"$15,000"},"launch_plan":{"primary_communities":[{"channel":"r/PromAdvice","subscribers":"4K","post_type":"Show-build with free promo codes for first 50 users"},{"channel":"r/teenagers","subscribers":"3M","post_type":"Soft post in time of year — link in bio only"},{"channel":"TikTok #prom","post_type":"UGC: 'I built this in 3 weeks because my sister couldn't find a dress' — show app, hook with try-on"},{"channel":"Instagram Reels under #promdresses","post_type":"Same UGC, multi-cut edits"}],"paid_ads":[{"channel":"Meta Ads","budget":"$30/day for 14 days","creative":"Before/after AI try-on, target US ages 16-19 + parents 35-55"},{"channel":"TikTok Ads","budget":"$20/day for 14 days","creative":"UGC-style, native, target #prom interest"}],"press_angle":"Solo founder builds AI dress try-on in 3 weeks during prom season — featured by app review TikTokers / r/SideProject for Show-style launch"}},"trends":{"generated_at":"2026-04-28T18:35:42.998Z","tiktok_top":[{"hashtag":"#prom","rank":1,"rank_change":0,"posts":179872,"video_views":766182036,"industry":"Apparel & Accessories","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/prom"},{"hashtag":"#promdress","rank":6,"rank_change":0,"posts":17306,"video_views":141449483,"industry":"Apparel & Accessories","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/promdress"},{"hashtag":"#prom2026","rank":4,"rank_change":0,"posts":30256,"video_views":137431733,"industry":"Apparel & Accessories","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/prom2026"},{"hashtag":"#jaafarjackson","rank":21,"rank_change":6,"posts":2357,"video_views":73475540,"industry":"News & Entertainment","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/jaafarjackson"},{"hashtag":"#ovo","rank":36,"rank_change":8,"posts":2930,"video_views":69989352,"industry":"News & Entertainment","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/ovo"},{"hashtag":"#promtransition","rank":7,"rank_change":0,"posts":11848,"video_views":64652614,"industry":"Apparel & Accessories","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/promtransition"},{"hashtag":"#chriseanrock","rank":12,"rank_change":29,"posts":1700,"video_views":61440723,"industry":"News & Entertainment","is_new":false,"trend_direction":"stable","tiktok_url":"https://www.tiktok.com/tag/chriseanrock"},{"hashtag":"#thegreatdivide","rank":2,"rank_change":0,"posts":21184,"video_views":54561683,"industry":"News & Entertainment","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/thegreatdivide"},{"hashtag":"#stagecoach","rank":8,"rank_change":0,"posts":7707,"video_views":52329194,"industry":"Vehicle & Transportation","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/stagecoach"},{"hashtag":"#anthonyedwards","rank":16,"rank_change":0,"posts":3237,"video_views":52274828,"industry":"Sports & Outdoor","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/anthonyedwards"},{"hashtag":"#pibble","rank":25,"rank_change":7,"posts":3940,"video_views":48068651,"industry":"Pets","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/pibble"},{"hashtag":"#megantheestallion","rank":3,"rank_change":4,"posts":6058,"video_views":44757231,"industry":null,"is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/megantheestallion"},{"hashtag":"#timberwolves","rank":19,"rank_change":0,"posts":2113,"video_views":43002505,"industry":"Sports & Outdoor","is_new":true,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/timberwolves"},{"hashtag":"#scientology","rank":30,"rank_change":56,"posts":553,"video_views":40504278,"industry":"News & Entertainment","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/scientology"},{"hashtag":"#shooting","rank":27,"rank_change":0,"posts":2406,"video_views":39833204,"industry":"Life Services","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/shooting"},{"hashtag":"#gta6","rank":23,"rank_change":0,"posts":12125,"video_views":33554266,"industry":"Games","is_new":true,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/gta6"},{"hashtag":"#seniorprom","rank":11,"rank_change":0,"posts":10383,"video_views":33495188,"industry":"Apparel & Accessories","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/seniorprom"},{"hashtag":"#michealjackson","rank":13,"rank_change":3,"posts":5094,"video_views":33201360,"industry":"News & Entertainment","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/michealjackson"},{"hashtag":"#jeffy","rank":43,"rank_change":0,"posts":2219,"video_views":32248503,"industry":"Games","is_new":true,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/jeffy"},{"hashtag":"#prom26","rank":9,"rank_change":0,"posts":10887,"video_views":30933996,"industry":"Apparel & Accessories","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/prom26"},{"hashtag":"#prom2k26","rank":15,"rank_change":0,"posts":8271,"video_views":28199759,"industry":null,"is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/prom2k26"},{"hashtag":"#tomadachilife","rank":46,"rank_change":16,"posts":3551,"video_views":26717981,"industry":"Games","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/tomadachilife"},{"hashtag":"#nuggets","rank":29,"rank_change":0,"posts":2007,"video_views":24763544,"industry":"Sports & Outdoor","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/nuggets"},{"hashtag":"#whitehouse","rank":10,"rank_change":0,"posts":1814,"video_views":19740380,"industry":"News & Entertainment","is_new":true,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/whitehouse"},{"hashtag":"#lukecombs","rank":26,"rank_change":0,"posts":3421,"video_views":19271317,"industry":"News & Entertainment","is_new":true,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/lukecombs"},{"hashtag":"#chrisean","rank":35,"rank_change":0,"posts":745,"video_views":17376780,"industry":"News & Entertainment","is_new":true,"trend_direction":"stable","tiktok_url":"https://www.tiktok.com/tag/chrisean"},{"hashtag":"#btsconcert","rank":22,"rank_change":0,"posts":2357,"video_views":15834881,"industry":"News & Entertainment","is_new":true,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/btsconcert"},{"hashtag":"#clix","rank":39,"rank_change":13,"posts":3358,"video_views":15297106,"industry":"Games","is_new":false,"trend_direction":"down","tiktok_url":"https://www.tiktok.com/tag/clix"},{"hashtag":"#flashflood","rank":41,"rank_change":0,"posts":3444,"video_views":14013198,"industry":"News & Entertainment","is_new":true,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/flashflood"},{"hashtag":"#klaythompson","rank":5,"rank_change":5,"posts":2990,"video_views":14011968,"industry":"Sports & Outdoor","is_new":false,"trend_direction":"up","tiktok_url":"https://www.tiktok.com/tag/klaythompson"}],"x_top":[{"rank":1,"trend":"Phillies","is_hashtag":false,"volume":null},{"rank":2,"trend":"Minneapolis","is_hashtag":false,"volume":null},{"rank":3,"trend":"Game 5","is_hashtag":false,"volume":null},{"rank":4,"trend":"OPEC","is_hashtag":false,"volume":null},{"rank":5,"trend":"Fauci","is_hashtag":false,"volume":null},{"rank":6,"trend":"Rob Thomson","is_hashtag":false,"volume":null},{"rank":7,"trend":"Don Mattingly","is_hashtag":false,"volume":null},{"rank":8,"trend":"#lovelygrey","is_hashtag":true,"volume":null},{"rank":9,"trend":"King Charles","is_hashtag":false,"volume":null},{"rank":10,"trend":"Dombrowski","is_hashtag":false,"volume":null},{"rank":11,"trend":"#petal","is_hashtag":true,"volume":null},{"rank":12,"trend":"Topper","is_hashtag":false,"volume":null},{"rank":13,"trend":"Marie Harf","is_hashtag":false,"volume":null},{"rank":14,"trend":"Kevin Long","is_hashtag":false,"volume":null},{"rank":15,"trend":"David Morens","is_hashtag":false,"volume":null},{"rank":16,"trend":"Ariana","is_hashtag":false,"volume":null},{"rank":17,"trend":"Brad Stevens","is_hashtag":false,"volume":null},{"rank":18,"trend":"Kid Rock","is_hashtag":false,"volume":null},{"rank":19,"trend":"The UAE","is_hashtag":false,"volume":null},{"rank":20,"trend":"Ted Lasso","is_hashtag":false,"volume":null}],"huggingface_models":[{"name":"DeepSeek-V4-Pro","organization":"deepseek-ai","pipeline_tag":"text-generation","likes":3122,"downloads":174402,"url":"https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro"},{"name":"privacy-filter","organization":"openai","pipeline_tag":"token-classification","likes":1004,"downloads":57743,"url":"https://huggingface.co/openai/privacy-filter"},{"name":"Qwen3.6-27B","organization":"Qwen","pipeline_tag":"image-text-to-text","likes":954,"downloads":508728,"url":"https://huggingface.co/Qwen/Qwen3.6-27B"},{"name":"DeepSeek-V4-Flash","organization":"deepseek-ai","pipeline_tag":"text-generation","likes":815,"downloads":96948,"url":"https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash"},{"name":"Qwen3.6-27B-GGUF","organization":"unsloth","pipeline_tag":"image-text-to-text","likes":475,"downloads":702161,"url":"https://huggingface.co/unsloth/Qwen3.6-27B-GGUF"},{"name":"Kimi-K2.6","organization":"moonshotai","pipeline_tag":"image-text-to-text","likes":1126,"downloads":489001,"url":"https://huggingface.co/moonshotai/Kimi-K2.6"},{"name":"Qwen3.6-35B-A3B","organization":"Qwen","pipeline_tag":"image-text-to-text","likes":1483,"downloads":1510129,"url":"https://huggingface.co/Qwen/Qwen3.6-35B-A3B"},{"name":"DeepSeek-V4-Pro-Base","organization":"deepseek-ai","pipeline_tag":"?","likes":234,"downloads":1532,"url":"https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-Base"},{"name":"MiMo-V2.5-Pro","organization":"XiaomiMiMo","pipeline_tag":"text-generation","likes":224,"downloads":396,"url":"https://huggingface.co/XiaomiMiMo/MiMo-V2.5-Pro"},{"name":"LLaDA2.0-Uni","organization":"inclusionAI","pipeline_tag":"any-to-any","likes":220,"downloads":506,"url":"https://huggingface.co/inclusionAI/LLaDA2.0-Uni"},{"name":"Qwen3.6-35B-A3B-GGUF","organization":"unsloth","pipeline_tag":"image-text-to-text","likes":849,"downloads":1705737,"url":"https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF"},{"name":"Qwen3.6-27B-Uncensored-HauhauCS-Aggressive","organization":"HauhauCS","pipeline_tag":"image-text-to-text","likes":220,"downloads":215232,"url":"https://huggingface.co/HauhauCS/Qwen3.6-27B-Uncensored-HauhauCS-Aggressive"},{"name":"Hy3-preview","organization":"tencent","pipeline_tag":"text-generation","likes":176,"downloads":7671,"url":"https://huggingface.co/tencent/Hy3-preview"},{"name":"DeepSeek-V4-Flash-Base","organization":"deepseek-ai","pipeline_tag":"?","likes":177,"downloads":3025,"url":"https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-Base"},{"name":"Qwen3.6-27B-FP8","organization":"Qwen","pipeline_tag":"image-text-to-text","likes":158,"downloads":745458,"url":"https://huggingface.co/Qwen/Qwen3.6-27B-FP8"}]},"charts":{"top_free":[{"rank":1,"title":"ChatGPT","category":"Productivity","maker":"OpenAI OpCo, LLC","short_desc":"Introducing ChatGPT for iOS: OpenAI’s latest advancements at your fingertips. This official app is free, syncs your history across devices, and brings you the latest from OpenAI, including the new ima","link":"https://apps.apple.com/us/app/chatgpt/id6448311069?uo=2","clonable":true,"angle":"Vertical-specific AI assistants (legal, medical, customer service, niche industries)","why_now":"API costs collapsed, niche SaaS wraps making $50K-500K/mo"},{"rank":2,"title":"Claude by Anthropic","category":"Productivity","maker":"Anthropic PBC","short_desc":"Meet Claude, your AI problem solver and thinking partner. Claude works with you to write, research, code, and tackle complex problems with depth and precision. It enhances your thinking and expands wh","link":"https://apps.apple.com/us/app/claude-by-anthropic/id6473753684?uo=2","clonable":true,"angle":"Vertical-specific reasoning agents (research, code review, medical scribe)","why_now":"Sonnet API priced for productization"},{"rank":3,"title":"Google Gemini","category":"Productivity","maker":"Google","short_desc":"Google Gemini app is your personal, proactive and powerful AI Assistant. With Gemini on your iPhone or iPad, you can: - Enjoy fast and unlimited prompting powered by our biggest upgrade yet, Gemini 3 ","link":"https://apps.apple.com/us/app/google-gemini/id6477489729?uo=2","clonable":false,"angle":"","why_now":""},{"rank":4,"title":"Meta AI - Assistant & Glasses","category":"Productivity","maker":"Meta Platforms, Inc.","short_desc":"Meta AI is your personal AI assistant—connected to the world, but rooted in yours. Get answers, recommendations, and inspiration you can actually use. • Richer responses: Meta AI taps into what people","link":"https://apps.apple.com/us/app/meta-ai-assistant-glasses/id1558240027?uo=2","clonable":false,"angle":"","why_now":""},{"rank":5,"title":"Temu: Shop Like a Billionaire","category":"Shopping","maker":"Temu","short_desc":"Shop on Temu for exclusive offers. No matter what you're looking for, Temu has you covered, including fashion, home decor, handmade crafts, beauty & cosmetics, clothing, shoes, and more. Download Temu","link":"https://apps.apple.com/us/app/temu-shop-like-a-billionaire/id1641486558?uo=2","clonable":false,"angle":"","why_now":""},{"rank":6,"title":"CapCut: Photo & Video Editor","category":"Photo & Video","maker":"Bytedance Pte. Ltd","short_desc":"CapCut offers easy-to-use video editing functions, in-APP fonts and effects, advanced features such as keyframe animation, smooth slow-motion, chroma key, and stabilization, to help you capture and sn","link":"https://apps.apple.com/us/app/capcut-photo-video-editor/id1500855883?uo=2","clonable":true,"angle":"Niche video editors (TikTok creator, podcast clipper, presentation recorder)","why_now":"TikTok has compliance issues — riding the wedge"},{"rank":7,"title":"Threads","category":"Social Networking","maker":"Instagram, Inc.","short_desc":"Discover new perspectives and connect through conversation on Threads. See what people are talking about right now—from niche interests to big moments. With communities, you can find people who also c","link":"https://apps.apple.com/us/app/threads/id6446901002?uo=2","clonable":false,"angle":"","why_now":""},{"rank":8,"title":"Google","category":"Utilities","maker":"Google","short_desc":"Download the Google app to stay in the know about things that matter to you. Try AI Overviews, find quick answers, explore your interests, and stay up to date with Discover. The more you use the Googl","link":"https://apps.apple.com/us/app/google/id284815942?uo=2","clonable":false,"angle":"","why_now":""},{"rank":9,"title":"Netflix Game Controller","category":"Entertainment","maker":"Netflix, Inc.","short_desc":"Play games on your TV or computer browser with the Netflix Game Controller. This app allows you to play games on Netflix using your phone or mobile device as a game controller. The Netflix Game Contro","link":"https://apps.apple.com/us/app/netflix-game-controller/id6447582581?uo=2","clonable":false,"angle":"","why_now":""},{"rank":10,"title":"HBO Max: Stream Movies & TV","category":"Entertainment","maker":"WarnerMedia Global Digital Services, LLC","short_desc":"The most talked about shows and movies featuring the worlds of HBO, the DC Universe, Adult Swim, A24, and beyond. With HBO Max you'll get: • Access to thousands of TV shows and movies. • Exclusive, aw","link":"https://apps.apple.com/us/app/hbo-max-stream-movies-tv/id1666653815?uo=2","clonable":false,"angle":"","why_now":""},{"rank":11,"title":"Whatnot: Shop, Sell, Connect","category":"Shopping","maker":"Whatnot Inc.","short_desc":"Whatnot is the largest live shopping platform in the US, UK, and Europe - we’re a marketplace bringing millions together to shop, sell, and connect around the things they love. From bags to beauty, co","link":"https://apps.apple.com/us/app/whatnot-shop-sell-connect/id1488269261?uo=2","clonable":true,"angle":"Niche live-commerce: collectibles, vintage, art, books","why_now":"Live-commerce is exploding"},{"rank":12,"title":"Microsoft Outlook","category":"Productivity","maker":"Microsoft Corporation","short_desc":"Outlook lets you bring all your email accounts and calendars in one convenient spot. Whether it’s staying on top of your inbox or scheduling the next big thing, we make it easy to be your most product","link":"https://apps.apple.com/us/app/microsoft-outlook/id951937596?uo=2","clonable":false,"angle":"","why_now":""},{"rank":13,"title":"WhatsApp Messenger","category":"Social Networking","maker":"WhatsApp Inc.","short_desc":"WhatsApp from Meta is a free messaging and calling app used by over 2 billion people across 180+ countries. It's super simple, reliable and private, making it perfect for staying in touch with your fr","link":"https://apps.apple.com/us/app/whatsapp-messenger/id310633997?uo=2","clonable":false,"angle":"","why_now":""},{"rank":14,"title":"Microsoft Authenticator","category":"Productivity","maker":"Microsoft Corporation","short_desc":"Use Microsoft Authenticator for easy, secure sign-ins for all your online accounts using multi-factor authentication, passwordless, or password autofill. You also have additional account management op","link":"https://apps.apple.com/us/app/microsoft-authenticator/id983156458?uo=2","clonable":false,"angle":"","why_now":""},{"rank":15,"title":"SHEIN - Shopping Online","category":"Shopping","maker":"ROADGET BUSINESS PTE. LTD.","short_desc":"Everything you love, now at your fingertips! SHEIN is a fun and ultra-affordable online shopping platform. From fashion apparel to home, beauty, accessories, shoes and pets, plus electronics, tools, o","link":"https://apps.apple.com/us/app/shein-shopping-online/id878577184?uo=2","clonable":true,"angle":"Niche fast-fashion verticals: plus-size, modest, athleisure-only, men-only","why_now":"SHEIN catalog is overwhelming for specific niches"},{"rank":16,"title":"Shop: All your favorite brands","category":"Shopping","maker":"Shopify Inc.","short_desc":"Shop brands you love: - Shop big brands and local stores, and follow your faves - Get notified about special offers, price drops, restocks, and new product drops - Save items for later and organize th","link":"https://apps.apple.com/us/app/shop-all-your-favorite-brands/id1223471316?uo=2","clonable":false,"angle":"","why_now":""},{"rank":17,"title":"Gmail - Email by Google","category":"Productivity","maker":"Google","short_desc":"The official Gmail app brings the best of Gmail to your iPhone or iPad with robust security, real-time notifications, multiple account support, and search that works across all your mail. With the Gma","link":"https://apps.apple.com/us/app/gmail-email-by-google/id422689480?uo=2","clonable":false,"angle":"","why_now":""},{"rank":18,"title":"Google Maps","category":"Navigation","maker":"Google","short_desc":"Explore and navigate the world with confidence using Google Maps. Find the best routes with live traffic data and real-time GPS navigation for driving, walking, cycling, and public transport. Discover","link":"https://apps.apple.com/us/app/google-maps/id585027354?uo=2","clonable":true,"angle":"Niche maps: parking, EV charging, dog parks, pickleball courts, hiking trails (the Momego pattern at scale)","why_now":"Google Maps is the universal one — niches ignored"},{"rank":19,"title":"Grok - AI Chat & Video","category":"Productivity","maker":"X Corp.","short_desc":"Grok is an AI-powered assistant, developed by xAI, designed to be maximally truthful, useful, and curious. Get answers to any question, generate striking images and videos, and let Grok search the web","link":"https://apps.apple.com/us/app/grok-ai-chat-video/id6670324846?uo=2","clonable":true,"angle":"Personality-driven AI for entertainment niches (dating coach, comedy writer)","why_now":"Voice + video AI is new — first-mover advantage"},{"rank":20,"title":"Suno - AI Songs & Music","category":"Music","maker":"Suno, Inc.","short_desc":"Amplify your imagination. Powered by the world’s most advanced AI music model, Suno transforms your ideas into songs—no instruments needed, just your creative vision. Whether you’re a shower-singer, a","link":"https://apps.apple.com/us/app/suno-ai-songs-music/id6480136315?uo=2","clonable":true,"angle":"Niche music verticals: jingles for businesses, kids songs, custom karaoke, anniversary songs","why_now":"Suno proves the market — monetize a niche they ignore"},{"rank":21,"title":"TikTok - Videos, Shop & LIVE","category":"Entertainment","maker":"TikTok Ltd.","short_desc":"TikTok is the global discovery platform for videos, streaming on LIVE, shopping, and more. Our mission is to inspire creativity and bring joy. Over a billion people come to TikTok to share what they l","link":"https://apps.apple.com/us/app/tiktok-videos-shop-live/id835599320?uo=2","clonable":false,"angle":"","why_now":""},{"rank":22,"title":"Indeed Job Search","category":"Business","maker":"Indeed Inc.","short_desc":"Discover your next job opportunity on Indeed, the free job search app designed to connect you with better work anytime, anywhere. Forget the other job search apps. With 12 jobs added every second and ","link":"https://apps.apple.com/us/app/indeed-job-search/id309735670?uo=2","clonable":true,"angle":"Industry-specific job boards (creators, contractors, locum tenens, remote-only)","why_now":"Indeed is generic spam; specialized boards charge premium"},{"rank":23,"title":"Telegram Messenger","category":"Social Networking","maker":"Telegram FZ-LLC","short_desc":"Pure instant messaging — simple, fast, secure, and synced across all your devices. One of the top 5 most downloaded apps in the world with over 1 billion active users. FAST: Telegram is the fastest me","link":"https://apps.apple.com/us/app/telegram-messenger/id686449807?uo=2","clonable":false,"angle":"","why_now":""},{"rank":24,"title":"Instagram","category":"Photo & Video","maker":"Instagram, Inc.","short_desc":"Little moments lead to big friendships. Share yours on Instagram. — From Meta Connect with friends, find other fans, and see what people around you are up to and into. Explore your interests and post ","link":"https://apps.apple.com/us/app/instagram/id389801252?uo=2","clonable":false,"angle":"","why_now":""},{"rank":25,"title":"X","category":"News","maker":"X Corp.","short_desc":"Welcome to X (formerly known as Twitter), your trusted digital town square where conversations unfold in real time, and the world connects through breaking news, live events, podcasts, and everything ","link":"https://apps.apple.com/us/app/x/id333903271?uo=2","clonable":false,"angle":"","why_now":""}],"top_grossing":[{"rank":1,"title":"ChatGPT","category":"Productivity","maker":"OpenAI OpCo, LLC","short_desc":"Introducing ChatGPT for iOS: OpenAI’s latest advancements at your fingertips. This official app is free, syncs your history across devices, and brings you the latest from OpenAI, including the new ima","link":"https://apps.apple.com/us/app/chatgpt/id6448311069?uo=2","clonable":true,"angle":"Vertical-specific AI assistants (legal, medical, customer service, niche industries)","why_now":"API costs collapsed, niche SaaS wraps making $50K-500K/mo"},{"rank":2,"title":"YouTube","category":"Photo & Video","maker":"Google","short_desc":"Get the official YouTube app on iPhones and iPads. See what the world is watching -- from the hottest music videos to what’s popular in gaming, fashion, beauty, news, learning and more. Subscribe to c","link":"https://apps.apple.com/us/app/youtube/id544007664?uo=2","clonable":false,"angle":"","why_now":""},{"rank":3,"title":"TikTok - Videos, Shop & LIVE","category":"Entertainment","maker":"TikTok Ltd.","short_desc":"TikTok is the global discovery platform for videos, streaming on LIVE, shopping, and more. Our mission is to inspire creativity and bring joy. Over a billion people come to TikTok to share what they l","link":"https://apps.apple.com/us/app/tiktok-videos-shop-live/id835599320?uo=2","clonable":false,"angle":"","why_now":""},{"rank":4,"title":"Peacock TV: Stream TV & Movies","category":"Entertainment","maker":"Peacock TV LLC","short_desc":"Download Peacock, NBCUniversal’s streaming service. Peacock has all your favorite culture-defining entertainment, all in one place. With Peacock, stream exclusive Originals, fan-favorite movie franchi","link":"https://apps.apple.com/us/app/peacock-tv-stream-tv-movies/id1508186374?uo=2","clonable":false,"angle":"","why_now":""},{"rank":5,"title":"Paramount+","category":"Entertainment","maker":"CBS Interactive","short_desc":"Stream exclusive originals, blockbuster movies, live sports like NFL on CBS, UFC, and UEFA Champions League, all of SHOWTIME® (Premium plan only), and favorites from CBS, Nickelodeon, Comedy Central, ","link":"https://apps.apple.com/us/app/paramount/id530168168?uo=2","clonable":false,"angle":"","why_now":""},{"rank":6,"title":"Snapchat","category":"Photo & Video","maker":"Snap, Inc.","short_desc":"Snapchat is a fast and fun way to share the moment with your friends and family SNAP • Snapchat opens right to the Camera — just tap to take a photo, or press and hold for video. • Express yourself wi","link":"https://apps.apple.com/us/app/snapchat/id447188370?uo=2","clonable":false,"angle":"","why_now":""},{"rank":7,"title":"HBO Max: Stream Movies & TV","category":"Entertainment","maker":"WarnerMedia Global Digital Services, LLC","short_desc":"The most talked about shows and movies featuring the worlds of HBO, the DC Universe, Adult Swim, A24, and beyond. With HBO Max you'll get: • Access to thousands of TV shows and movies. • Exclusive, aw","link":"https://apps.apple.com/us/app/hbo-max-stream-movies-tv/id1666653815?uo=2","clonable":false,"angle":"","why_now":""},{"rank":8,"title":"Royal Match","category":"Games","maker":"Dream Games","short_desc":"King Robert needs your help to restore Royal Castle’s former glory. Break the obstacles and combine amazing power-ups to beat joyful and challenging levels! Keep unlocking wonderful areas by playing f","link":"https://apps.apple.com/us/app/royal-match/id1482155847?uo=2","clonable":true,"angle":"Casual mobile games — match-3 with hooks (already a $1B+ category)","why_now":"Hyper-casual games still print money with right hook"},{"rank":9,"title":"MLB","category":"Sports","maker":"MLB","short_desc":"The MLB App is the #1 destination for live baseball video and audio, directly on your iOS device. Watch and listen live or on-demand! -- Jump directly into your favorite team's live game from your hom","link":"https://apps.apple.com/us/app/mlb/id493619333?uo=2","clonable":true,"angle":"Niche sports trackers: pickleball, MMA, college specific teams, fantasy variants","why_now":"Most niche sports have no good real-time app"},{"rank":10,"title":"MONOPOLY GO!","category":"Games","maker":"Scopely, Inc.","short_desc":"Hit GO! Roll the dice! Earn MONOPOLY money, interact with your friends, family members and fellow Tycoons from around the world as you explore the expanding universe of MONOPOLY GO! It’s the new way t","link":"https://apps.apple.com/us/app/monopoly-go/id1621328561?uo=2","clonable":true,"angle":"Same as Royal Match — board-game-skinned casual","why_now":"Brand IP attached drives downloads"},{"rank":11,"title":"Pokémon TCG Pocket","category":"Games","maker":"The Pokemon Company","short_desc":"Pokémon Trading Card Game Pocket has players in 150 countries and regions around the world. Use your mobile devices to enjoy collecting and battling with Pokémon cards anytime, anywhere! ■ Open packs ","link":"https://apps.apple.com/us/app/pok%C3%A9mon-tcg-pocket/id6479970832?uo=2","clonable":false,"angle":"","why_now":""},{"rank":12,"title":"LinkedIn: Community & Network","category":"Business","maker":"LinkedIn Corporation","short_desc":"Welcome professionals! The key to getting in is getting started. Begin your career journey with LinkedIn today. Are you searching for the right job opportunities to advance your career? LinkedIn is on","link":"https://apps.apple.com/us/app/linkedin-community-network/id288429040?uo=2","clonable":true,"angle":"Niche professional networks: doctors (Doximity exists), creators, contractors, blue-collar","why_now":"LinkedIn is too generic; vertical Slacks are unmonetizable"},{"rank":13,"title":"Candy Crush Saga","category":"Games","maker":"King","short_desc":"Explore a world full of delicious match-3 puzzles and endless fun! Blast through thousands of challenging levels in this timeless puzzle game from King. Match candies, conquer jelly, toffees, and jam,","link":"https://apps.apple.com/us/app/candy-crush-saga/id553834731?uo=2","clonable":true,"angle":"Match-3 with niche theme","why_now":""},{"rank":14,"title":"Kingshot","category":"Games","maker":"Century Games Pte. Ltd.","short_desc":"Kingshot is an innovative idle medieval survival game that combines strategic gameplay with rich details waiting to be explored. When a sudden rebellion overturns the fate of an entire dynasty and ign","link":"https://apps.apple.com/us/app/kingshot/id6739554056?uo=2","clonable":true,"angle":"Gacha/RPG hybrids","why_now":""},{"rank":15,"title":"Gossip Harbor®: Merge & Story","category":"Games","maker":"Microfun Limited","short_desc":"Welcome to Gossip Harbor Follow Quinn Castillo as her picture perfect life on Brimwave Island crumbles around her. Divorce, sabotage and secrets. Help answer the question everyone's thinking: Who's tr","link":"https://apps.apple.com/us/app/gossip-harbor-merge-story/id1623318294?uo=2","clonable":true,"angle":"Story-merge games","why_now":"Hot category, low capital requirement to test"},{"rank":16,"title":"Crunchyroll","category":"Entertainment","maker":"Crunchyroll, LLC","short_desc":"WATCH THE MOST POPULAR AND TOP-RATED ANIME ANYTIME, ANYWHERE Stream new episodes, classic favorites, and anime movies with the Crunchyroll app. Whether you love action-packed anime, heartwarming slice","link":"https://apps.apple.com/us/app/crunchyroll/id329913454?uo=2","clonable":false,"angle":"","why_now":""},{"rank":17,"title":"Disney+","category":"Entertainment","maker":"Disney","short_desc":"Disney+ is the streaming home of your favorite stories. With beloved movies and series from Disney, Pixar, Marvel, Star Wars, National Geographic, there's always something to explore. Stream the lates","link":"https://apps.apple.com/us/app/disney/id1446075923?uo=2","clonable":false,"angle":"","why_now":""},{"rank":18,"title":"Last War:Survival","category":"Games","maker":"FUNFLY PTE. LTD.","short_desc":"A global zombie infestation has converted many into zombies. As a survivor, your primary goal is to retain your humanity and survive - Think Fast, Move Faster! Begin your journey with an intense survi","link":"https://apps.apple.com/us/app/last-war-survival/id6448786147?uo=2","clonable":true,"angle":"Free-to-play strategy games","why_now":""},{"rank":19,"title":"Claude by Anthropic","category":"Productivity","maker":"Anthropic PBC","short_desc":"Meet Claude, your AI problem solver and thinking partner. Claude works with you to write, research, code, and tackle complex problems with depth and precision. It enhances your thinking and expands wh","link":"https://apps.apple.com/us/app/claude-by-anthropic/id6473753684?uo=2","clonable":true,"angle":"Vertical-specific reasoning agents (research, code review, medical scribe)","why_now":"Sonnet API priced for productization"},{"rank":20,"title":"YouTube Music","category":"Music","maker":"Google","short_desc":"Connecting you to the world of music: ● Music content including live performances, covers, remixes and music content you can’t find elsewhere ● Thousands of curated playlist across many genres and act","link":"https://apps.apple.com/us/app/youtube-music/id1017492454?uo=2","clonable":false,"angle":"","why_now":""},{"rank":21,"title":"Pandora: Music & Podcasts","category":"Music","maker":"Pandora Media, LLC","short_desc":"Create stations from your favorite songs, artists or genres, search or browse to find recommended stations for your mood or activity, and discover podcasts that speak to you. Download today and get in","link":"https://apps.apple.com/us/app/pandora-music-podcasts/id284035177?uo=2","clonable":false,"angle":"","why_now":""},{"rank":22,"title":"Tinder Dating App: Date & Chat","category":"Lifestyle","maker":"Tinder LLC","short_desc":"Tinder is the place to meet someone new and see where a spark might lead. With millions of people nearby and around the world, Tinder makes dating fun and helps you find someone who matches your vibe,","link":"https://apps.apple.com/us/app/tinder-dating-app-date-chat/id547702041?uo=2","clonable":true,"angle":"Niche dating: sober, religious-specific, age-specific, hobby-specific (climbing, board games)","why_now":"Niche dating apps consistently make $50K-500K/mo"},{"rank":23,"title":"Life360: Stay Connected & Safe","category":"Social Networking","maker":"Life360","short_desc":"Whether at home, online, or on the move, our comprehensive family safety features bring peace of mind to your loved ones AND help safeguard your personal belongings. Experience location safety feature","link":"https://apps.apple.com/us/app/life360-stay-connected-safe/id384830320?uo=2","clonable":true,"angle":"Family-coordination niches: elder care, college kids, remote family check-ins","why_now":"Life360 is bloated; simpler niche app wins on UX"},{"rank":24,"title":"Audible: Audiobooks & Podcasts","category":"Books","maker":"Audible, Inc.","short_desc":"Discover storytelling that speaks to you with Audible. Audiobooks, podcasts and Audible Originals await in an all-in-one audio entertainment app. Storytelling and entertainment for all genres awaits. ","link":"https://apps.apple.com/us/app/audible-audiobooks-podcasts/id379693831?uo=2","clonable":true,"angle":"Niche audiobook/podcast experiences: business audio, language-learning audio, spiritual","why_now":"Discovery is broken on Audible"},{"rank":25,"title":"Canva: AI Video & Photo Editor","category":"Photo & Video","maker":"Canva","short_desc":"CREATE ANYTHING WITH CANVA Canva is your all-in-one creative platform for stunning graphic design, photo editing, and video creation. From crafting presentations and building visual spreadsheets to de","link":"https://apps.apple.com/us/app/canva-ai-video-photo-editor/id897446215?uo=2","clonable":true,"angle":"Industry-specific design tools (real-estate flyers, restaurant menus, gym programs)","why_now":"Canva is too generic for many verticals"}]},"ltv":[{"vertical":"Mental Health & Therapy","icon":"🧠","ltv_band":"$200–$500 per user","arpu_band":"$15–$70/mo","why_high_ltv":"Anxiety, sleep, mood are recurring problems. Once a user finds something that helps, they stay 12+ months.","high_cpc_keywords":["anxiety relief app","therapy journal","mood tracker","depression help","panic attack app","ocd cbt"],"incumbents":[{"name":"Calm","size":"$1B+","weakness":"Generic — meditation grab-bag, no personalization"},{"name":"Headspace","size":"$3B valuation","weakness":"Same as Calm"},{"name":"BetterHelp","size":"$1B+","weakness":"Therapy-only, expensive ($70/wk), low retention"},{"name":"Finch","size":"$50M ARR est","weakness":"Cute pet gimmick, narrow demo"}],"niche_gaps":[{"niche":"Postpartum anxiety / depression","tam_signal":"r/beyondthebump 350K, r/Postpartum_Depression 60K, $180B perinatal mental health market"},{"niche":"ADHD-specific anxiety / overwhelm","tam_signal":"r/ADHD 2M, r/adhdwomen 750K, growing 30%/yr"},{"niche":"Breakup recovery (named, time-bound)","tam_signal":"Pat Walls's #ep799 mentions this category. r/BreakUps 250K"},{"niche":"Health-anxiety / hypochondria specific","tam_signal":"r/HealthAnxiety 75K, very high engagement"},{"niche":"OCD-specific CBT exposures","tam_signal":"r/OCD 250K, NoCD app exists but expensive"}]},{"vertical":"Dating & Relationships","icon":"💘","ltv_band":"$80–$200 per user","arpu_band":"$15–$50/mo","why_high_ltv":"Existential motivation. Users will pay anything once. The category has hit 'apocalypse fatigue' — everyone hates incumbents.","high_cpc_keywords":["dating app","matchmaking","find love","serious relationship app"],"incumbents":[{"name":"Tinder/Hinge/Bumble","size":"$11B Match Group","weakness":"Hated. Dating app fatigue. Algorithms feel rigged."},{"name":"Coffee Meets Bagel","size":"$300M valuation","weakness":"Slow, declining"}],"niche_gaps":[{"niche":"Sober dating","tam_signal":"r/stopdrinking 800K, AA membership ~2M US"},{"niche":"Religion-specific (Muslim, Catholic, Jewish, Hindu)","tam_signal":"Muzz/Salams making $20M+ ARR — proven but space for niches"},{"niche":"Hobby-specific (climbing, board games, bouldering)","tam_signal":"Climbing has 7M US participants; no app"},{"niche":"Demographic-specific (40+, divorced, single parents)","tam_signal":"OurTime $300M ARR — but UX terrible"},{"niche":"Asexual / queer-specific","tam_signal":"r/asexual 280K, no decent app"},{"niche":"Slow dating (no swiping, conversation-first)","tam_signal":"Hinge growing 30%/yr signaling demand for non-swipe UX"}]},{"vertical":"Personal Finance & Money","icon":"💰","ltv_band":"$100–$400 per user (+ affiliate revenue)","arpu_band":"$5–$30/mo","why_high_ltv":"Mint shutting down created a massive vacuum. Plus: credit-card affiliate commissions ($50–$500 per signup) make CAC payback near-instant.","high_cpc_keywords":["budget app","investment tracker","subscription manager","credit score","tax filing"],"incumbents":[{"name":"YNAB","size":"Public-ish","weakness":"Steep learning curve, $99/yr"},{"name":"Copilot Money","size":"Acquired by Monarch","weakness":"iOS-only, US-only"},{"name":"Monarch Money","size":"$200M valuation","weakness":"Generic — no niche specialization"},{"name":"Rocket Money","size":"Owned by Rocket Companies","weakness":"Subscription-cancel focused, not budgeting"}],"niche_gaps":[{"niche":"Freelancer / 1099 finance (taxes + savings + invoicing)","tam_signal":"60M+ US freelancers. Nothing combines all three well"},{"niche":"Couple finance (joint + separate)","tam_signal":"r/personalfinance 20M, recurring complaint"},{"niche":"Crypto-aware budgeting","tam_signal":"r/CryptoCurrency 8M, no app handles fiat + crypto cleanly"},{"niche":"Student loan optimizer","tam_signal":"$1.7T student debt, refinance affiliates pay $200-500"},{"niche":"Small biz expense (dropshippers, creators, etc.)","tam_signal":"Etsy 7M sellers, Shopify 4M — bad expense tools"},{"niche":"Annual subscription audit (vs Rocket's monthly focus)","tam_signal":"Recurring complaint on r/personalfinance"}]},{"vertical":"Fitness Coaching & Programs","icon":"💪","ltv_band":"$200–$500 per user","arpu_band":"$10–$50/mo","why_high_ltv":"Recurring monthly. Cohorts are sticky if program is good. Gravl ($400K/mo) and Future ($100M+ ARR) prove the math.","high_cpc_keywords":["personal trainer app","workout plan","fitness coach","home workout"],"incumbents":[{"name":"Future","size":"$100M+ ARR","weakness":"$200/mo — pricing limits TAM"},{"name":"MacroFactor","size":"Fast-growing","weakness":"Macro-tracking only — no programming"},{"name":"Gravl","size":"$400K/mo (Starter Story #44)","weakness":"Generic fitness — niches still open"},{"name":"Centr (Chris Hemsworth)","size":"$50M+","weakness":"Brand-driven, not scientific"}],"niche_gaps":[{"niche":"Postpartum fitness (pelvic floor + diastasis aware)","tam_signal":"r/beyondthebump 350K — recurring 'where do I start' posts"},{"niche":"Senior fitness (50+, joint-friendly)","tam_signal":"Boomer fitness underserved — 70M Americans 55+"},{"niche":"Sport-specific cross-training (climbing, surfing, trail running)","tam_signal":"r/climbharder 180K, r/running 4M"},{"niche":"Calisthenics-only (no equipment)","tam_signal":"r/bodyweightfitness 2M"},{"niche":"Bulking-specific (gain weight)","tam_signal":"r/gainit 100K, painfully underserved"},{"niche":"Pre/post-surgery rehab","tam_signal":"5M+ knee/hip surgeries/yr in US, no app"}]},{"vertical":"Language Learning","icon":"🗣","ltv_band":"$120–$300 per user","arpu_band":"$10–$30/mo","why_high_ltv":"Long use cycles (12-36 months). Sticky once started. Duolingo proves $100M+ ARR is achievable.","high_cpc_keywords":["learn Spanish app","language tutor","Mandarin learning","fluent speaking"],"incumbents":[{"name":"Duolingo","size":"$10B public","weakness":"Game-y, weak on speaking"},{"name":"Babbel","size":"$200M ARR","weakness":"Generic, no AI tutor"},{"name":"Lingoda","size":"$100M+ ARR","weakness":"Live tutor — high CAC"},{"name":"Speak","size":"$100M+ valuation","weakness":"AI-tutor pioneer but generic"}],"niche_gaps":[{"niche":"Rare languages (Korean for K-pop fans, Japanese for anime, Mandarin for biz)","tam_signal":"K-pop fanbase 100M+, currently using clunky tools"},{"niche":"Use-case-specific (medical Spanish, legal English, business Mandarin)","tam_signal":"Healthcare workers + legal interns underserved"},{"niche":"Heritage learners (re-learning parent's language as adult)","tam_signal":"20M+ second-gen Americans want to reconnect"},{"niche":"Language-for-emigrants (TOEFL/IELTS prep specifically)","tam_signal":"1M+ TOEFL test-takers/yr"},{"niche":"ASL / sign language (very underserved)","tam_signal":"r/asl growing, no good app"}]},{"vertical":"Tax & Legal Services","icon":"📑","ltv_band":"$200–$1000 per user (annual)","arpu_band":"$50–$300/year","why_high_ltv":"TurboTax extracted $4B/yr from US filers. Niche professionals will pay $200+ for vertical-specific solutions.","high_cpc_keywords":["tax filing","LLC formation","1099 tax","self-employed tax","freelance tax","crypto tax"],"incumbents":[{"name":"TurboTax / H&R Block","size":"$4B revenue","weakness":"Hated — predatory pricing, dark patterns"},{"name":"LegalZoom","size":"$700M revenue","weakness":"Generic LLC formation, weak post-formation tools"},{"name":"Keeper Tax","size":"Y Combinator scale","weakness":"Freelancer-only"}],"niche_gaps":[{"niche":"Crypto trader tax (Schedule D specifically)","tam_signal":"10M+ US crypto holders. Existing tools are clunky"},{"niche":"Creator economy tax (TikTok/YouTube/OnlyFans)","tam_signal":"5M+ creators who hate tax season"},{"niche":"Dropshipper / Amazon FBA tax","tam_signal":"1M+ ecommerce sellers"},{"niche":"Real estate investor tax (depreciation, 1031)","tam_signal":"BiggerPockets 1M+ users — recurring tax complaints"},{"niche":"Pet business / dog-walker / dog-boarding tax","tam_signal":"100K+ Rover-style pet pros — ignored category"}]},{"vertical":"Career & Job Search","icon":"💼","ltv_band":"$80–$300 per user","arpu_band":"$15–$50/mo","why_high_ltv":"Job seekers are highly motivated and pay quickly when results matter (interview = career change).","high_cpc_keywords":["resume builder","linkedin optimizer","job application tracker","cover letter ai"],"incumbents":[{"name":"Teal","size":"$50M+ valuation","weakness":"Generic — no industry vertical"},{"name":"ResyMatch","size":"Side project","weakness":"Single feature"},{"name":"LinkedIn Premium","size":"$1B+","weakness":"Useless for active search"}],"niche_gaps":[{"niche":"Faculty / academia jobs (academic CV, paper-tracker)","tam_signal":"100K+ faculty searches/yr, no good tool"},{"niche":"Designer portfolio + job tools","tam_signal":"Bēhance / Dribbble disconnect — no integrated tool"},{"niche":"Industry-specific (PM job tracker, dev job tracker, finance job tracker)","tam_signal":"Each has 100K+ active searchers"},{"niche":"Trades (electrician, plumber, HVAC) job board","tam_signal":"5M+ skilled trades workers, terrible tools"},{"niche":"International candidate (visa-aware, employer-sponsorship)","tam_signal":"1M+ H1B/visa applicants/yr"}]},{"vertical":"Pet Care & Animal Health","icon":"🐶","ltv_band":"$60–$200 per user","arpu_band":"$5–$15/mo","why_high_ltv":"Pet owners are extremely loyal — pets live 10-15 years. Low monthly fee, very long retention. Plus food/insurance affiliate.","high_cpc_keywords":["dog training app","pet health","puppy training","dog behavior"],"incumbents":[{"name":"Pupford / Doggo","size":"Small","weakness":"Generic dog training"},{"name":"Rover","size":"$1B+","weakness":"Booking marketplace only — no in-app care"}],"niche_gaps":[{"niche":"Breed-specific training (huskies, doodles, GSDs — very different needs)","tam_signal":"1M+ /yr puppy registrations of top breeds"},{"niche":"Puppy potty training (very specific, very anxious owners)","tam_signal":"r/puppy101 800K, recurring questions"},{"niche":"Reactive / aggressive dog (owners pay $$$)","tam_signal":"r/reactivedogs 100K, very engaged"},{"niche":"Senior dog care (medication, joint, food)","tam_signal":"10M+ senior dogs in US"},{"niche":"Cat behavior (litter, scratching, vet)","tam_signal":"r/cats 9M, way underserved by training apps (mostly dog-focused)"},{"niche":"Exotic pet care (reptiles, birds, rabbits)","tam_signal":"20M+ exotic pets in US"}]},{"vertical":"Real Estate & Home","icon":"🏠","ltv_band":"$100–$2000 per user (transaction-driven)","arpu_band":"Highly variable — $20/mo or $500 one-time","why_high_ltv":"Real estate transactions are $5K-50K commissions. Even small affiliate splits = high payouts. Plus subscription tools for recurring use.","high_cpc_keywords":["home value","rental search","property search","mortgage calculator","home renovation"],"incumbents":[{"name":"Zillow / Redfin","size":"$5B+ public","weakness":"Bloated — try doing one specific thing"},{"name":"Realtor.com","size":"$2B revenue","weakness":"Old, slow"}],"niche_gaps":[{"niche":"Renter-specific tools (lease compare, deposit return, roommate)","tam_signal":"44M US renters, mostly underserved"},{"niche":"First-time homebuyer education + tracker","tam_signal":"1M+ first-time buyers/yr, all confused"},{"niche":"Investor-specific (BRRRR, fix-and-flip ROI, 1031 exchange)","tam_signal":"BiggerPockets 1M+ users"},{"niche":"Home maintenance scheduler (HVAC, gutters, paint)","tam_signal":"85M+ homeowners, no good app"},{"niche":"Renovation budget tracker (per-room, per-contractor)","tam_signal":"$500B+ home reno spend/yr"}]},{"vertical":"Productivity for High-Earners","icon":"⚙️","ltv_band":"$200–$1000 per user","arpu_band":"$20–$100/mo","why_high_ltv":"Professionals will pay 10x consumer apps if it saves 30 min/day. Software bills are tax-deductible.","high_cpc_keywords":["executive assistant ai","time tracking","meeting notes ai","second brain"],"incumbents":[{"name":"Reclaim","size":"$50M+ valuation","weakness":"Calendar-AI generic"},{"name":"Otter.ai","size":"$500M valuation","weakness":"Transcription-only"},{"name":"Notion","size":"$10B valuation","weakness":"Generic — no vertical"}],"niche_gaps":[{"niche":"Lawyer-specific (billable hours + matter mgmt + dictation)","tam_signal":"1.3M US lawyers, hate Clio"},{"niche":"Doctor-specific (charting + scribe + EMR-pasteable)","tam_signal":"1M US doctors, $4B medical scribe market"},{"niche":"Therapist-specific (DAP/SOAP notes, billing)","tam_signal":"200K+ US therapists"},{"niche":"Coach / consultant tools (client portal + invoicing + scheduling)","tam_signal":"1M+ US coaches, fragmented stack"},{"niche":"Sales rep tools (call notes + CRM-pasteable + follow-up)","tam_signal":"1M+ US sales reps"}]}],"underserved":{"methodology":[{"step":1,"title":"Find a problem with proven demand","actions":["Browse subreddits looking for recurring complaints (`/top` or `/sort=new` with high upvotes)","Use Google Trends to confirm search volume is rising or stable (not collapsing)","Check community size: subreddits ≥50K, FB groups, Discord servers"]},{"step":2,"title":"Verify search volume is real money","actions":["Free tool: Google Keyword Planner — get rough monthly searches","Cheaper paid: Ahrefs Webmaster Tools (free), Ubersuggest free trial","Look for 10K+ monthly searches in commercial-intent keywords (`buy`, `app`, `tracker`, `tool`)"]},{"step":3,"title":"Confirm NO good app exists","actions":["Search App Store for the exact keywords — top 5 results should be old, ad-bloated, broken, or generic","Search ProductHunt for the niche — recent launches are tells","Google '<niche> app' — if first page shows mostly blog posts and forum threads, that's gold (it means people are searching but not finding)"]},{"step":4,"title":"Confirm willingness to pay","actions":["Adjacent products that DO exist — what do they charge? (e.g. if there's a $50 paper book solving the problem, an app at $5/mo will sell)","Look at the subreddit's r/<niche>/wiki for product recommendations — what do they actually pay for?","Check Etsy and Amazon for non-software products in the niche — high prices = high willingness to pay"]},{"step":5,"title":"Build it (apply the same Stage 2-4)","actions":["All the same: Validate → Build (14-21 days) → Launch in the proven community","The advantage: you don't have to fight incumbents — you OWN the niche from day 1"]}],"example_niches":[{"niche":"Hashimoto's / Hypothyroid food + symptom tracker","demand_evidence":"r/Hashimotos 75K, r/Hypothyroidism 130K, recurring 'what to eat' posts","no_app_evidence":"App Store search returns 1-2 generic thyroid apps with terrible reviews","adjacent_paid":"Books like 'Hashimoto's Protocol' sell for $25, programs $200+","monetization":"Subscription $9.99/mo. Optional doctor-paid affiliate"},{"niche":"Pickleball court finder (real-time availability)","demand_evidence":"Pickleball is fastest-growing sport in US (8M+ players, 70%+ YoY growth). r/Pickleball 100K","no_app_evidence":"PlayerSpace and similar are park-rec-only — no real-time availability","adjacent_paid":"Players pay $10-30 per court reservation; apps could take $1-2 commission","monetization":"Freemium + commission on bookings + paid 'court alerts' for prime times"},{"niche":"Boat slip / marina availability","demand_evidence":"Boating is $50B/yr industry, 100K+ slips in US, AlwaysOn forums very active","no_app_evidence":"Dockwa exists for short-term but yearly slip discovery is nonexistent — most done via phone","adjacent_paid":"Slip rentals $200-2000/mo — high value transactions","monetization":"Marketplace fee on bookings + subscription for prime slip alerts"},{"niche":"Drum / oboe / specific instrument practice tracker","demand_evidence":"Each instrument has dedicated subreddits 50-200K+. r/drums 600K","no_app_evidence":"Generic music practice apps (Practi, Modacity) are mediocre","adjacent_paid":"Music lessons $50-150/hr, music software $20-100","monetization":"Subscription $4.99/mo, optional paid programs for specific genres"},{"niche":"Bird watching log (birding app, but actually good)","demand_evidence":"r/birding 1.5M, r/whatsthisbird 500K, eBird from Cornell has 10M+ users","no_app_evidence":"Merlin Bird ID (free Cornell) and eBird are old + clunky. Recent niche apps fail on UX","adjacent_paid":"Bird guidebooks $30-50, optics $100-2000, group tours $1000+","monetization":"Subscription with premium features (rare bird alerts, region-specific)"},{"niche":"Funeral / cremation comparison tool","demand_evidence":"Annual deaths in US: 3M+. Funeral cost transparency is a huge gripe","no_app_evidence":"Funerals.org is informational only. No actual comparison app","adjacent_paid":"Funerals cost $7-10K average; getting the right info saves $1-2K easily","monetization":"Affiliate commissions from funeral homes, death-tech is a $20B+ category"},{"niche":"Pollen / specific allergen tracker (not generic weather)","demand_evidence":"30M+ US allergy sufferers. r/Allergies 80K, very high engagement","no_app_evidence":"Pollen.com and Weather.com show generic levels — no per-allergen forecast","adjacent_paid":"Allergy meds $30-100/mo, immunotherapy $1-5K/yr","monetization":"Subscription for personalized allergen forecasts, medication reminders"},{"niche":"Kid screen-time agreement signing app (parents <-> kids)","demand_evidence":"Recurring parenting blog topic, r/parenting 5M, r/screentimeAccount discussions","no_app_evidence":"Apple Screen Time and Google Family Link are enforcement, not negotiation tools","adjacent_paid":"Books like 'Screen Time' guides sell for $20","monetization":"Family subscription $4.99/mo, school-district licensing"},{"niche":"Specific dietary-restriction recipe finder (FODMAP, GAPS, AIP, low-histamine)","demand_evidence":"FODMAP has 1M+ practitioners; r/IBS 250K, r/AIP_Recipe communities","no_app_evidence":"Generic recipe apps (Yummly) ignore restrictive diets, niche apps poorly maintained","adjacent_paid":"Diet books $20-40, programs $200+","monetization":"Subscription $7.99/mo, recipe pack one-time purchases"},{"niche":"Stadium concession line / wait time tracker","demand_evidence":"MLB attendance 70M/yr, NFL 17M, college football 50M+. Concession lines are universal complaint","no_app_evidence":"Some stadiums have apps but generic; no aggregator across stadiums","adjacent_paid":"Concession spend $10-30 per fan per game","monetization":"Per-stadium licensing to teams, optional crowdsource user app"}]}};
+const STAGES = [
+  {n:1, title:'Source', icon:'🎯'},
+  {n:2, title:'Validate', icon:'✅'},
+  {n:3, title:'Build', icon:'⚡'},
+  {n:4, title:'Launch', icon:'🚀'},
+];
+let currentStage = 1;
+
+function renderStageNav() {
+  document.getElementById('stageNav').innerHTML = STAGES.map(s =>
+    '<div class="stage-pill ' + (s.n===currentStage?'active':'') + '" onclick="goToStage(' + s.n + ')"><span class="stage-num">' + s.n + '</span>' + s.icon + ' ' + s.title + '</div>'
+  ).join('');
+}
+
+function goToStage(n) {
+  currentStage = n;
+  document.querySelectorAll('.stage-section').forEach(el => el.classList.remove('active'));
+  document.getElementById('stage-'+n).classList.add('active');
+  renderStageNav();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function fmtNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(0)+'K';
+  return n;
+}
+
+function renderTrends() {
+  const t = DATA.trends;
+  document.getElementById('trendsTimestamp').innerHTML = 'Generated: <strong>' + new Date(t.generated_at).toLocaleString() + '</strong> — from <code>trend-detector/data/processed/latest.json</code>';
+  const grid = document.getElementById('trendsGrid');
+  grid.innerHTML = t.tiktok_top.slice(0, 12).map(tr => {
+    const featured = (tr.hashtag_clean === 'prom' || tr.hashtag === '#prom');
+    return '<div class="trend-card ' + (featured?'featured':'') + '" onclick="window.open(\''+tr.tiktok_url+'\', \'_blank\')">' +
+      '<div class="trend-rank">TikTok • <span class="rank-num">#' + tr.rank + '</span></div>' +
+      '<div class="trend-tag">' + tr.hashtag + '</div>' +
+      '<div class="trend-stats"><span class="trend-stat"><strong>' + fmtNum(tr.posts) + '</strong> posts</span><span class="trend-stat"><strong>' + fmtNum(tr.video_views) + '</strong> views</span></div>' +
+      '<span class="trend-industry">' + tr.industry + '</span>' +
+      '<span class="trend-direction ' + tr.trend_direction + '" style="float:right;font-size:11px;">' + (tr.trend_direction === 'up' ? '↗ rising' : tr.trend_direction === 'down' ? '↘ falling' : '→ stable') + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+function renderProm() {
+  const p = DATA.prom;
+  let html = '<div style="margin-bottom: 18px;">' +
+    '<div style="font-size: 11px; color: var(--teal2); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Trend Signal</div>' +
+    '<div style="font-family: \'Press Start 2P\', monospace; font-size: 24px; color: var(--orange2); margin-bottom: 8px;">' + p.trend_signal.hashtag + '</div>' +
+    '<div style="display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 13px;">' +
+      '<span><strong style="color: var(--text)">' + fmtNum(p.trend_signal.posts) + '</strong> posts</span>' +
+      '<span><strong style="color: var(--text)">' + fmtNum(p.trend_signal.video_views) + '</strong> views</span>' +
+      '<span><strong style="color: var(--text)">Rank #' + p.trend_signal.rank + '</strong></span>' +
+      '<span>' + p.trend_signal.industry + '</span>' +
+      '<span>📅 ' + p.trend_signal.period + '</span>' +
+    '</div>' +
+    '<div style="background: rgba(0,212,170,0.06); border-left: 2px solid var(--teal); padding: 10px 14px; border-radius: 0 6px 6px 0; margin-top: 12px; font-size: 13px; color: #ccc; line-height: 1.6;"><strong style="color: var(--teal2)">Why interesting:</strong> ' + p.trend_signal.why_interesting + '</div>' +
+  '</div>';
+
+  html += '<div class="prom-step"><div class="prom-step-num">STEP 1</div><div class="prom-step-title">Survey existing apps in this space</div><div class="apps-grid">';
+  p.existing_apps_landscape.forEach(a => {
+    html += '<div class="app-row"><div class="app-row-name">' + a.name + '</div><div class="app-row-line"><strong>What:</strong> ' + a.what_it_does + '</div><div class="app-row-line strength">' + a.strength + '</div><div class="app-row-line weakness">' + a.weakness + '</div></div>';
+  });
+  html += '</div></div>';
+
+  html += '<div class="prom-step"><div class="prom-step-num">STEP 2</div><div class="prom-step-title">Gap analysis — what\'s missing</div><table class="gaps-table"><thead><tr><th>Gap</th><th>Evidence</th><th>Monetization</th></tr></thead><tbody>';
+  p.gap_analysis.forEach(g => {
+    html += '<tr><td><strong style="color: var(--teal2)">' + g.gap + '</strong></td><td>' + g.evidence + '</td><td style="color: var(--gold2)">' + g.monetization + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+
+  const spec = p.differentiated_app_spec;
+  html += '<div class="prom-step"><div class="prom-step-num">STEP 3</div><div class="prom-step-title">Differentiated app spec</div>' +
+    '<p><strong style="color: var(--orange2)">Name:</strong> ' + spec.name + '</p>' +
+    '<p><strong style="color: var(--orange2)">Thesis:</strong> ' + spec.thesis + '</p>' +
+    '<p><strong style="color: var(--teal2)">V1 features:</strong></p><ul>' + spec.core_features_v1.map(f=>'<li>' + f + '</li>').join('') + '</ul>' +
+    '<p style="margin-top: 12px;"><strong style="color: var(--teal2)">Stack:</strong></p><ul>' + spec.tech_stack.map(s=>'<li>' + s + '</li>').join('') + '</ul>' +
+    '<p style="margin-top: 12px;"><strong style="color: var(--orange2)">Time-box:</strong> ' + spec.time_box + '</p>' +
+  '</div>';
+
+  const v = p.pre_build_validation_plan;
+  html += '<div class="prom-step"><div class="prom-step-num">STEP 4</div><div class="prom-step-title">Pre-build validation plan</div>' +
+    '<p><strong style="color: var(--teal2)">First 10 paying customers:</strong></p><ul>' + v.first_10_paying_customers.map(c=>'<li>' + c + '</li>').join('') + '</ul>' +
+    '<p style="margin-top: 10px;"><strong style="color: var(--red)">Kill criteria:</strong></p><ul>' + v.kill_criteria.map(k=>'<li>' + k + '</li>').join('') + '</ul>' +
+    '<p style="margin-top: 10px;"><strong style="color: var(--gold2)">Targets:</strong> Month 1: ' + v.month_1_revenue_target + ' — Month 3: ' + v.month_3_revenue_target + '</p>' +
+  '</div>';
+
+  const l = p.launch_plan;
+  html += '<div class="prom-step"><div class="prom-step-num">STEP 5</div><div class="prom-step-title">Launch plan (organic + paid)</div>' +
+    '<p><strong style="color: var(--teal2)">Communities:</strong></p><ul>' + l.primary_communities.map(c=>'<li><strong>' + c.channel + '</strong>' + (c.subscribers?' (' + c.subscribers + ')':'') + ' — ' + c.post_type + '</li>').join('') + '</ul>' +
+    '<p style="margin-top: 10px;"><strong style="color: var(--gold2)">Paid ads:</strong></p><ul>' + l.paid_ads.map(a=>'<li><strong>' + a.channel + '</strong> — ' + a.budget + ' — ' + a.creative + '</li>').join('') + '</ul>' +
+    '<p style="margin-top: 10px;"><strong style="color: var(--orange2)">Press angle:</strong> ' + l.press_angle + '</p>' +
+  '</div>';
+
+  document.getElementById('promWalk').innerHTML = html;
+}
+
+function renderClones() {
+  const grid = document.getElementById('cloneGrid');
+  grid.innerHTML = DATA.clones.map(c => {
+    return '<div class="clone-card">' +
+      '<div class="clone-top"><div class="clone-name">' + c.name + '</div><div class="clone-revenue">' + c.revenue + '</div></div>' +
+      '<div class="clone-meta">🏛 ' + c.category + ' • 📱 ' + c.platform + ' • EP #' + c.ep + ' • <strong>' + c.founder + '</strong>' + (c.url?' • <a href="' + c.url + '" target="_blank" style="color:var(--blue)">visit</a>':'') + '</div>' +
+      '<div class="clone-what">' + c.what_it_does + '</div>' +
+      '<div class="clone-why">💡 ' + c.why_it_works + '</div>' +
+      '<div class="clone-niches"><div class="clone-niches-lbl">🎯 Clone-into niches</div>' +
+        c.clone_into_niches.map(n => '<div class="niche-row"><div class="niche-name">' + n.niche + '</div><div><div class="niche-angle">' + n.angle + '</div><div class="niche-channel">📢 ' + n.channel + '</div></div></div>').join('') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderCategoryMap() {
+  const grid = document.getElementById('catGrid');
+  const map = DATA.subreddit_map;
+  grid.innerHTML = Object.entries(map).map(([name, cat]) => {
+    return '<div class="cat-card">' +
+      '<div class="cat-icon">' + cat.icon + '</div>' +
+      '<div class="cat-name">' + name + '</div>' +
+      cat.subreddits.map(s => '<div class="sub-row"><span class="sub-name">' + s.name + '</span><span class="sub-count">' + s.subscribers + '</span><span class="sub-fit">' + s.fit + '</span></div>').join('') +
+      '<div class="cat-channels"><strong>Paid ads:</strong> ' + cat.ad_channels.join(' • ') + '</div>' +
+      (cat.starter_story_apps.length ? '<div class="cat-apps">✨ Starter Story apps: ' + cat.starter_story_apps.join(', ') + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function populateCategorySelect() {
+  const sel = document.getElementById('ws-category');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— pick a category —</option>' +
+    Object.keys(DATA.subreddit_map).map(k => '<option value="' + k + '">' + DATA.subreddit_map[k].icon + ' ' + k + '</option>').join('');
+  sel.onchange = () => {
+    const cat = DATA.subreddit_map[sel.value];
+    const out = document.getElementById('autoCommunities');
+    if (!cat) { out.innerHTML = 'Pick a category above to load the launch map.'; return; }
+    out.innerHTML = '<div style="font-weight: 700; color: var(--teal2); margin-bottom: 8px;">Launch into these:</div>' +
+      cat.subreddits.map(s => '<div style="margin-bottom: 4px;"><strong style="color: var(--blue)">' + s.name + '</strong> (' + s.subscribers + ') — ' + s.fit + '</div>').join('') +
+      '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);"><strong style="color: var(--gold2)">Paid ads:</strong> ' + cat.ad_channels.join(' • ') + '</div>';
+  };
+}
+
+function generatePlan() {
+  const v = id => (document.getElementById(id) ? document.getElementById(id).value : '').trim();
+  const cat = DATA.subreddit_map[v('ws-category')];
+  const subs = cat ? cat.subreddits.map(s => '- ' + s.name + ' (' + s.subscribers + ')').join('\n') : '(no category picked)';
+  const adChannels = cat ? cat.ad_channels.join(', ') : '(pick category)';
+
+  const md = '# LAUNCH PLAN\nGenerated: ' + new Date().toISOString().slice(0,10) + '\n\n' +
+    '## 1. Idea\n' + (v('ws-statement') || '(missing)') + '\n\n' +
+    '## 2. Category\n' + (v('ws-category') || '(missing)') + '\n\n' +
+    '## 3. First 10 paying customers\n' + (v('ws-first10') || '(missing — STOP, fill this in first)') + '\n\n' +
+    '## 4. Launch communities\n' + subs + '\nPaid ad channels: ' + adChannels + '\n\n' +
+    '## 5. Reddit launch post\n' + (v('ws-redditpost') || '(missing)') + '\n\n' +
+    '## 6. Paid ad test\nChannel + budget: ' + (v('ws-adchannel') || '(missing)') + '\nCreative: ' + (v('ws-adcreative') || '(missing)') + '\n\n' +
+    '## 7. Kill criteria\n- Pre-launch DM positive reply rate: ' + (v('ws-killdm') || '(missing)') + '\n- Day-14 waitlist: ' + (v('ws-killwait') || '(missing)') + '\n- Month-1 MRR floor: ' + (v('ws-killmrr') || '(missing)') + '\n- Month-3 MRR target: ' + (v('ws-targetmrr') || '(missing)') + '\n\n' +
+    '---\n## Next steps\n1. DM your 10 named customers — measure reply rate vs your kill criterion\n2. Draft your subreddit posts (3 × ' + (cat ? cat.subreddits[0].name : 'subreddit') + ')\n3. Set up landing page + waitlist (Carrd / Typedream)\n4. Schedule the build sprint — 14 to 21 days\n5. Pre-write the launch sequence so you\'re not improvising on day 0';
+
+  const out = document.getElementById('planOutput');
+  out.style.display = 'block';
+  out.textContent = md;
+  out.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function loadPromExample() {
+  goToStage(2);
+  setTimeout(() => {
+    const p = DATA.prom;
+    document.getElementById('ws-statement').value = p.differentiated_app_spec.name + ': ' + p.differentiated_app_spec.thesis;
+    document.getElementById('ws-category').value = '';
+    document.getElementById('ws-first10').value = p.pre_build_validation_plan.first_10_paying_customers.map((c,i)=>(i+1) + '. ' + c).join('\n');
+    document.getElementById('ws-redditpost').value = "Title: I built an AI dress try-on app in 3 weeks because my sister couldn't pick a prom dress\n\nBody: My 17yo sister has spent 4 weekends shopping for a prom dress and returned 8. So I built a thing where you can paste any Pinterest dress link and see yourself wearing it. Free for the first 100 prom-2026 girls. Would love your feedback.\n\n[link]\n\nWhat would you add?";
+    document.getElementById('ws-adchannel').value = p.launch_plan.paid_ads[0].channel + ' — ' + p.launch_plan.paid_ads[0].budget;
+    document.getElementById('ws-adcreative').value = p.launch_plan.paid_ads[0].creative;
+    document.getElementById('ws-killdm').value = '<40% = pivot';
+    document.getElementById('ws-killwait').value = '<100 = pivot';
+    document.getElementById('ws-killmrr').value = p.pre_build_validation_plan.kill_criteria[2];
+    document.getElementById('ws-targetmrr').value = p.pre_build_validation_plan.month_3_revenue_target;
+    generatePlan();
+  }, 100);
+}
+
+function clearWorksheet() {
+  ['ws-statement','ws-category','ws-first10','ws-redditpost','ws-adchannel','ws-adcreative','ws-killdm','ws-killwait','ws-killmrr','ws-targetmrr'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('planOutput').style.display = 'none';
+  document.getElementById('autoCommunities').innerHTML = 'Pick a category above to load the launch map.';
+}
+
+// === PATH A METHOD TABS ===
+function setMethod(id, el) {
+  document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.method-body').forEach(b => b.classList.remove('active'));
+  document.getElementById('method-' + id).classList.add('active');
+}
+
+// === A2 RENDER ===
+let chartView = 'grossing';
+function setChartTab(view, el) {
+  chartView = view;
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderCharts();
+}
+
+function renderCharts() {
+  const data = chartView === 'grossing' ? DATA.charts.top_grossing : DATA.charts.top_free;
+  const tbl = document.getElementById('chartsTable');
+  let html = '<thead><tr><th style="width:40px">#</th><th>App</th><th style="width:120px">Status</th><th>Clone angle / why now</th></tr></thead><tbody>';
+  data.forEach(a => {
+    const rowClass = a.clonable ? 'clonable' : '';
+    const status = a.clonable
+      ? '<span class="clonable-badge">✓ Clonable</span>'
+      : '<span class="skip-badge">Skip — too big</span>';
+    const angle = a.clonable
+      ? '<div class="chart-angle">' + a.angle + '</div>' + (a.why_now ? '<div class="chart-why-now">⚡ ' + a.why_now + '</div>' : '')
+      : '<div class="chart-angle" style="color: var(--muted); font-style: italic;">Mega-platform — don\'t try to clone</div>';
+    html += '<tr class="' + rowClass + '">' +
+      '<td><strong style="color: var(--orange2)">' + a.rank + '</strong></td>' +
+      '<td><div class="chart-app-name">' + a.title + '</div><div class="chart-app-cat">' + a.category + ' · ' + a.maker + '</div></td>' +
+      '<td>' + status + '</td>' +
+      '<td>' + angle + '</td>' +
+    '</tr>';
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+
+// === A3 RENDER ===
+function renderLTV() {
+  const grid = document.getElementById('ltvGrid');
+  grid.innerHTML = DATA.ltv.map(v => {
+    const incumbents = v.incumbents.map(i =>
+      '<div class="incumbent-row"><span class="incumbent-name">' + i.name + '</span><span class="incumbent-size">' + i.size + '</span><span class="incumbent-weak">' + i.weakness + '</span></div>'
+    ).join('');
+    const niches = v.niche_gaps.map(n =>
+      '<div class="ltv-niche-row"><div class="ltv-niche-name">' + n.niche + '</div><div class="ltv-niche-tam">📊 ' + n.tam_signal + '</div></div>'
+    ).join('');
+    const keywords = v.high_cpc_keywords.map(k =>
+      '<span class="ltv-keyword">' + k + '</span>'
+    ).join('');
+    return '<div class="ltv-card">' +
+      '<div class="ltv-top">' +
+        '<div class="ltv-icon">' + v.icon + '</div>' +
+        '<div style="flex:1;"><div class="ltv-name">' + v.vertical + '</div>' +
+        '<div class="ltv-bands"><span class="ltv-band-pill">LTV: ' + v.ltv_band + '</span><span class="ltv-band-pill">ARPU: ' + v.arpu_band + '</span></div></div>' +
+      '</div>' +
+      '<div class="ltv-why">💡 ' + v.why_high_ltv + '</div>' +
+      '<div class="ltv-section-lbl">🔑 High-CPC keywords</div>' +
+      '<div class="ltv-keywords">' + keywords + '</div>' +
+      '<div class="ltv-section-lbl">🏛 Incumbents (and their weakness)</div>' +
+      '<div style="margin-bottom: 14px;">' + incumbents + '</div>' +
+      '<div class="ltv-section-lbl">🎯 Niche gaps where incumbent is bad</div>' +
+      '<div>' + niches + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// === A4 RENDER ===
+function renderUnderserved() {
+  const meth = document.getElementById('methodologySteps');
+  meth.innerHTML = DATA.underserved.methodology.map(s =>
+    '<div class="meth-step"><div class="meth-step-num">STEP ' + s.step + '</div>' +
+    '<div class="meth-step-title">' + s.title + '</div>' +
+    '<ul>' + s.actions.map(a => '<li>' + a + '</li>').join('') + '</ul></div>'
+  ).join('');
+
+  const grid = document.getElementById('nicheExamples');
+  grid.innerHTML = DATA.underserved.example_niches.map(n =>
+    '<div class="niche-ex-card">' +
+      '<div class="niche-ex-name">' + n.niche + '</div>' +
+      '<div class="niche-ex-row"><span class="niche-ex-lbl">Demand</span><span class="niche-ex-val">' + n.demand_evidence + '</span></div>' +
+      '<div class="niche-ex-row"><span class="niche-ex-lbl">Gap</span><span class="niche-ex-val">' + n.no_app_evidence + '</span></div>' +
+      '<div class="niche-ex-row"><span class="niche-ex-lbl">Adjacent $</span><span class="niche-ex-val">' + n.adjacent_paid + '</span></div>' +
+      '<div class="niche-ex-row"><span class="niche-ex-lbl">Monetize</span><span class="niche-ex-val">' + n.monetization + '</span></div>' +
+    '</div>'
+  ).join('');
+}
+
+renderStageNav();
+renderTrends();
+renderProm();
+renderClones();
+renderCategoryMap();
+populateCategorySelect();
+renderCharts();
+renderLTV();
+renderUnderserved();
+</script>
+</body>
+</html>
