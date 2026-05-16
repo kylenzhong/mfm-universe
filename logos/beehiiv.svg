@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#05120d"/>
+  <polygon points="256,60 390,135 390,285 256,360 122,285 122,135" fill="none" stroke="#2DE1A8" stroke-width="14"/>
+  <polygon points="256,100 358,158 358,274 256,332 154,274 154,158" fill="rgba(45,225,168,0.1)" stroke="#2DE1A8" stroke-width="5"/>
+  <text x="256" y="282" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="148" font-weight="900" fill="#2DE1A8">B</text>
+  <text x="256" y="460" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="38" font-weight="900" fill="#2DE1A8" letter-spacing="4">beehiiv</text>
+</svg>

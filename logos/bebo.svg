@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#12062a"/>
+  <!-- Speech bubble / social shape -->
+  <ellipse cx="256" cy="220" rx="190" ry="145" fill="#7C5CFC"/>
+  <!-- Tail -->
+  <polygon points="155,340 196,278 220,352" fill="#7C5CFC"/>
+  <!-- Three dots inside -->
+  <circle cx="162" cy="220" r="34" fill="white"/>
+  <circle cx="256" cy="220" r="34" fill="white"/>
+  <circle cx="350" cy="220" r="34" fill="white"/>
+  <!-- Inner dots (eyes of dots) -->
+  <circle cx="162" cy="220" r="16" fill="#7C5CFC"/>
+  <circle cx="256" cy="220" r="16" fill="#7C5CFC"/>
+  <circle cx="350" cy="220" r="16" fill="#7C5CFC"/>
+  <text x="256" y="474" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="44" font-weight="900" fill="#7C5CFC" letter-spacing="4">BEBO</text>
+</svg>

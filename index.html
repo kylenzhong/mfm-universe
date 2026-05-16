@@ -79,6 +79,7 @@
   .tile.rpg { --accent: var(--purple); }
   .tile.starter { --accent: var(--orange); }
   .tile.pipeline { --accent: var(--teal); }
+  .tile.newsletter { --accent: var(--gold2); }
   .tile-icon { font-size: 36px; margin-bottom: 14px; }
   .tile-title {
     font-weight: 800; font-size: 18px; margin-bottom: 8px;
@@ -166,17 +167,24 @@
       </div>
     </a>
 
-    <a href="MFM_RPG.html" class="tile rpg">
-      <div class="tile-arrow">→</div>
-      <div class="tile-icon">🎮</div>
-      <div class="tile-title">MFM RPG</div>
-      <div class="tile-desc">A pixel-art RPG where you play through the MFM universe, leveling up by absorbing the lessons of past episodes. For fun and study both.</div>
+    <a href="#newsletter" class="tile newsletter" style="cursor:default;opacity:0.92" onclick="event.preventDefault();document.getElementById('newsletter-soon').scrollIntoView({behavior:'smooth'})">
+      <div class="tile-arrow">✨</div>
+      <div class="tile-icon">✉️</div>
+      <div class="tile-title">Newsletter</div>
+      <div class="tile-desc">A weekly digest for operators — each new MFM episode broken into a TL;DR, an idea-density riff, and "if you wanted to do this, start here." Launching W19 — May 2026.</div>
       <div class="tile-stats">
-        <span class="tile-stat">Pixel art</span>
-        <span class="tile-stat">Interactive</span>
-        <span class="tile-stat">Playable in browser</span>
+        <span class="tile-stat">Coming soon</span>
+        <span class="tile-stat">Weekly</span>
+        <span class="tile-stat">Free</span>
       </div>
     </a>
+  </div>
+
+  <div id="newsletter-soon" style="background:linear-gradient(135deg,#141428 0%,#1a1a35 100%);border:1px solid #2a2a4a;border-radius:16px;padding:32px;margin-bottom:32px;text-align:center">
+    <div style="color:#f0c040;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px">Coming W19 (May 18–22, 2026)</div>
+    <h2 style="color:#fff;font-size:22px;margin-bottom:10px">The MFM operator's digest</h2>
+    <p style="color:#cdd;font-size:14px;line-height:1.6;max-width:560px;margin:0 auto 18px">A weekly read for people who screenshot ideas from the show and never go back to them. Sign-up form lands W19. Until then: bookmark this page or follow the project on GitHub.</p>
+    <a href="https://github.com/kylenzhong/mfm-universe" style="display:inline-block;background:rgba(212,160,0,0.15);color:#f0c040;border:1px solid #d4a000;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none">Watch the repo →</a>
   </div>
 
   <div class="footer">

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#060e1a"/>
+  <ellipse cx="248" cy="256" rx="200" ry="42" fill="#4a7aaa"/>
+  <path d="M440,256 L496,256 L480,236 L480,276 Z" fill="#4a7aaa"/>
+  <polygon points="220,256 260,80 310,256 260,268" fill="#3a6090"/>
+  <polygon points="68,256 92,152 118,256" fill="#3a6090"/>
+  <ellipse cx="100" cy="282" rx="50" ry="20" fill="#2a4a6a"/>
+  <circle cx="360" cy="242" r="12" fill="#aaddff" opacity="0.8"/>
+  <circle cx="330" cy="242" r="12" fill="#aaddff" opacity="0.8"/>
+  <circle cx="300" cy="242" r="12" fill="#aaddff" opacity="0.8"/>
+  <circle cx="270" cy="242" r="12" fill="#aaddff" opacity="0.8"/>
+  <text x="256" y="360" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="28" font-weight="900" fill="#6699cc" letter-spacing="3">MARQUIS JET</text>
+  <text x="256" y="396" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="rgba(102,153,204,0.6)" letter-spacing="4">EST. 2001</text>
+</svg>

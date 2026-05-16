@@ -1,4 +1,14 @@
 {
-  "cleanUrls": false,
-  "trailingSlash": false
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/(.*).html",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, must-revalidate" }]
+    },
+    {
+      "source": "/(.*).svg",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    }
+  ]
 }

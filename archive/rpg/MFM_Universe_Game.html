@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MFM Universe - Walk the City</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
+canvas { display: block; }
+
+#loading {
+    position: fixed; inset: 0; z-index: 100;
+    background: linear-gradient(135deg, #0a0a2e 0%, #1a1a4e 50%, #0a0a2e 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: white;
+}
+#loading h1 {
+    font-size: 48px; font-weight: 900; letter-spacing: 4px;
+    background: linear-gradient(90deg, #ff4444, #ff8800, #ff4444);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+#loading p { font-size: 16px; color: #888; margin-bottom: 30px; }
+#progress-bar {
+    width: 300px; height: 6px; background: #333; border-radius: 3px; overflow: hidden;
+}
+#progress-fill {
+    width: 0%; height: 100%; background: linear-gradient(90deg, #ff4444, #ff8800);
+    border-radius: 3px; transition: width 0.3s;
+}
+
+#hud {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+    pointer-events: none;
+}
+#hud-left {
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+    padding: 10px 20px; border-radius: 10px; color: white;
+}
+#hud-left h2 { font-size: 18px; font-weight: 700; color: #ff5555; }
+#hud-left span { font-size: 12px; color: #aaa; }
+#hud-right {
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+    padding: 10px 20px; border-radius: 10px; color: #ccc; font-size: 12px;
+    text-align: right; line-height: 1.6;
+}
+
+#crosshair {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 20px; height: 20px; z-index: 10; pointer-events: none;
+}
+#crosshair::before, #crosshair::after {
+    content: ''; position: absolute; background: rgba(255,255,255,0.5);
+}
+#crosshair::before { width: 2px; height: 20px; left: 9px; top: 0; }
+#crosshair::after { width: 20px; height: 2px; left: 0; top: 9px; }
+
+#minimap {
+    position: fixed; bottom: 20px; right: 20px; width: 180px; height: 180px;
+    background: rgba(0,0,0,0.7); border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 10px; z-index: 10; overflow: hidden;
+}
+#minimap canvas { width: 100%; height: 100%; }
+
+#tooltip {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+    padding: 12px 24px; border-radius: 8px; color: white;
+    font-size: 16px; font-weight: 600; z-index: 10;
+    pointer-events: none; opacity: 0; transition: opacity 0.3s;
+    border: 1px solid rgba(255,100,100,0.3);
+}
+#tooltip.visible { opacity: 1; }
+
+#instructions {
+    position: fixed; bottom: 20px; left: 20px; z-index: 10;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+    padding: 12px 16px; border-radius: 10px; color: #999;
+    font-size: 11px; line-height: 1.8; pointer-events: none;
+}
+#instructions kbd {
+    background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 3px;
+    font-family: monospace; color: #ddd;
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+    <h1>MFM UNIVERSE</h1>
+    <p>Loading the city...</p>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+</div>
+
+<div id="hud" style="display:none">
+    <div id="hud-left">
+        <h2>MFM UNIVERSE</h2>
+        <span>Walk the Silicon Valley of Podcasting</span>
+    </div>
+    <div id="hud-right">
+        <div id="coords"></div>
+    </div>
+</div>
+
+<div id="crosshair" style="display:none"></div>
+
+<div id="tooltip"></div>
+
+<div id="instructions" style="display:none">
+    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move &nbsp;
+    <kbd>Mouse</kbd> Look &nbsp;
+    <kbd>Shift</kbd> Sprint &nbsp;
+    <kbd>Space</kbd> Jump &nbsp;
+    <kbd>Esc</kbd> Release cursor
+</div>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
+    }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// Since r128 doesn't have GLTFLoader in module form, load it via classic script
+// We'll build the scene procedurally instead — matching the Blender scene exactly
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 500);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.body.appendChild(renderer.domElement);
+
+// ── SKY ──
+const skyGeo = new THREE.SphereGeometry(200, 32, 32);
+const skyMat = new THREE.ShaderMaterial({
+    uniforms: {
+        topColor: { value: new THREE.Color(0x4488cc) },
+        bottomColor: { value: new THREE.Color(0xaaccee) },
+    },
+    vertexShader: `varying vec3 vWorldPos;
+        void main() { vec4 wp = modelMatrix * vec4(position,1.0); vWorldPos = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`,
+    fragmentShader: `uniform vec3 topColor; uniform vec3 bottomColor; varying vec3 vWorldPos;
+        void main() { float h = normalize(vWorldPos).y * 0.5 + 0.5; gl_FragColor = vec4(mix(bottomColor, topColor, h), 1.0); }`,
+    side: THREE.BackSide
+});
+scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+// ── LIGHTING ──
+const sun = new THREE.DirectionalLight(0xfff5e0, 2.5);
+sun.position.set(30, 50, -20);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -80; sun.shadow.camera.right = 80;
+sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
+scene.add(sun);
+scene.add(new THREE.AmbientLight(0x8899bb, 0.6));
+scene.add(new THREE.HemisphereLight(0x88aacc, 0x445522, 0.4));
+
+// ── MATERIALS ──
+function makeMat(color, opts = {}) {
+    return new THREE.MeshStandardMaterial({
+        color: new THREE.Color(color),
+        metalness: opts.metal || 0,
+        roughness: opts.rough !== undefined ? opts.rough : 0.5,
+        emissive: opts.emissive ? new THREE.Color(opts.emissive) : undefined,
+        emissiveIntensity: opts.emissiveStr || 0,
+    });
+}
+
+const roadMat = makeMat(0x2a2a2e, { rough: 0.9 });
+const lawnMat = makeMat(0x2a8820, { rough: 0.8 });
+const darkBase = makeMat(0x151518, { metal: 0.6, rough: 0.25 });
+
+// ── GROUND ──
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), roadMat);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Lawn patches
+const lawnPositions = [
+    [0, 0, 40, 36], [-50, -50, 30, 30], [50, -50, 30, 30],
+    [-50, 40, 25, 25], [50, 40, 25, 25],
+];
+lawnPositions.forEach(([x, z, w, d]) => {
+    const lawn = new THREE.Mesh(new THREE.PlaneGeometry(w, d), lawnMat);
+    lawn.rotation.x = -Math.PI / 2; lawn.position.set(x, 0.05, z);
+    lawn.receiveShadow = true; scene.add(lawn);
+});
+
+// ── BUILDING DATA ──
+const buildings = [
+    // name, x, z (note: Blender Y → Three.js -Z), w, d, h, color, textColor
+    { name: "MFM\nUNIVERSE", x: 0, z: 0, w: 34, d: 28, h: 14, col: 0x8cb8cc, textCol: 0xff0505, roof: true, main: true },
+    { name: "HUBSPOT", x: 40, z: 35, w: 20, d: 16, h: 8, col: 0xa67a56, textCol: 0xff7a59 },
+    { name: "HAMPTON", x: -38, z: 35, w: 20, d: 16, h: 7, col: 0x5a8ca5, textCol: 0x004225 },
+    { name: "SPANX", x: -30, z: -48, w: 14, d: 11, h: 12, col: 0xcc2840, textCol: 0xffffff },
+    { name: "Y COMBINATOR", x: 0, z: -52, w: 16, d: 13, h: 16, col: 0xe65a1a, textCol: 0xffffff },
+    { name: "MARQUIS JET", x: 30, z: -48, w: 14, d: 12, h: 11, col: 0x282830, textCol: 0xd9b333 },
+    { name: "29029", x: 55, z: -40, w: 12, d: 10, h: 9, col: 0x334d80, textCol: 0xffffff },
+    { name: "EXPLODING\nKITTENS", x: -55, z: -40, w: 14, d: 10, h: 10, col: 0x9a2818, textCol: 0xf21a0a },
+    { name: "SHOPIFY", x: 50, z: -5, w: 14, d: 12, h: 10, col: 0x5aa633, textCol: 0xffffff },
+    { name: "CALM", x: 50, z: 18, w: 12, d: 10, h: 7, col: 0x335ab3, textCol: 0xffffff },
+    { name: "APPSUMO", x: -50, z: -5, w: 14, d: 12, h: 9, col: 0xf2991a, textCol: 0x1a1a1a },
+    { name: "MILK ROAD", x: -50, z: 18, w: 12, d: 10, h: 7, col: 0xd9d9cc, textCol: 0x261a80 },
+    { name: "FEASTABLES", x: 60, z: 25, w: 12, d: 10, h: 8, col: 0x803399, textCol: 0xffd900 },
+    { name: "GYMSHARK", x: -60, z: 25, w: 12, d: 10, h: 8, col: 0x1f1f26, textCol: 0xffffff },
+    { name: "NOTION", x: -60, z: -15, w: 10, d: 9, h: 7, col: 0xf2f2e6, textCol: 0x1a1a1a },
+    { name: "STRIPE", x: 60, z: -15, w: 10, d: 9, h: 8, col: 0x403399, textCol: 0xffffff },
+    { name: "SENDGRID", x: 0, z: 40, w: 18, d: 12, h: 6, col: 0x3380cc, textCol: 0xffffff },
+];
+
+const buildingMeshes = [];
+const colliders = [];
+const labelData = [];
+
+buildings.forEach(b => {
+    const glassMat = makeMat(b.col, { metal: 0.3, rough: 0.1 });
+
+    // Building body
+    const geo = new THREE.BoxGeometry(b.w, b.h, b.d);
+    const mesh = new THREE.Mesh(geo, glassMat);
+    mesh.position.set(b.x, b.h / 2, b.z);
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    scene.add(mesh);
+    buildingMeshes.push(mesh);
+
+    // Collider box (slightly larger for collision)
+    colliders.push({
+        minX: b.x - b.w/2 - 0.5, maxX: b.x + b.w/2 + 0.5,
+        minZ: b.z - b.d/2 - 0.5, maxZ: b.z + b.d/2 + 0.5,
+        h: b.h
+    });
+
+    // Dark base
+    const baseGeo = new THREE.BoxGeometry(b.w + 0.2, 0.6, b.d + 0.2);
+    const baseMesh = new THREE.Mesh(baseGeo, darkBase);
+    baseMesh.position.set(b.x, 0.3, b.z);
+    scene.add(baseMesh);
+
+    // Window stripes (visual detail)
+    const stripeMat = makeMat(0x1e2026, { metal: 0.8, rough: 0.3 });
+    for (let sy = 2; sy < b.h; sy += 2) {
+        const stripeGeo = new THREE.BoxGeometry(b.w + 0.05, 0.15, b.d + 0.05);
+        const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+        stripe.position.set(b.x, sy, b.z);
+        scene.add(stripe);
+    }
+
+    // Label data for 3D text canvas
+    labelData.push({
+        name: b.name, x: b.x, z: b.z, h: b.h, d: b.d, w: b.w,
+        textCol: b.textCol, roof: b.roof, main: b.main
+    });
+});
+
+// ── 3D TEXT LABELS (Canvas textures on planes) ──
+function makeTextSprite(text, color, size, isFront = true) {
+    const canvas = document.createElement('canvas');
+    const lines = text.split('\n');
+    const fontSize = 64;
+    canvas.width = 512;
+    canvas.height = fontSize * lines.length + 40;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = `#${new THREE.Color(color).getHexString()}`;
+    ctx.font = `900 ${fontSize}px Impact, Arial Black, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    lines.forEach((line, i) => {
+        const y = canvas.height / 2 + (i - (lines.length-1)/2) * fontSize;
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillText(line, canvas.width/2 + 2, y + 2);
+        ctx.fillStyle = `#${new THREE.Color(color).getHexString()}`;
+        ctx.fillText(line, canvas.width/2, y);
+    });
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.LinearFilter;
+    const aspect = canvas.width / canvas.height;
+    const planeH = size;
+    const planeW = planeH * aspect;
+
+    const mat = new THREE.MeshBasicMaterial({
+        map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false
+    });
+    return new THREE.Mesh(new THREE.PlaneGeometry(planeW, planeH), mat);
+}
+
+labelData.forEach(b => {
+    if (b.main) {
+        // MFM: text on roof
+        const label = makeTextSprite(b.name, b.textCol, 10);
+        label.rotation.x = -Math.PI / 2;
+        label.position.set(b.x, b.h + 0.5, b.z);
+        scene.add(label);
+    } else {
+        // Others: text on front face
+        const label = makeTextSprite(b.name, b.textCol, Math.min(b.h * 0.6, 4));
+        label.position.set(b.x, b.h * 0.55, b.z + b.d/2 + 0.15);
+        scene.add(label);
+    }
+});
+
+// ── MR BEAST BILLBOARD ──
+const bbX = 25, bbZ = 30;
+const poleMat = makeMat(0x5a5a60, { metal: 0.8, rough: 0.3 });
+[-4, 4].forEach(dx => {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 18, 8), poleMat);
+    pole.position.set(bbX + dx, 9, bbZ); scene.add(pole);
+});
+const panelMat = makeMat(0x08b0d5, { rough: 0.3, emissive: 0x05708a, emissiveStr: 0.3 });
+const panel = new THREE.Mesh(new THREE.BoxGeometry(12, 5, 0.3), panelMat);
+panel.position.set(bbX, 14, bbZ + 0.15); scene.add(panel);
+const bbLabel = makeTextSprite("MrBEAST", 0xffffff, 3.5);
+bbLabel.position.set(bbX, 14, bbZ + 0.35); scene.add(bbLabel);
+colliders.push({ minX: bbX-6.5, maxX: bbX+6.5, minZ: bbZ-1, maxZ: bbZ+1, h: 18 });
+
+// ── HOT AIR BALLOONS ──
+function makeBalloon(x, y, z, color, text, textColor) {
+    const group = new THREE.Group();
+
+    // Envelope
+    const envGeo = new THREE.SphereGeometry(6, 24, 16);
+    envGeo.scale(1, 1.3, 1);
+    const envMat = makeMat(color, { rough: 0.4, emissive: color, emissiveStr: 0.1 });
+    const envelope = new THREE.Mesh(envGeo, envMat);
+    envelope.position.y = 0;
+    group.add(envelope);
+
+    // Basket
+    const basketMat = makeMat(0x8c5a26, { rough: 0.6 });
+    const basket = new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 2), basketMat);
+    basket.position.y = -10.8;
+    group.add(basket);
+
+    // Ropes
+    const ropeMat = makeMat(0x4d331a, { rough: 0.7 });
+    [[-0.8,-0.8],[0.8,-0.8],[-0.8,0.8],[0.8,0.8]].forEach(([dx,dz]) => {
+        const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 9, 4), ropeMat);
+        rope.position.set(dx, -6, dz); group.add(rope);
+    });
+
+    // Text label
+    const label = makeTextSprite(text, textColor, 3);
+    label.position.set(0, 0, 6.2);
+    group.add(label);
+
+    group.position.set(x, y, z);
+    scene.add(group);
+    return group;
+}
+
+const hustleBalloon = makeBalloon(-35, 35, -20, 0x192734, "THE\nHUSTLE", 0xffffff);
+const brewBalloon = makeBalloon(40, 38, -25, 0xbf8c40, "MORNING\nBREW", 0x261a05);
+
+// ── TREES ──
+const trunkMat = makeMat(0x5a4020, { rough: 0.8 });
+const leafMat = makeMat(0x338822, { rough: 0.6 });
+function addTree(x, z) {
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2, 6), trunkMat);
+    trunk.position.set(x, 1, z); trunk.castShadow = true; scene.add(trunk);
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 8), leafMat);
+    crown.position.set(x, 3, z); crown.castShadow = true; scene.add(crown);
+}
+for (let i = 0; i < 60; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 18 + Math.random() * 55;
+    addTree(Math.cos(angle) * dist, Math.sin(angle) * dist);
+}
+
+// ── STREET BANNERS ──
+const bannerColors = [0xff4d33, 0x33b3ff, 0xffcc1a, 0x4de64d];
+for (let i = 0; i < 8; i++) {
+    const x = -45 + i * 12;
+    const col = bannerColors[i % 4];
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 6, 6), poleMat);
+    pole.position.set(x, 3, 25); scene.add(pole);
+    const flag = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.5, 1),
+        makeMat(col, { rough: 0.4, emissive: col, emissiveStr: 0.2 })
+    );
+    flag.position.set(x + 0.5, 5, 25); scene.add(flag);
+}
+
+// ── CARS ──
+const carColors = [0xff3333, 0x3366ff, 0x33cc33, 0xffaa00, 0xcc33ff, 0x333333];
+for (let i = 0; i < 20; i++) {
+    const carCol = carColors[i % carColors.length];
+    const car = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 4), makeMat(carCol, { metal: 0.4, rough: 0.3 }));
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 25 + Math.random() * 40;
+    car.position.set(Math.cos(angle) * dist, 0.5, Math.sin(angle) * dist);
+    car.rotation.y = angle + Math.PI/2;
+    car.castShadow = true;
+    scene.add(car);
+}
+
+// ── PEOPLE (simple capsules) ──
+const skinMat = makeMat(0xd9a680, { rough: 0.6 });
+for (let i = 0; i < 25; i++) {
+    const person = new THREE.Group();
+    const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.25, 0.25, 1.2, 6),
+        makeMat([0x3366cc, 0xcc3333, 0x33aa33, 0xff8800, 0x8833aa][i%5], { rough: 0.5 })
+    );
+    body.position.y = 0.9;
+    person.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), skinMat);
+    head.position.y = 1.7;
+    person.add(head);
+
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 15 + Math.random() * 50;
+    person.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+    person.castShadow = true;
+    scene.add(person);
+}
+
+// ══════════════════════════════════════════════════
+// PLAYER CONTROLLER
+// ══════════════════════════════════════════════════
+const player = {
+    x: 0, y: 2.5, z: 60,  // Start in front of MFM building
+    yaw: Math.PI,  // Face toward buildings
+    pitch: 0,
+    vx: 0, vz: 0, vy: 0,
+    speed: 12,
+    sprintMul: 2,
+    onGround: true,
+};
+
+camera.position.set(player.x, player.y, player.z);
+
+// Input
+const keys = {};
+document.addEventListener('keydown', e => { keys[e.code] = true; });
+document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+let isLocked = false;
+renderer.domElement.addEventListener('click', () => {
+    renderer.domElement.requestPointerLock();
+});
+document.addEventListener('pointerlockchange', () => {
+    isLocked = document.pointerLockElement === renderer.domElement;
+});
+document.addEventListener('mousemove', e => {
+    if (!isLocked) return;
+    player.yaw -= e.movementX * 0.002;
+    player.pitch -= e.movementY * 0.002;
+    player.pitch = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, player.pitch));
+});
+
+// Collision check
+function checkCollision(nx, nz) {
+    for (const c of colliders) {
+        if (nx > c.minX && nx < c.maxX && nz > c.minZ && nz < c.maxZ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Proximity check for tooltip
+function getNearestBuilding() {
+    let nearest = null, minDist = 15;
+    for (const b of buildings) {
+        const dx = player.x - b.x, dz = player.z - b.z;
+        const dist = Math.sqrt(dx*dx + dz*dz);
+        if (dist < minDist) { minDist = dist; nearest = b; }
+    }
+    return nearest;
+}
+
+// ── ANIMATION LOOP ──
+const clock = new THREE.Clock();
+let frames = 0;
+
+function animate() {
+    requestAnimationFrame(animate);
+    const dt = Math.min(clock.getDelta(), 0.05);
+    frames++;
+
+    // Player movement
+    const sprint = keys['ShiftLeft'] || keys['ShiftRight'] ? player.sprintMul : 1;
+    const speed = player.speed * sprint * dt;
+
+    const forward = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+    const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+
+    let moveX = 0, moveZ = 0;
+    if (keys['KeyW']) { moveX += forward.x * speed; moveZ += forward.z * speed; }
+    if (keys['KeyS']) { moveX -= forward.x * speed; moveZ -= forward.z * speed; }
+    if (keys['KeyA']) { moveX -= right.x * speed; moveZ -= right.z * speed; }
+    if (keys['KeyD']) { moveX += right.x * speed; moveZ += right.z * speed; }
+
+    // Collision resolution (slide along walls)
+    const nx = player.x + moveX;
+    const nz = player.z + moveZ;
+    if (!checkCollision(nx, player.z)) player.x = nx;
+    if (!checkCollision(player.x, nz)) player.z = nz;
+
+    // Jump
+    if (keys['Space'] && player.onGround) {
+        player.vy = 8;
+        player.onGround = false;
+    }
+    player.vy -= 20 * dt; // gravity
+    player.y += player.vy * dt;
+    if (player.y <= 2.5) { player.y = 2.5; player.vy = 0; player.onGround = true; }
+
+    // Boundary
+    player.x = Math.max(-120, Math.min(120, player.x));
+    player.z = Math.max(-120, Math.min(120, player.z));
+
+    // Camera
+    camera.position.set(player.x, player.y, player.z);
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = player.yaw;
+    camera.rotation.x = player.pitch;
+
+    // Balloon animation (gentle bob + drift)
+    const t = clock.elapsedTime;
+    hustleBalloon.position.y = 35 + Math.sin(t * 0.5) * 1.5;
+    hustleBalloon.position.x = -35 + Math.sin(t * 0.3) * 3;
+    brewBalloon.position.y = 38 + Math.sin(t * 0.4 + 1) * 1.5;
+    brewBalloon.position.x = 40 + Math.sin(t * 0.35 + 2) * 3;
+
+    // Tooltip for nearby building
+    const nearby = getNearestBuilding();
+    const tooltip = document.getElementById('tooltip');
+    if (nearby) {
+        tooltip.textContent = `📍 ${nearby.name.replace('\n', ' ')}`;
+        tooltip.classList.add('visible');
+    } else {
+        tooltip.classList.remove('visible');
+    }
+
+    // Coords HUD
+    if (frames % 10 === 0) {
+        document.getElementById('coords').textContent =
+            `X: ${player.x.toFixed(0)}  Z: ${player.z.toFixed(0)}`;
+    }
+
+    renderer.render(scene, camera);
+}
+
+// ── START ──
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Hide loading, show HUD
+setTimeout(() => {
+    document.getElementById('progress-fill').style.width = '100%';
+    setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('hud').style.display = 'flex';
+        document.getElementById('crosshair').style.display = 'block';
+        document.getElementById('instructions').style.display = 'block';
+        animate();
+    }, 500);
+}, 800);
+
+// Simulate loading progress
+let prog = 0;
+const loadInterval = setInterval(() => {
+    prog += Math.random() * 30;
+    if (prog >= 100) { prog = 100; clearInterval(loadInterval); }
+    document.getElementById('progress-fill').style.width = prog + '%';
+}, 200);
+</script>
+</body>
+</html>

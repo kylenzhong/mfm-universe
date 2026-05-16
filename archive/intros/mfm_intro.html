@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My First Million — The Companies</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #06030f;
+  font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+/* ═══════════════════════════════════════════════════════
+   SKY
+═══════════════════════════════════════════════════════ */
+#sky {
+  position: fixed; inset: 0; z-index: 0;
+  background: linear-gradient(180deg,
+    #060318  0%, #0d0b48 20%, #3d1060 44%,
+    #8c3840 63%, #d45e1e 78%, #f5a520 91%, #f8c85a 100%);
+}
+#sun-glow {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 260px;
+  background: radial-gradient(ellipse, rgba(255,165,28,.55) 0%,
+    rgba(255,90,0,.12) 55%, transparent 70%);
+  z-index: 1; pointer-events: none;
+}
+#stars-cvs { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+#clouds    { position: fixed; top: 0; left: 0; width: 100%; height: 55%;
+  z-index: 3; pointer-events: none; overflow: hidden; }
+
+/* ═══════════════════════════════════════════════════════
+   SCENE WRAPPER (contains all three parallax layers)
+═══════════════════════════════════════════════════════ */
+#scene-wrapper {
+  position: fixed; inset: 0; overflow: hidden; z-index: 5;
+}
+
+/* ─ Shared layer styles ─ */
+.p-layer {
+  position: absolute; bottom: 0; left: 0;
+  height: 100%; width: max-content;
+  display: flex; align-items: flex-end;
+  will-change: transform;
+}
+
+/* BG LAYER — small, hazy, 30% pan speed */
+#layer-bg {
+  padding-bottom: 95px; padding-left: 60px; padding-right: 200px; gap: 10px;
+  filter: opacity(0.42) blur(1.4px) saturate(0.5);
+  /* atmospheric perspective: everything looks slightly washed / desaturated */
+}
+/* Shift bg buildings up — they sit higher in the frame = look further away */
+#layer-bg .building { transform: translateY(-52px); }
+/* mountain/hills silhouette fixed between sky and layers */
+#mountains {
+  position: fixed; bottom: 108px; left: 0; right: 0; height: 220px;
+  z-index: 4; pointer-events: none;
+}
+
+/* MID LAYER — main MFM buildings, 100% speed */
+#layer-mid {
+  padding-bottom: 90px; padding-left: 120px; padding-right: 300px; gap: 18px;
+}
+
+/* FG LAYER — street props, 130% speed */
+#layer-fg {
+  padding-bottom: 0; padding-left: 80px; padding-right: 200px; gap: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GROUND & ROAD
+═══════════════════════════════════════════════════════ */
+#ground {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 130px;
+  z-index: 10;
+  background: linear-gradient(180deg, #9e7840 0%, #6a4820 100%);
+}
+#road {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 74px;
+  z-index: 11; background: #1c1c1c; border-top: 3px solid #303030;
+  overflow: hidden;
+}
+#road-dashes {
+  position: absolute; top: 50%; left: 0; right: 0; height: 5px;
+  background: repeating-linear-gradient(
+    90deg, #d4a017 0, #d4a017 44px, transparent 44px, transparent 90px);
+  transform: translateY(-50%);
+  animation: dashMove .75s linear infinite;
+}
+@keyframes dashMove { to { background-position-x: -90px; } }
+
+/* ═══════════════════════════════════════════════════════
+   BUILDINGS
+═══════════════════════════════════════════════════════ */
+.building {
+  flex-shrink: 0; position: relative;
+  border-radius: 4px 4px 0 0; overflow: visible;
+}
+
+/* subtle edge + top highlight */
+.building::before {
+  content: ''; position: absolute; inset: 0;
+  box-shadow: inset 1px 0 0 rgba(255,255,255,.06),
+              inset -1px 0 0 rgba(255,255,255,.04),
+              inset 0 1px 0 rgba(255,255,255,.09);
+  border-radius: 3px 3px 0 0;
+  z-index: 3; pointer-events: none;
+}
+
+/* window-grid overlay */
+.b-grid {
+  position: absolute; inset: 0; z-index: 1;
+  background-image:
+    repeating-linear-gradient(transparent,transparent 13px, rgba(0,0,0,.18) 13px, rgba(0,0,0,.18) 14px),
+    repeating-linear-gradient(90deg,transparent,transparent 13px, rgba(0,0,0,.18) 13px, rgba(0,0,0,.18) 14px);
+  border-radius: 4px 4px 0 0;
+}
+
+/* Logo area */
+.b-logo {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  width: 62%; z-index: 8;
+}
+.b-logo svg { width: 100%; height: auto; display: block; }
+
+/* Company name */
+.b-name {
+  position: absolute; bottom: 10px; left: 0; right: 0;
+  text-align: center; font-size: 8px; font-weight: 700;
+  letter-spacing: 2.4px; text-transform: uppercase;
+  color: rgba(255,255,255,.3); z-index: 8;
+}
+
+/* Antenna */
+.antenna {
+  position: absolute; top: 0; left: 50%;
+  transform: translate(-50%, -100%);
+  width: 2px; background: linear-gradient(to top, rgba(180,180,200,.5), transparent);
+  z-index: 5;
+}
+.antenna::after {
+  content: ''; position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #ff4444;
+  box-shadow: 0 0 6px #ff4444;
+  animation: blink 1.8s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* Palm tree */
+.palm { flex-shrink: 0; align-self: flex-end; }
+
+/* ═══════════════════════════════════════════════════════
+   ACQUISITION ANIMATIONS
+═══════════════════════════════════════════════════════ */
+
+/* Acquisition wash overlay (color pours down over building) */
+.acq-wash {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  transform-origin: top; transform: scaleY(0);
+  transition: transform 1.8s cubic-bezier(.2,.8,.3,1);
+  z-index: 6; border-radius: 4px 4px 0 0;
+  opacity: .72;
+}
+.acq-wash.active { transform: scaleY(1); }
+
+/* Acquisition badge that drops in from above */
+.acq-badge {
+  position: absolute; top: -56px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, #f5c519, #e0a800);
+  color: #000; padding: 3px 10px; border-radius: 3px;
+  font-size: 9px; font-weight: 900; letter-spacing: 2px;
+  white-space: nowrap; z-index: 12;
+  opacity: 0; transition: top .8s ease .3s, opacity .5s ease .3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.acq-badge.active { top: 8px; opacity: 1; }
+
+/* Deal info that floats up */
+.deal-float {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 13px; font-weight: 900;
+  color: #f5c519; text-shadow: 0 0 20px rgba(245,197,25,.8);
+  letter-spacing: 1px; z-index: 15;
+  opacity: 0; pointer-events: none;
+}
+.deal-float.active {
+  animation: floatUp 3.5s ease forwards;
+}
+@keyframes floatUp {
+  0%  { opacity: 0; transform: translateX(-50%) translateY(0); }
+  15% { opacity: 1; }
+  80% { opacity: 1; }
+  100%{ opacity: 0; transform: translateX(-50%) translateY(-90px); }
+}
+
+/* Acquirer building "power surge" when it absorbs something */
+.building.absorbing {
+  animation: absorb 2.2s ease-in-out;
+}
+@keyframes absorb {
+  0%   { filter: brightness(1); }
+  30%  { filter: brightness(1.6) saturate(1.5); transform: scaleY(1.08); transform-origin: bottom; }
+  65%  { filter: brightness(1.3); transform: scaleY(1.04); transform-origin: bottom; }
+  100% { filter: brightness(1); transform: scaleY(1); transform-origin: bottom; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   INFO CARD (pops up as a company building enters view)
+═══════════════════════════════════════════════════════ */
+#info-card {
+  position: fixed; bottom: 155px; left: 50px;
+  background: rgba(5,5,18,.88); border: 1px solid rgba(255,255,255,.12);
+  border-left: 3px solid #f5c519;
+  padding: 14px 20px; border-radius: 4px;
+  max-width: 340px; z-index: 80;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .5s ease, transform .5s ease;
+  pointer-events: none; backdrop-filter: blur(12px);
+}
+#info-card.visible { opacity: 1; transform: translateY(0); }
+#info-card .ic-name {
+  font-size: 14px; font-weight: 900; letter-spacing: 1px;
+  text-transform: uppercase; color: #f5c519; margin-bottom: 4px;
+}
+#info-card .ic-tagline {
+  font-size: 11px; color: rgba(255,255,255,.75); line-height: 1.5; margin-bottom: 6px;
+}
+#info-card .ic-exit {
+  font-size: 10px; font-weight: 700; color: #2DE1A8; letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TITLE CARD
+═══════════════════════════════════════════════════════ */
+#title-card {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 90; pointer-events: none;
+  animation: titleShow 8s ease-in-out 1.2s both;
+}
+@keyframes titleShow {
+  0%   { opacity:0; transform:scale(.93) translateY(14px); }
+  12%  { opacity:1; transform:scale(1) translateY(0); }
+  70%  { opacity:1; }
+  100% { opacity:0; transform:scale(1.04) translateY(-8px); }
+}
+#title-line1 {
+  font-size: clamp(32px, 5.5vw, 76px); font-weight: 900;
+  color: #fff; letter-spacing: .22em; text-transform: uppercase;
+  text-shadow: 0 0 80px rgba(255,130,30,.7), 0 3px 24px rgba(0,0,0,.8);
+}
+#title-line2 {
+  margin-top: 10px;
+  font-size: clamp(10px, 1.1vw, 15px);
+  color: rgba(255,215,100,.92); letter-spacing: .55em; font-weight: 300;
+  text-shadow: 0 0 30px rgba(255,160,40,.5);
+}
+#title-line3 {
+  margin-top: 6px;
+  font-size: clamp(9px, .9vw, 13px);
+  color: rgba(255,255,255,.4); letter-spacing: .4em; font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIGNETTE
+═══════════════════════════════════════════════════════ */
+#vignette {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at 50% 55%,transparent 38%,rgba(0,0,0,.8) 100%);
+  z-index: 70; pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROGRESS DOT ROW (subtle progress indicator)
+═══════════════════════════════════════════════════════ */
+#progress-bar {
+  position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 7px; z-index: 85;
+  opacity: 0; animation: fadeIn 1s ease 10s forwards;
+}
+@keyframes fadeIn { to { opacity: 1; } }
+.pdot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,.25); transition: background .4s, transform .3s;
+}
+.pdot.current { background: #f5c519; transform: scale(1.4); }
+.pdot.passed  { background: rgba(245,197,25,.4); }
+
+/* Replay button */
+#replay-btn {
+  position: fixed; bottom: 28px; right: 32px; z-index: 95;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22);
+  color: rgba(255,255,255,.7); font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 9px 20px; border-radius: 4px; cursor: pointer;
+  opacity: 0; animation: fadeIn 1s ease 63s forwards; transition: all .2s;
+}
+#replay-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+/* Scanlines */
+#scanlines {
+  position: fixed; inset: 0; z-index: 77; pointer-events: none;
+  background: repeating-linear-gradient(transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
+}
+</style>
+</head>
+<body>
+
+<!-- SKY -->
+<div id="sky"></div>
+<div id="sun-glow"></div>
+<canvas id="stars-cvs"></canvas>
+<div id="clouds"></div>
+
+<!-- DISTANT HILLS / MOUNTAINS (depth layer) -->
+<svg id="mountains" viewBox="0 0 1600 220" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+  <!-- Far range (lightest, most purple-haze) -->
+  <path d="M0,220 L0,130 L80,70 L160,100 L260,42 L380,88 L480,30 L590,76 L700,22 L820,65 L930,18 L1050,55 L1160,12 L1280,58 L1400,28 L1520,62 L1600,40 L1600,220 Z"
+        fill="rgba(28,12,48,0.38)"/>
+  <!-- Mid range (slightly more distinct) -->
+  <path d="M0,220 L0,155 L100,100 L200,130 L310,80 L430,115 L530,68 L650,108 L760,62 L880,100 L980,52 L1100,92 L1220,58 L1340,95 L1460,68 L1600,90 L1600,220 Z"
+        fill="rgba(35,15,55,0.52)"/>
+  <!-- Near range (darkest, most distinct) -->
+  <path d="M0,220 L0,175 L120,128 L240,158 L350,112 L470,145 L580,100 L700,138 L810,92 L940,128 L1060,85 L1180,118 L1300,78 L1430,112 L1530,88 L1600,105 L1600,220 Z"
+        fill="rgba(20,8,32,0.72)"/>
+</svg>
+
+<!-- SCENE LAYERS -->
+<div id="scene-wrapper">
+  <div id="layer-bg"  class="p-layer"></div>
+  <div id="layer-mid" class="p-layer"></div>
+  <div id="layer-fg"  class="p-layer"></div>
+</div>
+
+<!-- GROUND -->
+<div id="ground"></div>
+<div id="road"><div id="road-dashes"></div></div>
+
+<!-- OVERLAYS -->
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<!-- INFO CARD -->
+<div id="info-card">
+  <div class="ic-name" id="ic-name"></div>
+  <div class="ic-tagline" id="ic-tagline"></div>
+  <div class="ic-exit" id="ic-exit"></div>
+</div>
+
+<!-- TITLE -->
+<div id="title-card">
+  <div id="title-line1">My First Million</div>
+  <div id="title-line2">The Companies &nbsp;·&nbsp; Exit Stories &nbsp;·&nbsp; The MFM Universe</div>
+  <div id="title-line3">Sam Parr &nbsp;·&nbsp; Shaan Puri &nbsp;·&nbsp; and the builders they love</div>
+</div>
+
+<!-- PROGRESS -->
+<div id="progress-bar"></div>
+<button id="replay-btn" onclick="location.reload()">↺ &nbsp;Replay</button>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════════════
+   COMPANY DATA  (10 MFM companies)
+══════════════════════════════════════════════════════════ */
+const MFM_COMPANIES = [
+  /* 0 */ {
+    id: 'marquis-jet',
+    name: 'Marquis Jet',
+    tagline: 'Co-founded by Jesse Itzler — first fractional private jet card company',
+    exit: 'ACQUIRED → NetJets / Berkshire Hathaway · 2010',
+    color: '#0f1e2e',
+    accentColor: '#6699cc',
+    h: 440, w: 108,
+    wcols: 5, wrows: 11,
+    antenna: 38,
+    acquired: true,
+    acquiredBy: 'Berkshire Hathaway',
+    acquiredColor: '#5a3e00',
+    deal: 'NetJets / Berkshire',
+    year: '2010',
+    hostConnection: 'MFM Guest — Jesse Itzler',
+    logo: `<svg viewBox="0 0 120 60" fill="none">
+      <ellipse cx="55" cy="28" rx="42" ry="9" fill="#6699cc"/>
+      <path d="M95,28 L118,28 L110,22 L110,34 Z" fill="#6699cc"/>
+      <polygon points="48,28 58,9 70,28 58,30" fill="#4a7aaa"/>
+      <polygon points="16,28 24,17 30,28" fill="#4a7aaa"/>
+      <ellipse cx="34" cy="34" rx="10" ry="5" fill="#263a4d"/>
+      <circle cx="76" cy="26" r="2.5" fill="#aaddff"/>
+      <circle cx="66" cy="26" r="2.5" fill="#aaddff"/>
+      <circle cx="56" cy="26" r="2.5" fill="#aaddff"/>
+    </svg>`
+  },
+  /* 1 */ {
+    id: 'got-junk',
+    name: '1-800-GOT-JUNK?',
+    tagline: 'Brian Scudamore turned junk removal into a $600M+ franchise empire',
+    exit: 'ONGOING — $600M+ valuation, ~150 franchise locations',
+    color: '#003087',
+    accentColor: '#ffffff',
+    h: 370, w: 126,
+    wcols: 7, wrows: 9,
+    acquired: false,
+    hostConnection: 'MFM Classic Ep — "How to build a boring business"',
+    logo: `<svg viewBox="0 0 110 70" fill="none">
+      <rect x="5" y="20" width="40" height="42" rx="4" fill="#0044bb"/>
+      <rect x="44" y="10" width="58" height="52" rx="3" fill="#0044bb"/>
+      <circle cx="20" cy="65" r="8" fill="#222"/>
+      <circle cx="20" cy="65" r="4" fill="#555"/>
+      <circle cx="78" cy="65" r="8" fill="#222"/>
+      <circle cx="78" cy="65" r="4" fill="#555"/>
+      <rect x="8" y="23" width="34" height="23" rx="2" fill="#88bbff" opacity=".7"/>
+      <text x="64" y="45" text-anchor="middle" font-family="Arial Black" font-size="11" font-weight="900" fill="white">JUNK?</text>
+      <line x1="44" y1="40" x2="44" y2="62" stroke="#0033aa" stroke-width="2"/>
+    </svg>`
+  },
+  /* 2 */ {
+    id: 'rxbar',
+    name: 'RXBAR',
+    tagline: 'Peter Rahal built a no-BS protein bar brand with brutal transparency',
+    exit: 'ACQUIRED → Kellogg\'s · $600M · 2017',
+    color: '#1a0000',
+    accentColor: '#cc3300',
+    h: 395, w: 110,
+    wcols: 5, wrows: 10,
+    acquired: true,
+    acquiredBy: "Kellogg's",
+    acquiredColor: '#8B0000',
+    deal: "Kellogg's · $600M",
+    year: '2017',
+    hostConnection: 'MFM Guest — Peter Rahal (multiple appearances)',
+    logo: `<svg viewBox="0 0 100 60" fill="none">
+      <rect x="5" y="15" width="90" height="30" rx="5" fill="#cc3300"/>
+      <rect x="8" y="18" width="84" height="24" rx="3" fill="#aa2200"/>
+      <text x="50" y="36" text-anchor="middle" font-family="Arial Black" font-size="18" font-weight="900" fill="white">RXBAR</text>
+    </svg>`
+  },
+  /* 3 */ {
+    id: 'morning-brew',
+    name: 'Morning Brew',
+    tagline: 'Austin Rief grew a dorm-room newsletter into a media empire',
+    exit: 'ACQUIRED → Business Insider · $75M · 2021',
+    color: '#2c1a0a',
+    accentColor: '#d4956a',
+    h: 420, w: 118,
+    wcols: 6, wrows: 10,
+    acquired: true,
+    acquiredBy: 'Business Insider',
+    acquiredColor: '#1a1a1a',
+    deal: 'Business Insider · $75M',
+    year: '2021',
+    hostConnection: 'MFM Classic — "Building & Selling Morning Brew"',
+    logo: `<svg viewBox="0 0 100 100" fill="none">
+      <rect x="20" y="45" width="55" height="48" rx="5" fill="#4a2c1a"/>
+      <path d="M73,58 Q92,66 73,82" fill="none" stroke="#4a2c1a" stroke-width="7" stroke-linecap="round"/>
+      <path d="M35,36 Q40,21 35,8"  stroke="#8b6358" stroke-width="4" stroke-linecap="round"/>
+      <path d="M50,33 Q55,18 50,5"  stroke="#8b6358" stroke-width="4" stroke-linecap="round"/>
+      <path d="M65,36 Q70,21 65,8"  stroke="#8b6358" stroke-width="4" stroke-linecap="round"/>
+      <text x="47" y="80" text-anchor="middle" font-family="Arial Black" font-size="24" font-weight="900" fill="white">M</text>
+    </svg>`
+  },
+  /* 4 */ {
+    id: 'bebo',
+    name: 'Bebo',
+    tagline: 'Shaan Puri pivoted a social network into an esports platform',
+    exit: 'ACQUIRED → Twitch / Amazon · $25M · 2019',
+    color: '#1a0a2e',
+    accentColor: '#7c5cfc',
+    h: 450, w: 112,
+    wcols: 6, wrows: 11,
+    antenna: 32,
+    acquired: true,
+    acquiredBy: 'Twitch / Amazon',
+    acquiredColor: '#4b0082',
+    deal: 'Twitch / Amazon · $25M',
+    year: '2019',
+    hostConnection: 'Shaan Puri — Co-Host',
+    logo: `<svg viewBox="0 0 100 80" fill="none">
+      <ellipse cx="50" cy="38" rx="42" ry="30" fill="#7c5cfc"/>
+      <polygon points="28,65 40,55 44,72" fill="#7c5cfc"/>
+      <circle cx="34" cy="38" r="8" fill="white"/>
+      <circle cx="50" cy="38" r="8" fill="white"/>
+      <circle cx="66" cy="38" r="8" fill="white"/>
+      <circle cx="34" cy="38" r="4" fill="#7c5cfc"/>
+      <circle cx="50" cy="38" r="4" fill="#7c5cfc"/>
+      <circle cx="66" cy="38" r="4" fill="#7c5cfc"/>
+    </svg>`
+  },
+  /* 5 */ {
+    id: 'milk-road',
+    name: 'The Milk Road',
+    tagline: 'Shaan Puri co-founded a crypto newsletter — 250K subscribers in 10 months',
+    exit: 'ACQUIRED → Bitfo · 8-Figure Exit · 2022',
+    color: '#031a1f',
+    accentColor: '#00b4d8',
+    h: 380, w: 110,
+    wcols: 5, wrows: 9,
+    acquired: true,
+    acquiredBy: 'Bitfo',
+    acquiredColor: '#005f73',
+    deal: 'Bitfo · 8-Figure Exit',
+    year: '2022',
+    hostConnection: 'Shaan Puri — Co-Host (fastest exit ever)',
+    logo: `<svg viewBox="0 0 80 110" fill="none">
+      <rect x="12" y="48" width="56" height="60" rx="3" fill="#0096c7"/>
+      <polygon points="12,48 40,22 68,48" fill="#0077a8"/>
+      <polygon points="12,36 40,22 40,36" fill="#005f89"/>
+      <polygon points="40,36 40,22 68,36" fill="#005f89"/>
+      <text x="40" y="83" text-anchor="middle" font-family="Arial Black" font-size="10" font-weight="900" fill="white">MILK</text>
+      <text x="40" y="97" text-anchor="middle" font-family="Arial Black" font-size="10" font-weight="900" fill="white">ROAD</text>
+    </svg>`
+  },
+  /* 6 */ {
+    id: 'the-hustle',
+    name: 'The Hustle',
+    tagline: 'Sam Parr grew a daily business newsletter to 1.5 million subscribers',
+    exit: 'ACQUIRED → HubSpot · ~$27M · 2021',
+    color: '#1c0800',
+    accentColor: '#ff6b35',
+    h: 475, w: 116,
+    wcols: 6, wrows: 12,
+    acquired: true,
+    acquiredBy: 'HubSpot',
+    acquiredColor: '#ff7a59',
+    deal: 'HubSpot · ~$27M',
+    year: '2021',
+    hostConnection: 'Sam Parr — Co-Host (his biggest exit)',
+    logo: `<svg viewBox="0 0 100 100" fill="none">
+      <text x="50" y="72" text-anchor="middle" font-family="Arial Black" font-size="72" font-weight="900" fill="#ff6b35">H</text>
+      <polygon points="54,8 46,36 52,36 44,78 64,32 56,32" fill="#ff6b35" opacity=".7"/>
+    </svg>`
+  },
+  /* 7 */ {
+    id: 'hubspot',
+    name: 'HubSpot',
+    tagline: 'Dharmesh Shah & Brian Halligan coined "inbound marketing" — went public 2014',
+    exit: 'PUBLIC (HUBS) — $20B+ market cap peak · Acquired The Hustle & more',
+    color: '#1a0800',
+    accentColor: '#ff7a59',
+    h: 580, w: 130,  /* tallest — the big acquirer */
+    wcols: 7, wrows: 15,
+    antenna: 55,
+    acquired: false,
+    isAcquirer: true,
+    hostConnection: 'MFM Guest — Dharmesh Shah (multiple eps) · Acquired Sam\'s company',
+    logo: `<svg viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="12" fill="#ff7a59"/>
+      <circle cx="50" cy="16" r="9"  fill="#ff7a59"/>
+      <circle cx="78" cy="33" r="9"  fill="#ff7a59"/>
+      <circle cx="78" cy="67" r="9"  fill="#ff7a59"/>
+      <circle cx="50" cy="84" r="9"  fill="#ff7a59"/>
+      <circle cx="22" cy="67" r="9"  fill="#ff7a59"/>
+      <circle cx="22" cy="33" r="9"  fill="#ff7a59"/>
+    </svg>`
+  },
+  /* 8 */ {
+    id: 'hampton',
+    name: 'Hampton',
+    tagline: 'Sam Parr\'s private community for founders — $8M+ ARR',
+    exit: 'ONGOING — $8M+ ARR and growing',
+    color: '#0a0a14',
+    accentColor: '#c9a84c',
+    h: 415, w: 112,
+    wcols: 6, wrows: 10,
+    acquired: false,
+    hostConnection: 'Sam Parr — Co-Host (current venture)',
+    logo: `<svg viewBox="0 0 100 100" fill="none">
+      <path d="M50,5 L85,20 L85,55 Q85,82 50,97 Q15,82 15,55 L15,20 Z"
+            fill="none" stroke="#c9a84c" stroke-width="4.5"/>
+      <text x="50" y="66" text-anchor="middle" font-family="Arial Black" font-size="42" font-weight="900" fill="#c9a84c">H</text>
+    </svg>`
+  },
+  /* 9 */ {
+    id: 'beehiiv',
+    name: 'Beehiiv',
+    tagline: 'Tyler Denk left Morning Brew to build the newsletter platform for pros',
+    exit: 'ONGOING — $20M+ ARR · Series B funded',
+    color: '#05120d',
+    accentColor: '#2de1a8',
+    h: 430, w: 112,
+    wcols: 6, wrows: 11,
+    antenna: 28,
+    acquired: false,
+    hostConnection: 'MFM Guest — Tyler Denk',
+    logo: `<svg viewBox="0 0 100 100" fill="none">
+      <polygon points="50,8 80,25 80,62 50,78 20,62 20,25"
+               stroke="#2de1a8" stroke-width="5" fill="rgba(45,225,168,.12)"/>
+      <polygon points="50,18 72,30 72,56 50,68 28,56 28,30"
+               stroke="#2de1a8" stroke-width="2.5" fill="none" opacity=".5"/>
+      <text x="50" y="53" text-anchor="middle" font-family="Arial Black" font-size="28" font-weight="900" fill="#2de1a8">B</text>
+    </svg>`
+  }
+];
+
+/* acquirer display buildings (rendered in bg or mid layer, triggered during acquisition animations) */
+const ACQUIRERS = {
+  'hubspot':     { color: '#3a1200', accentColor: '#ff7a59' },
+  'business-insider': { color: '#0a0a14', accentColor: '#ffffff' },
+  'kellogs':     { color: '#1a0000', accentColor: '#cc0000' },
+  'twitch':      { color: '#1a0028', accentColor: '#9146ff' },
+  'berkshire':   { color: '#14100a', accentColor: '#c9a84c' },
+};
+
+/* ══════════════════════════════════════════════════════════
+   SVG PALM TREE
+══════════════════════════════════════════════════════════ */
+function makePalmSVG(h) {
+  const w = Math.round(h * 0.6);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 60 100" fill="none">
+    <path d="M30,100 C28,78 27,58 29,40 C31,22 32,12 30,5"
+          stroke="#7a5c32" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M30,12 C15,3  1,9  0,24" stroke="#2a7a2a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M30,12 C45,3 59,9 60,24" stroke="#2a7a2a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M30,12 C19,0  7,-2  2,8"  stroke="#388a38" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M30,12 C41,0 53,-2 58,8"  stroke="#388a38" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M30,12 C25,-2 17,-6 10,-4" stroke="#2a7a2a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M30,12 C35,-2 43,-6 50,-4" stroke="#2a7a2a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M30,12 C30,-2 25,-9 18,-11" stroke="#1e6e1e" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIT WINDOWS CANVAS
+══════════════════════════════════════════════════════════ */
+function makeLitCanvas(bw, bh, cols, rows) {
+  const cvs = document.createElement('canvas');
+  cvs.width = bw; cvs.height = bh;
+  cvs.style.cssText = 'position:absolute;inset:0;z-index:2;pointer-events:none;';
+  const ctx = cvs.getContext('2d');
+  const cw = bw / cols, rh = bh / rows;
+
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++) {
+      if (Math.random() < 0.27) {
+        const alpha = 0.35 + Math.random() * 0.48;
+        const warm  = 140 + Math.floor(Math.random() * 115);
+        ctx.fillStyle = `rgba(255,255,${warm},${alpha.toFixed(2)})`;
+        ctx.fillRect(c*cw+2, r*rh+2, cw-4, rh-4);
+      }
+    }
+
+  // Random window flicker
+  const flicker = () => {
+    const c = Math.floor(Math.random()*cols), r = Math.floor(Math.random()*rows);
+    ctx.clearRect(c*cw+2, r*rh+2, cw-4, rh-4);
+    if (Math.random() < 0.32) {
+      const a = 0.35 + Math.random()*.48;
+      const w = 140 + Math.floor(Math.random()*115);
+      ctx.fillStyle = `rgba(255,255,${w},${a.toFixed(2)})`;
+      ctx.fillRect(c*cw+2, r*rh+2, cw-4, rh-4);
+    }
+    setTimeout(flicker, 500 + Math.random()*1200);
+  };
+  setTimeout(flicker, Math.random()*2000);
+  return cvs;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BUILDING FACTORY
+══════════════════════════════════════════════════════════ */
+function makeBuilding(co) {
+  const el = document.createElement('div');
+  el.className = 'building';
+  el.id = 'b-' + co.id;
+  el.setAttribute('data-company', co.id);
+  el.style.cssText = `width:${co.w}px;height:${co.h}px;background:${co.color};`;
+
+  // Window grid
+  const grid = document.createElement('div'); grid.className = 'b-grid'; el.appendChild(grid);
+  // Lit windows canvas
+  el.appendChild(makeLitCanvas(co.w, co.h, co.wcols, co.wrows));
+
+  // Acquisition overlay (hidden initially)
+  if (co.acquired) {
+    const wash = document.createElement('div');
+    wash.className = 'acq-wash'; wash.id = 'wash-' + co.id;
+    wash.style.background = co.acquiredColor;
+    el.appendChild(wash);
+
+    const badge = document.createElement('div');
+    badge.className = 'acq-badge'; badge.id = 'badge-' + co.id;
+    badge.textContent = '⟶ ACQUIRED';
+    el.appendChild(badge);
+
+    const deal = document.createElement('div');
+    deal.className = 'deal-float'; deal.id = 'deal-' + co.id;
+    deal.style.bottom = (co.h + 10) + 'px';
+    deal.textContent = co.deal + ' · ' + co.year;
+    el.appendChild(deal);
+  }
+
+  // HubSpot acquirer pulse ring
+  if (co.isAcquirer) {
+    const ring = document.createElement('div');
+    ring.style.cssText = `position:absolute;inset:-6px;border:3px solid rgba(255,122,89,0);
+      border-radius:6px 6px 0 0;z-index:15;pointer-events:none;
+      transition:border-color 1s ease;`;
+    ring.id = 'ring-' + co.id;
+    el.appendChild(ring);
+  }
+
+  // Logo
+  const lb = document.createElement('div'); lb.className = 'b-logo'; lb.innerHTML = co.logo; el.appendChild(lb);
+  // Name
+  const nm = document.createElement('div'); nm.className = 'b-name'; nm.textContent = co.name; el.appendChild(nm);
+  // Antenna
+  if (co.antenna) {
+    const ant = document.createElement('div');
+    ant.className = 'antenna'; ant.style.height = co.antenna + 'px'; el.appendChild(ant);
+  }
+  return el;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BACKGROUND "CITY" BUILDINGS (generic)
+══════════════════════════════════════════════════════════ */
+const BG_BUILDINGS = [
+  { h:280,w:72,  color:'#1a1a2e' }, { h:320,w:88, color:'#0d1117' },
+  { h:260,w:66,  color:'#1c1c2e' }, { h:350,w:82, color:'#12101a' },
+  { h:290,w:76,  color:'#0d0d1c' }, { h:310,w:70, color:'#1a1428' },
+  { h:270,w:78,  color:'#0f1520' }, { h:340,w:68, color:'#1a0e1e' },
+  { h:300,w:84,  color:'#141424' }, { h:260,w:72, color:'#0d1218' },
+  { h:330,w:80,  color:'#1e1428' }, { h:280,w:74, color:'#101828' },
+];
+
+function makeBgBuilding(bg) {
+  // Scale down to ~58% so they genuinely look distant (real size reduction, not CSS scale)
+  const sc = 0.58;
+  const bw = Math.round(bg.w * sc), bh = Math.round(bg.h * sc);
+  const el = document.createElement('div');
+  el.className = 'building';
+  el.style.cssText = `width:${bw}px;height:${bh}px;background:${bg.color};`;
+  const grid = document.createElement('div'); grid.className = 'b-grid'; el.appendChild(grid);
+  el.appendChild(makeLitCanvas(bw, bh, Math.max(3, bw/14|0), Math.max(4, bh/14|0)));
+  return el;
+}
+
+/* ══════════════════════════════════════════════════════════
+   FOREGROUND PROPS (lamp posts, street signs)
+══════════════════════════════════════════════════════════ */
+function makeLampPost(h) {
+  const el = document.createElement('div');
+  el.style.cssText = `flex-shrink:0;align-self:flex-end;margin-bottom:74px;`;
+  el.innerHTML = `<svg width="22" height="${h}" viewBox="0 0 22 ${h}" fill="none">
+    <line x1="11" y1="${h}" x2="11" y2="18" stroke="#555" stroke-width="3"/>
+    <path d="M11,18 Q11,6 20,6" stroke="#555" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <ellipse cx="20" cy="6" rx="5" ry="3" fill="#ffe066" opacity=".9"/>
+    <ellipse cx="20" cy="8" rx="8" ry="5" fill="rgba(255,220,80,.25)"/>
+  </svg>`;
+  return el;
+}
+
+/* ══════════════════════════════════════════════════════════
+   STARS
+══════════════════════════════════════════════════════════ */
+(function initStars() {
+  const c = document.getElementById('stars-cvs');
+  c.width = window.innerWidth; c.height = window.innerHeight;
+  const ctx = c.getContext('2d');
+  for (let i = 0; i < 160; i++) {
+    const x=Math.random()*c.width, y=Math.random()*c.height*.52;
+    const r=Math.random()*1.5+.2, a=Math.random()*.65+.25;
+    ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI);
+    ctx.fillStyle=`rgba(255,255,255,${a.toFixed(2)})`; ctx.fill();
+  }
+  // subtle twinkling
+  setInterval(()=>{
+    const x=Math.random()*c.width, y=Math.random()*c.height*.52;
+    const r=Math.random()*1.2+.2;
+    ctx.clearRect(x-3,y-3,6,6);
+    ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI);
+    ctx.fillStyle=`rgba(255,255,255,${(Math.random()*.7+.1).toFixed(2)})`; ctx.fill();
+  }, 90);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   CLOUDS
+══════════════════════════════════════════════════════════ */
+(function initClouds() {
+  const wrap = document.getElementById('clouds');
+  const cloudData = [
+    { top:'8%', width:'340px', opacity:0.12, speed:80 },
+    { top:'14%', width:'280px', opacity:0.08, speed:110 },
+    { top:'22%', width:'420px', opacity:0.07, speed:150 },
+  ];
+  cloudData.forEach((cd, i) => {
+    const cloud = document.createElement('div');
+    cloud.style.cssText = `position:absolute;top:${cd.top};left:-500px;width:${cd.width};
+      height:60px;
+      background:radial-gradient(ellipse at 50% 60%, rgba(255,255,255,${cd.opacity}) 0%, transparent 70%);
+      animation:cloudDrift ${cd.speed}s linear ${i*-30}s infinite;`;
+    wrap.appendChild(cloud);
+  });
+  const style = document.createElement('style');
+  style.textContent = `@keyframes cloudDrift { from{transform:translateX(0)} to{transform:translateX(calc(100vw + 600px))} }`;
+  document.head.appendChild(style);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   SCENE ASSEMBLY
+══════════════════════════════════════════════════════════ */
+const bgLayer  = document.getElementById('layer-bg');
+const midLayer = document.getElementById('layer-mid');
+const fgLayer  = document.getElementById('layer-fg');
+
+// ── BG layer: generic city + palm silhouettes ──────────
+const bgPalmPositions = [0, 2, 4, 7, 9, 11];
+BG_BUILDINGS.forEach((bg, i) => {
+  if (bgPalmPositions.includes(i)) {
+    const p = document.createElement('div'); p.className = 'palm';
+    const ph = 90 + (i*11)%40;
+    p.innerHTML = makePalmSVG(ph); bgLayer.appendChild(p);
+  }
+  bgLayer.appendChild(makeBgBuilding(bg));
+});
+
+// ── MID layer: 10 MFM companies ────────────────────────
+const palmAfterIdx = new Set([0, 2, 4, 7, 9]);
+const midPalmDiv = () => { const d=document.createElement('div'); d.className='palm'; d.innerHTML=makePalmSVG(118+Math.random()*50|0); return d; };
+
+// Opening palm
+midLayer.appendChild(midPalmDiv());
+
+MFM_COMPANIES.forEach((co, i) => {
+  midLayer.appendChild(makeBuilding(co));
+  if (palmAfterIdx.has(i)) midLayer.appendChild(midPalmDiv());
+});
+
+// Closing palms
+midLayer.appendChild(midPalmDiv());
+midLayer.appendChild(midPalmDiv());
+
+// ── FG layer: lamp posts ───────────────────────────────
+for (let i = 0; i < 18; i++) {
+  const spacer = document.createElement('div');
+  spacer.style.cssText = `flex-shrink:0;width:${180 + (i%3)*80}px;`;
+  fgLayer.appendChild(spacer);
+  fgLayer.appendChild(makeLampPost(160 + (i%2)*20));
+}
+
+/* ══════════════════════════════════════════════════════════
+   PARALLAX PAN ENGINE
+══════════════════════════════════════════════════════════ */
+const PAN_DURATION = 65 * 1000; // 65 seconds
+let startTime = null;
+let acquisitionsFired = new Set();
+let currentCompanyIdx = -1;
+
+function easeInOut(t) { return (1 - Math.cos(t * Math.PI)) / 2; }
+
+// Company X positions in mid layer (computed after DOM is ready)
+let companyPositions = []; // x positions of building left edges
+
+function computePositions() {
+  // Use getBoundingClientRect at t=0 (before any translation) for accuracy
+  const layerRect = midLayer.getBoundingClientRect();
+  MFM_COMPANIES.forEach(co => {
+    const el = document.getElementById('b-' + co.id);
+    if (el) {
+      const elRect = el.getBoundingClientRect();
+      // x = position of building left edge inside the layer's natural coordinate space
+      const x = elRect.left - layerRect.left;
+      companyPositions.push({ co, x, w: co.w });
+    }
+  });
+}
+
+function animate(ts) {
+  if (!startTime) startTime = ts;
+  const elapsed = ts - startTime;
+  const rawProg = Math.min(elapsed / PAN_DURATION, 1.0);
+  const eased   = easeInOut(rawProg);
+
+  const midW    = midLayer.scrollWidth;
+  const vw      = window.innerWidth;
+  const midMax  = Math.max(0, midW - vw);
+  const midOff  = eased * midMax;
+
+  const bgMax   = Math.max(0, bgLayer.scrollWidth  - vw);
+  const fgMax   = Math.max(0, fgLayer.scrollWidth  - vw);
+
+  bgLayer.style.transform  = `translateX(-${Math.min(midOff * 0.32, bgMax)}px)`;
+  midLayer.style.transform = `translateX(-${midOff}px)`;
+  fgLayer.style.transform  = `translateX(-${Math.min(midOff * 1.28, fgMax)}px)`;
+
+  // Determine which company building is currently centered
+  const viewCenter = midOff + vw / 2;
+  let closestIdx = -1, closestDist = Infinity;
+  companyPositions.forEach((p, i) => {
+    const buildingCenter = p.x + p.w / 2;
+    const dist = Math.abs(buildingCenter - viewCenter);
+    if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+  });
+
+  if (closestIdx !== currentCompanyIdx && closestDist < vw / 2.5) {
+    currentCompanyIdx = closestIdx;
+    showInfoCard(MFM_COMPANIES[closestIdx]);
+    updateProgressDots(closestIdx);
+  }
+
+  // Trigger acquisition animations
+  companyPositions.forEach((p, i) => {
+    const co = p.co;
+    if (!co.acquired || acquisitionsFired.has(co.id)) return;
+    const buildingCenter = p.x + p.w / 2;
+    const distFromCenter = Math.abs(buildingCenter - viewCenter);
+    if (distFromCenter < 220) {
+      acquisitionsFired.add(co.id);
+      setTimeout(() => triggerAcquisition(co), 1200);
+    }
+  });
+
+  if (rawProg < 1) requestAnimationFrame(animate);
+}
+
+/* ══════════════════════════════════════════════════════════
+   ACQUISITION ANIMATION
+══════════════════════════════════════════════════════════ */
+function triggerAcquisition(co) {
+  // 1. Acquisition wash pours down
+  const wash  = document.getElementById('wash-' + co.id);
+  const badge = document.getElementById('badge-' + co.id);
+  const deal  = document.getElementById('deal-' + co.id);
+  if (!wash) return;
+
+  wash.classList.add('active');
+
+  setTimeout(() => {
+    badge && badge.classList.add('active');
+  }, 600);
+
+  setTimeout(() => {
+    deal && deal.classList.add('active');
+  }, 1200);
+
+  // 2. If acquired by HubSpot, make HubSpot building pulse + add absorbed label
+  if (co.acquiredBy === 'HubSpot') {
+    setTimeout(() => {
+      const hb = document.getElementById('b-hubspot');
+      if (hb) {
+        hb.classList.add('absorbing');
+        const ring = document.getElementById('ring-hubspot');
+        if (ring) ring.style.borderColor = 'rgba(255,122,89,.9)';
+        // Add a small "absorbed" tag to HubSpot building
+        const absTag = document.createElement('div');
+        absTag.style.cssText = `position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+          background:rgba(255,122,89,.9);color:#fff;font-size:7px;font-weight:900;letter-spacing:1.5px;
+          padding:2px 8px;border-radius:2px;white-space:nowrap;z-index:15;
+          opacity:0;transition:opacity .6s ease 1.5s;`;
+        absTag.textContent = '+ THE HUSTLE';
+        hb.appendChild(absTag);
+        requestAnimationFrame(() => requestAnimationFrame(() => absTag.style.opacity = '1'));
+        setTimeout(() => { hb.classList.remove('absorbing'); if(ring) ring.style.borderColor='rgba(255,122,89,0)'; }, 2600);
+      }
+    }, 900);
+  }
+
+  // 3. Connection beam between acquired building and its acquirer building (if adjacent)
+  if (co.acquiredBy === 'HubSpot') {
+    setTimeout(() => {
+      const hustleEl  = document.getElementById('b-the-hustle');
+      const hubspotEl = document.getElementById('b-hubspot');
+      if (!hustleEl || !hubspotEl) return;
+      const r1 = hustleEl.getBoundingClientRect();
+      const r2 = hubspotEl.getBoundingClientRect();
+      const x1 = r1.right, y1 = r1.top + r1.height * 0.35;
+      const x2 = r2.left,  y2 = r2.top + r2.height * 0.35;
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:55;';
+      const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+      const grad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+      grad.id = 'beamGrad'; grad.setAttribute('gradientUnits','userSpaceOnUse');
+      grad.setAttribute('x1',x1); grad.setAttribute('y1',y1);
+      grad.setAttribute('x2',x2); grad.setAttribute('y2',y2);
+      grad.innerHTML = `<stop offset="0%" stop-color="#ff6b35" stop-opacity="0.9"/>
+                        <stop offset="100%" stop-color="#ff7a59" stop-opacity="0.4"/>`;
+      defs.appendChild(grad);
+      svg.appendChild(defs);
+
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+      line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+      line.setAttribute('stroke','url(#beamGrad)');
+      line.setAttribute('stroke-width','2.5');
+      line.setAttribute('stroke-dasharray','10,5');
+      line.style.cssText = 'opacity:0;transition:opacity .4s ease;';
+      svg.appendChild(line);
+
+      // Dollar-amount label along the beam
+      const mid_x = (x1+x2)/2, mid_y = (y1+y2)/2 - 18;
+      const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x',mid_x); lbl.setAttribute('y',mid_y);
+      lbl.setAttribute('text-anchor','middle');
+      lbl.setAttribute('font-family',"Arial Black,sans-serif");
+      lbl.setAttribute('font-size','13'); lbl.setAttribute('font-weight','900');
+      lbl.setAttribute('fill','#f5c519');
+      lbl.style.cssText='opacity:0;transition:opacity .4s ease .3s;text-shadow:0 0 10px rgba(245,197,25,.8);';
+      lbl.textContent = '~$27M · 2021';
+      svg.appendChild(lbl);
+
+      document.body.appendChild(svg);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        line.style.opacity = '0.85';
+        lbl.style.opacity  = '1';
+        setTimeout(() => {
+          line.style.opacity = '0'; lbl.style.opacity = '0';
+          setTimeout(() => svg.remove(), 600);
+        }, 3000);
+      }));
+    }, 1200);
+  }
+
+  // 4. Emit acquisition to info card
+  setTimeout(() => {
+    showInfoCard(co, true);
+  }, 1400);
+}
+
+/* ══════════════════════════════════════════════════════════
+   INFO CARD
+══════════════════════════════════════════════════════════ */
+let infoTimeout = null;
+function showInfoCard(co, isAcq = false) {
+  const card   = document.getElementById('info-card');
+  const name   = document.getElementById('ic-name');
+  const tag    = document.getElementById('ic-tagline');
+  const exitEl = document.getElementById('ic-exit');
+
+  card.classList.remove('visible');
+  clearTimeout(infoTimeout);
+
+  infoTimeout = setTimeout(() => {
+    name.textContent   = co.name;
+    name.style.color   = co.accentColor || '#f5c519';
+    tag.textContent    = co.tagline;
+    exitEl.textContent = co.exit;
+    exitEl.style.color = co.acquired ? '#ff8866' : '#2de1a8';
+    card.classList.add('visible');
+
+    infoTimeout = setTimeout(() => card.classList.remove('visible'), 5000);
+  }, 200);
+}
+
+/* ══════════════════════════════════════════════════════════
+   PROGRESS DOTS
+══════════════════════════════════════════════════════════ */
+(function buildProgressDots() {
+  const bar = document.getElementById('progress-bar');
+  MFM_COMPANIES.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'pdot'; d.id = 'pdot-' + i; bar.appendChild(d);
+  });
+})();
+
+function updateProgressDots(activeIdx) {
+  MFM_COMPANIES.forEach((_, i) => {
+    const d = document.getElementById('pdot-' + i);
+    if (!d) return;
+    d.className = 'pdot' + (i === activeIdx ? ' current' : i < activeIdx ? ' passed' : '');
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  // Brief delay then compute positions and start animation
+  setTimeout(() => {
+    computePositions();
+    requestAnimationFrame(animate);
+  }, 500);
+});
+</script>
+</body>
+</html>
