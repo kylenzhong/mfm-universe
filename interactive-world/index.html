@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MFM Universe — Interactive World</title>
+<meta name="description" content="Walk around the MFM Universe — a pixel-art world where Sam and Shaan record live, visitors gather, and ideas get pitched in the shark tank.">
+<meta property="og:title" content="MFM Universe — Interactive World" />
+<meta property="og:description" content="Walk around the MFM Universe — a pixel-art world for My First Million listeners." />
+<meta property="og:type" content="website" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0d0d1a; color: #faf5e8; font-family: 'Inter', sans-serif; min-height: 100vh; }
+  body { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px 16px 48px; box-sizing: border-box; }
+  .topbar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .brand a { font-family: 'Press Start 2P', monospace; font-size: 13px; color: #f0c040; letter-spacing: 1px; text-decoration: none; }
+  .brand a:hover { color: #ff8c5e; }
+  .tagline { font-size: 12px; color: #8888aa; }
+  .frame { background: #141428; border: 1px solid #2a2a4a; border-radius: 16px; padding: 20px; box-shadow: 0 16px 64px rgba(0,0,0,0.5); }
+  .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 24px; }
+  .meta h1 { font-family: 'Press Start 2P', monospace; font-size: 12px; color: #f0c040; letter-spacing: 1px; margin: 0; }
+  .meta .right { font-size: 11px; color: #8888aa; font-family: 'JetBrains Mono', monospace; }
+  #game { border-radius: 8px; overflow: hidden; }
+  #game canvas { image-rendering: pixelated; display: block; }
+  .controls { display: flex; gap: 16px; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 1px solid #2a2a4a; flex-wrap: wrap; font-size: 12px; color: #8888aa; }
+  .key { background: #2a2a4a; color: #faf5e8; padding: 3px 8px; border-radius: 4px; font-size: 11px; border: 1px solid #404060; margin: 0 1px; font-family: 'JetBrains Mono', monospace; }
+  .legend { width: 100%; max-width: 1000px; margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 24px; font-size: 11px; color: #8888aa; padding: 16px 20px; background: rgba(20,20,40,0.5); border-radius: 12px; }
+  .legend strong { color: #f0c040; font-family: 'JetBrains Mono', monospace; }
+  footer { font-size: 11px; color: #555577; margin-top: 24px; text-align: center; }
+  footer a { color: #8888aa; text-decoration: none; }
+  footer a:hover { color: #f0c040; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><a href="/">← MFM·UNIVERSE</a></div>
+    <div class="tagline">interactive walkable world · v1</div>
+  </div>
+
+  <div class="frame">
+    <div class="meta">
+      <h1>THE MFM UNIVERSE</h1>
+      <div class="right">click canvas first &middot; walk into a zone to interact</div>
+    </div>
+    <div id="game"></div>
+    <div class="controls">
+      <span>move:</span>
+      <span><span class="key">↑</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span></span>
+      <span>or <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span></span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div><strong>The Stage</strong> — Sam &amp; Shaan recording live</div>
+    <div><strong>Newsstand</strong> — this Friday's drop</div>
+    <div><strong>Merch Shop</strong> — pixel mugs, tees, caps</div>
+    <div><strong>Shark Tank</strong> — pitches at the dock</div>
+    <div><strong>Gathering</strong> — the community around the fire</div>
+  </div>
+
+  <footer>
+    a fan project · not affiliated with My First Million · <a href="/">return to main site</a>
+  </footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
+<script>
+const SPRITE_DATA_URIS = {"char_sam": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAB30lEQVR4nO2avUsDQRDFo1jqeSKaqJUQLMQ+IYWNoIVNVFBsrAR7FfwDbGwsLBUrOxtjJwpBsDrE1IJobexiDFhqPSPscswdT9j36x57t/cYZt/tfRQKhBBCCAmVPusEx6sLP5bz966aZg8W+pEX/w+wAGgDaDLPgGp52Hl88vppul7WmRF8B7AAaANoUq8n331fZ0AxTjf/R0dqX2ZYMyH4DmAB0AbQDFgnsK55jT5fz2/dR2iC7wAWAG0AjTkD9JrcPVgXuvveETqaiIV+a94657dmio/gO4AFQBtAkzoD9N7b92ywf3Ij9NnRptB6719bWxLalxFWgu8AFgBtAE3qDLB+B9DM1SrO8bFZNf50l+Xl2QEsANoAGvOzwPbWonNc3/c1+tlAc36R7ZrXBN8BLADaABpzBug1qjPBt8b1+4KVL6l78zNCbzy8pPLnI/gOYAHQBtDk/o/QpVrDg6Ox6XrLjUeh+W3QCAuANoDGvA/wvSP0rfnGkByPSiWhK0licOcn+A5gAdAG0JgzwMfh+KTQI1NFoaPet9DddlvorPf+muA7gAVAG0CTewYkp9dCV3fqQj+rTCiUp53z8V/hjGEB0AbQ5J4Bf/4jbN3LA1p5O3ATfAewAGgDaH4BcL9hVsyeFM4AAAAASUVORK5CYII=", "char_shaan": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACQ0lEQVR4nO2aO0gDQRCGL2IhROIVhiSYCJYKIvggkEZUsI0POLBRAiLYRvBVWFioCAoWYisWCkENwVpEKwNaBxsLEwiikFMsxCZ24oyy67ong+x83c/tTX6GmdnN3VkWwzAm4/M6YDzeVfU65mfy+WtPPdd4Gew/wgmgNkCNdj/Jej4SCQFt27Ywnuu6QJfL98L1ujPB+ArgBFAboEa5f2Q9f5mwgU5VQt8v/CF/PROMrwBOALUBamp1A+B9PlWxdUMCZOcG2UyQYXwFcAKoDVCjPQNwD+Ke3RrqAHpi91y4XgZezzNAE04AtQFqlGeA02QLr6ene4Gemj8AOrs2BvTwak4YD/c8/m+gi/EVwAmgNkCN9jlgcnzQCx8fZBeSQKd24LlBd9/HGF8BnABqA9QoPxPcGBkQPhNMzzm/d2N9PRfgc0ChcAM0vxfQhBNAbYAa5XPAzPEp6Dk8E57LLlgfiNjCeKo97zXGVwAngNoANdrfB8jOBdHgK9DNjfVK8e8eX4AuPdQJ1+MZJcP4CuAEUBugxvPvBPFMSLTqPXJo6+kHOhAOA725vgc0zwBFOAHUBqiRNqhsn5dRbJ8Funq2BLTsXIB73muMrwBOALUBapQ36WR3A9C5qyegY86i8H5f3zLQRXQdzwjrZB/IoN8vN6mA8RXACaA2QI32u0E8E45K8N1dSxR+R1jMrAjjxRw4Iy5QvNG3Q1WLQoyvAE4AtQFqlGcA3vfxDMA9msvA9TI6b7ehlvy+LsZXACeA2gA17+kDhHiOpCN+AAAAAElFTkSuQmCC", "char_player": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACXklEQVR4nO2aPUgDQRCFE7lCRQySxCsCBvEnhUVEolWamEYQiYiVWNkqgkgEC20FQQU7G23ERggEi9jYBUFMEQsJMYIoiBxaqFhEEbR1Btl12TsG2fm6xx2XxzD7bnZzfp/LrI3Fvtx+5k+Wj6p+N5/X4ObD/iNcAGoD1CivJ9U1Pj/dA/S98yq8P2K3Ar29XxPer5sJxncAF4DaADXaGTDYHxDe3xFuVP0JgNeZYHwHcAGoDVBjyW7weraXgecGnDnn5Ret5xvfAVwAagPUSDMAg2d7XWR7A68xvgO4ANQGqFHOgOHNB+H1laQN9O3TG9DRUAvQqSE462O8zgjjO4ALQG2AGmkGyPbXCyNx4V6hfAdrHA3B67MFmAGTwWegcUbg8wHeC2jCBaA2QI3yHCBb826DM6JSqQI93q73fOM7gAtAbYAa5QzAdNvi/wUyA83C6/i9j8FrHsP/DWrCBaA2QI12Blw74lkc7/8x+LwglZ0DOm19AB2s7QF9JjMowfgO4AJQG6BG+5s72d6gKZ4F2rbDQCf6roBui8AzRUxhdUd4fTF3wt8HqMAFoDZAjfYcsHV8AdbcxkQaZIKF1jymdNkLdMIHM6F8cAh0rBPOFdWb9z86/R3jO4ALQG2AGmkG4DWtiuM8Ao3nAAzOhC7JXkIX4zuAC0BtgBrlOSCTgGeA+RI8D7CSS0CLJ3s5p9YU0DOBHNA8B2jCBaA2QI32XgBnwq7kvf9ZXBcbwhmC54a6okEJxncAF4DaADXKGYDf+zgD8Hs6X1T7hme0Lj7zw7+vi/EdwAWgNkDNN5sfg0Tx1zgPAAAAAElFTkSuQmCC", "char_npc1": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACE0lEQVR4nO2bPUsDQRCGo2gjmAREPAM2aiJoYeMXki6gIIKgoNiIiPgDtFBrixwB/QESLNLYaECQoEIqQQT9BX61oiBEW/Gjnilus8ydr7DzdC+X3XsZZuZ27zaxmKIoLtMgnWB3NvcjGb9Rroo9SGhE3vw/oAFAG0BjXX+mmh/rTRDdkaTXT27fbW9JCLtnOJ8BGgC0ATTiHmCqeVtealRfPwT3DGlPcD4DNABoA2ia0AY4vIfwHmPqCbY4nwEaALQBNOIewGtyZojWbHv/KNHxziTRj9XzwPml6woTzmeABgBtAE3o64Ce3CTRa1uHRO/7i0Tztf/4HB1v6hFSnM8ADQDaABpxD1hdmhCN5zX/1zifARoAtAE04h5QLF0Qvb45TzR/7puI+rnPcT4DNABoA2hC3wt8PNeI5vt/ztUxrfmo9/8c5zNAA4A2gCbyM0Je7Yvornhr4HypkWaio/5W6HwGaADQBtCEfkaP94Th7xbRfIPLWaLjnkf0XqFEtPYASzQAaANojHsB6Vngs74FogduikSb1gW85sPG+QzQAKANoLF+H8C///Ozv21TearZ+M90gegndr37dIfoS/+IaL5XkOJ8BmgA0AbQiN8J8p5wcH9HdCadIfqtsh084XQ+8HLq1a/fXB04nwEaALQBNNY9gD/3eQ9YSZTp7yt2Z3uzhhqX/ueI43wGaADQBtD8ApCFacXPjG9aAAAAAElFTkSuQmCC", "char_npc2": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACBklEQVR4nO2awSvEQRTHf+TI7paV3ZSi3T1xcCNSUi4OSlKiVdsmdwfrP1jKXZIiJRebi4Pak2JzcSCHtSdSq6XYgwMHrr5PzZhm9NK8z+3bzr6+vd57M/P7/YJAEARBEARBEAQfabANMJfJfbow8lv2tvPWnr/T6DLYf0QSwG2AG+N+0vV8Z1sP6FQyZRS/fFsGfVe7Vq63nQneV4AkgNsAN9YzwLTn53svQe9c9SnX//VM8L4CJAHcBrhpsg1Ae3J54EHzjwgo2uN0huhmim4m6PC+AiQB3Aa4MZ4BdJ9dnxyFc0EoPg3rF3L7oDfzM8r4pucEW7yvAEkAtwFujGcA7Xlbfp4bIsr1tvs+xfsKkARwG+DG+i6QTY+Bpvv24Czdx3GfD8UjyvjPxyugabSlw6I8E7RBEsBtgBvrGbC1ewI6m8bfV887QNejL6DpDFg7bQE9lAiDLlVezU0q8L4CJAHcBrgxngF036V3g8LTCKzPhPOgazcYb6MyBbqrOwq6/d3UoRneV4AkgNsAN9bnAEqyjD2vud4Hi4l70KHYB+izkgNTCryvAEkAtwFunM8AelY/GMZ3e82tEdDFWAx0vVpVxnON9xUgCeA2wI3T726DQP/eQDcTKOOFC9C2zwAp3leAJIDbADfOzwGUfvJMb+LtERdQTThybYjgfQVIArgNcPMFxQFxrp+SMpQAAAAASUVORK5CYII=", "char_npc3": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABuUlEQVR4nO2aMUtDMRSFa3mC4KMWp7qKq5uDuIp2LAgKLi46CG4q9B+ICgpdRRfHhwhOotBN6lL8B04O1k3e5CDo6r1DYkzSg+R826F54XC4uS9NXqVCCCGEEEIISZGR0BOerCx+hZ7zJ3vX3aCeqyEn+48wALQBNN7rybbmtzaWha5N1Y3zla/vQp9f3hvH+/aE5CuAAaANoMlCT7jbXvN6XvcI3UNsPcGV5CuAAaANoAneAzT6vW7bB2hcx7uSfAUwALQBNNF7wH7nVuizw3XjeN+e4UryFcAA0AbQOPeA2Gd+wyb5CmAAaANovPcB+v/6c/dO6PbSpNN8+r1/elT8yddvSb4CGADaABrvHqDP6Gz3ALpHaJ6md4T+XNgUOutdODo0k3wFMAC0ATTR7wZbcxPG5/Wat/FSHAjNu0FPGADaABrvfYBeg7on2NZ4c6wvdK3REPr4YVTo0IeYyVcAA0AbQBP9XqC46gid57nQq9tNocvBQOisF/Z7AE3yFcAA0AbQDP1b4cfquNC6J2hmyzeh+a1wYBgA2gCa6PuA+Rl5HtCq6xEfxudv+safvUm+AhgA2gCabxFbUCEUQ1qwAAAAAElFTkSuQmCC", "char_npc4": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAB5UlEQVR4nO2ZIUhEQRCGn8c1j1MsnnBFg80iJqtoFQyCRRBtNhWumOUMCjYRLcYTBJMoXNUiVxRMoqAgNj0uGAStzn+w67p7/sjM14a3b9/PMPvvvN0sMwzDMAxDK12pJ9yamfhMPed3Vo/rSTXnUk72H7EEsAWwiV5PvjW/ND8l4uJAr3O+5vOriPcPz53jYz1BfQVYAtgC2ORTT7hSmY16Hz0CPcTnCaGorwBLAFsAm+QegOC+7usDkNDxoaivAEsAWwCbjnvA2s6piPeqc87xsZ4RivoKsASwBbAJ9oBOn/n9NeorwBLAFsAmug/A//W7+pmIK5N9QfPhvr+9WfuVrp+ivgIsAWwBbKI9AM/ofPcA6BFIY2hZxB/jiyLOXxwEKnSjvgIsAWwBbDp+Nzg91uN8H9e8j8fahojtbjASSwBbAJvkZ4JtfUCpJOKjh3LqT0ahvgIsAWwBbLweEHoGiGseuX96EfFgud85Hvd9BPWF9gXqK8ASwBbAJrgPwN7+5OpNxAu77v995PbG/byV6xZxdVRKxu+Hor4CLAFsAWyi/wXQEy4bLREXCgURjzRlH4BcF2VfgO9n2XuYQA/qK8ASwBbAJtgDcN9FD2jfp91rHlkfdq/x2H0fUV8BlgC2ADZfcg9g/wag+fYAAAAASUVORK5CYII="};
+const BACKDROP_URL = 'backdrop.png';
+const SPRITES = {};
+
+async function _bootstrap() {
+  for (const [key, dataUri] of Object.entries(SPRITE_DATA_URIS)) {
+    const resp = await fetch(dataUri);
+    const blob = await resp.blob();
+    SPRITES[key] = URL.createObjectURL(blob);
+  }
+  // Probe for backdrop.png on the server (relative to this HTML)
+  try {
+    const probe = await fetch(BACKDROP_URL, { method: 'HEAD' });
+    if (probe.ok) SPRITES.backdrop = BACKDROP_URL;
+  } catch (e) { /* no backdrop — will use procedural fallback */ }
+  startGame();
+}
+
+function startGame() {
+const W = 960, H = 540;
+
+const BLOCKED = [
+  { x: 48,  y: 16,  w: 200, h: 167, label: 'newsstand' },
+  { x: 288, y: 0,   w: 336, h: 194, label: 'amphitheater' },
+  { x: 691, y: 22,  w: 259, h: 173, label: 'merch-shop' },
+  { x: 77,  y: 216, w: 230, h: 130, label: 'pond' },
+  { x: 566, y: 227, w: 365, h: 116, label: 'community' },
+  { x: 459, y: 412, w: 42,  h: 50,  label: 'fountain' },
+  { x: 0,   y: 280, w: 20,  h: 260, label: 'edge-bush-left' },
+  { x: 940, y: 280, w: 20,  h: 260, label: 'edge-bush-right' },
+];
+
+const ZONES = [
+  { id: 'newsstand', label: 'NEWSSTAND',  x: 90,  y: 195, w: 130, h: 22,
+    dialog: 'Today\'s drop is out. "Sam: this book changed my life again. Anyway, ad break."' },
+  { id: 'stage',     label: 'THE STAGE',  x: 380, y: 200, w: 160, h: 22,
+    dialog: 'Live recording in session. Audience: 14. Sam & Shaan are mid-bit.' },
+  { id: 'merch',     label: 'MERCH SHOP', x: 730, y: 205, w: 130, h: 22,
+    dialog: 'New "Top 1% MFM Listener" pixel-mug just dropped. Tee restock Friday.' },
+  { id: 'pond',      label: 'SHARK TANK', x: 170, y: 350, w: 130, h: 22,
+    dialog: 'Cal Calmary at the mic: "Sold Clearly Kombucha to Molson. Looking for strategic investors..."' },
+  { id: 'community', label: 'GATHERING',  x: 640, y: 347, w: 200, h: 22,
+    dialog: 'A few founders around the fire. Hampton meetup in NYC: 2 weeks out.' },
+];
+
+const NPCS = [
+  { handle: '@jess',     x: 320, y: 240, sprite: 'char_npc1' },
+  { handle: '@ron',      x: 540, y: 250, sprite: 'char_npc2' },
+  { handle: '@kombucha', x: 320, y: 400, sprite: 'char_npc3' },
+  { handle: '@dev',      x: 640, y: 410, sprite: 'char_npc4' },
+];
+
+const PLAYER_SPAWN = { x: 480, y: 480 };
+const SPRITE_SIZE = 24;
+
+class WorldScene extends Phaser.Scene {
+  constructor() { super('World'); }
+
+  preload() {
+    for (const [key, url] of Object.entries(SPRITES)) {
+      if (key === 'backdrop') continue;
+      this.load.image(key, url);
+    }
+    if (SPRITES.backdrop) this.load.image('backdrop', SPRITES.backdrop);
+  }
+
+  create() {
+    if (this.textures.exists('backdrop')) {
+      this.add.image(0, 0, 'backdrop').setOrigin(0).setDisplaySize(W, H).setDepth(-1000);
+    } else {
+      this.drawProceduralBackdrop();
+    }
+
+    this.npcs = [];
+    for (const n of NPCS) {
+      const shadow = this.add.ellipse(n.x, n.y + 4, 14, 4, 0x000000, 0.4);
+      const sprite = this.add.image(n.x, n.y, n.sprite).setOrigin(0.5, 1).setDisplaySize(SPRITE_SIZE, SPRITE_SIZE);
+      const label = this.add.text(n.x, n.y + 8, n.handle, {
+        fontFamily: '"JetBrains Mono", monospace', fontSize: '8px', color: '#2a2520',
+        backgroundColor: 'rgba(250,245,232,0.7)', padding: { x: 2, y: 1 }
+      }).setOrigin(0.5, 0);
+      this.npcs.push({ shadow, sprite, label, ox: n.x, oy: n.y, phase: Math.random() * Math.PI * 2 });
+    }
+
+    this.playerShadow = this.add.ellipse(PLAYER_SPAWN.x, PLAYER_SPAWN.y + 4, 16, 5, 0x000000, 0.5);
+    this.player = this.add.image(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 'char_player').setOrigin(0.5, 1).setDisplaySize(SPRITE_SIZE + 4, SPRITE_SIZE + 4);
+    this.playerLabel = this.add.text(PLAYER_SPAWN.x, PLAYER_SPAWN.y + 8, 'YOU', {
+      fontFamily: '"Press Start 2P", monospace', fontSize: '7px', color: '#e8b84a',
+      backgroundColor: '#2a2520', padding: { x: 3, y: 2 }
+    }).setOrigin(0.5, 0);
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.wasd = this.input.keyboard.addKeys('W,A,S,D');
+
+    this.dialogBox = this.add.rectangle(W/2, H-30, W-40, 48, 0x2a2520, 0.95)
+      .setStrokeStyle(2, 0xe8b84a).setOrigin(0.5).setVisible(false).setDepth(20000);
+    this.dialogTitle = this.add.text(30, H-48, '', {
+      fontFamily: '"Press Start 2P", monospace', fontSize: '8px', color: '#e8b84a'
+    }).setVisible(false).setDepth(20001);
+    this.dialogText = this.add.text(30, H-30, '', {
+      fontFamily: '"JetBrains Mono", monospace', fontSize: '11px', color: '#faf5e8',
+      wordWrap: { width: W-60 }
+    }).setVisible(false).setDepth(20001);
+
+    this.lastZone = null;
+    this.dialogTimer = null;
+    this.elapsed = 0;
+  }
+
+  drawProceduralBackdrop() {
+    this.add.rectangle(0, 0, W, H, 0x9bc560).setOrigin(0).setDepth(-1000);
+    const PATH = 0xfaf0d8;
+    this.add.circle(W/2, H * 0.72, 80, PATH).setDepth(-999);
+    this.add.rectangle(140, H/2 - 12, 30, H/2 - 50, PATH).setOrigin(0).setDepth(-999);
+    this.add.rectangle(140, H/2 - 12, W/2 - 130, 30, PATH).setOrigin(0).setDepth(-999);
+    this.add.rectangle(W/2 - 15, 200, 30, H/2 - 60, PATH).setOrigin(0).setDepth(-999);
+    this.add.rectangle(W - 170, H/2 - 12, 30, H/2 - 50, PATH).setOrigin(0).setDepth(-999);
+    this.add.rectangle(W/2 + 100, H/2 - 12, W/2 - 250, 30, PATH).setOrigin(0).setDepth(-999);
+    const zoneColors = {
+      'newsstand': 0xb38a4a, 'amphitheater': 0xe0d4b8, 'merch-shop': 0x6a8eb0,
+      'pond': 0x6ec1d6, 'community': 0x8b6a3e,
+    };
+    BLOCKED.forEach(b => {
+      const color = zoneColors[b.label];
+      if (!color) return;
+      this.add.rectangle(b.x, b.y, b.w, b.h, color).setOrigin(0).setDepth(-500);
+      this.add.rectangle(b.x, b.y + b.h - 10, b.w, 10, 0x000000, 0.25).setOrigin(0).setDepth(-499);
+    });
+    const amphi = BLOCKED.find(b => b.label === 'amphitheater');
+    if (amphi) this.add.rectangle(amphi.x + amphi.w/2, amphi.y + 60, amphi.w * 0.55, 50, 0x4a8fc9, 0.85).setOrigin(0.5).setDepth(-498);
+    const fount = BLOCKED.find(b => b.label === 'fountain');
+    if (fount) {
+      this.add.circle(fount.x + fount.w/2, fount.y + fount.h/2, 18, 0x4a8fc9).setDepth(-499);
+      this.add.circle(fount.x + fount.w/2, fount.y + fount.h/2, 8, 0xa4d8e1).setDepth(-498);
+    }
+  }
+
+  canWalk(x, y) {
+    for (const b of BLOCKED) {
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return false;
+    }
+    if (x < 12 || x > W - 12 || y < 16 || y > H - 8) return false;
+    return true;
+  }
+
+  update(time, delta) {
+    this.elapsed += delta;
+    let dx = 0, dy = 0;
+    const sp = 2.2;
+    if (this.cursors.left.isDown || this.wasd.A.isDown) dx -= sp;
+    if (this.cursors.right.isDown || this.wasd.D.isDown) dx += sp;
+    if (this.cursors.up.isDown || this.wasd.W.isDown) dy -= sp;
+    if (this.cursors.down.isDown || this.wasd.S.isDown) dy += sp;
+    let nx = this.player.x + dx;
+    let ny = this.player.y + dy;
+    if (this.canWalk(nx, this.player.y)) this.player.x = nx;
+    if (this.canWalk(this.player.x, ny)) this.player.y = ny;
+
+    this.playerShadow.x = this.player.x;
+    this.playerShadow.y = this.player.y - 2;
+    const depthScale = 1.0 + ((this.player.y - H/2) / H) * 0.16;
+    const targetDisplay = (SPRITE_SIZE + 4);
+    this.player.setScale(depthScale * (targetDisplay / this.player.width));
+    this.playerLabel.x = this.player.x;
+    this.playerLabel.y = this.player.y + 4;
+
+    for (const n of this.npcs) {
+      n.sprite.x = n.ox + Math.sin((this.elapsed/900) + n.phase) * 6;
+      n.sprite.y = n.oy + Math.cos((this.elapsed/1200) + n.phase) * 3;
+      n.shadow.x = n.sprite.x;
+      n.shadow.y = n.sprite.y + 2;
+      n.label.x = n.sprite.x;
+      n.label.y = n.sprite.y + 4;
+    }
+
+    this.player.setDepth(this.player.y);
+    this.playerShadow.setDepth(this.player.y - 0.5);
+    this.playerLabel.setDepth(this.player.y + 0.5);
+    for (const n of this.npcs) {
+      n.sprite.setDepth(n.sprite.y);
+      n.shadow.setDepth(n.sprite.y - 0.5);
+      n.label.setDepth(n.sprite.y + 0.5);
+    }
+
+    let inside = null;
+    const px = this.player.x, py = this.player.y;
+    for (const z of ZONES) {
+      if (px >= z.x && px <= z.x + z.w && py >= z.y && py <= z.y + z.h) { inside = z; break; }
+    }
+    if (inside && inside.id !== this.lastZone) {
+      this.lastZone = inside.id;
+      this.dialogBox.setVisible(true);
+      this.dialogTitle.setText(inside.label).setVisible(true);
+      this.dialogText.setText(inside.dialog).setVisible(true);
+      if (this.dialogTimer) this.dialogTimer.remove();
+      this.dialogTimer = this.time.delayedCall(3600, () => {
+        this.dialogBox.setVisible(false);
+        this.dialogTitle.setVisible(false);
+        this.dialogText.setVisible(false);
+      });
+    } else if (!inside) { this.lastZone = null; }
+  }
+}
+
+new Phaser.Game({
+  type: Phaser.AUTO, parent: 'game',
+  width: W, height: H,
+  pixelArt: false, backgroundColor: '#9bc560',
+  scene: [WorldScene],
+});
+}
+_bootstrap().catch(e => {
+  console.error('[mfm] bootstrap failed:', e);
+  document.getElementById('game').innerHTML = '<div style="color:#e87a3c;padding:20px;font-family:monospace">Bootstrap failed: ' + e.message + '</div>';
+});
+</script>
+</body>
+</html>
