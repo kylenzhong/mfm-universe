@@ -107,6 +107,18 @@
   .tile.pipeline { --accent: var(--teal); }
   .tile.trends { --accent: var(--green); }
   .tile.newsletter { --accent: var(--gold2); }
+  .tile.activity { --accent: var(--purple); }
+  .tile.unbuilt { --accent: var(--teal2); }
+  .tile.coming-soon {
+    cursor: default; opacity: 0.85;
+  }
+  .tile.coming-soon:hover {
+    transform: none; border-color: var(--border);
+    box-shadow: none;
+  }
+  .tile.coming-soon:hover .tile-arrow {
+    color: var(--muted); transform: none;
+  }
   .tile-icon { font-size: 36px; margin-bottom: 14px; }
   .tile-title {
     font-weight: 800; font-size: 18px; margin-bottom: 8px;
@@ -224,6 +236,30 @@
         <span class="tile-stat">Free</span>
       </div>
     </a>
+
+    <div class="tile activity coming-soon" aria-disabled="true">
+      <div class="tile-arrow">⏳</div>
+      <div class="tile-icon">👥</div>
+      <div class="tile-title">Guest Activity Feed</div>
+      <div class="tile-desc">A daily digest of what MFM &amp; Starter Story guests posted, launched, raised, or shipped. Pulled from X, LinkedIn, and Substack — see what your alumni are actually doing in real time.</div>
+      <div class="tile-stats">
+        <span class="tile-stat">Coming soon</span>
+        <span class="tile-stat">Daily</span>
+        <span class="tile-stat"><strong>50+</strong> operators</span>
+      </div>
+    </div>
+
+    <div class="tile unbuilt coming-soon" aria-disabled="true">
+      <div class="tile-arrow">⏳</div>
+      <div class="tile-icon">🧭</div>
+      <div class="tile-title">Unbuilt Ideas Radar</div>
+      <div class="tile-desc">Every "someone should build this" surfaced on past MFM episodes, cross-checked against the App Store, Indie Hackers, and Product Hunt. Periodic re-scan flags when a field finally fills — or stays wide open.</div>
+      <div class="tile-stats">
+        <span class="tile-stat">Coming soon</span>
+        <span class="tile-stat">Weekly re-scan</span>
+        <span class="tile-stat">Backlog hunt</span>
+      </div>
+    </div>
   </div>
 
   <div id="newsletter-soon" style="background:linear-gradient(135deg,#141428 0%,#1a1a35 100%);border:1px solid #2a2a4a;border-radius:16px;padding:32px;margin-bottom:32px;text-align:center">
