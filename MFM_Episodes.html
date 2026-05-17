@@ -484,6 +484,44 @@
     transition: all .15s;
   }
   .listen-mini a:hover { background: var(--primary-deep); color: #fff; border-color: var(--primary-deep); }
+  .guest-link {
+    display: block;
+    margin: 8px 0 6px;
+    padding: 8px 10px;
+    background: var(--bg2);
+    border: 1px solid var(--card-edge);
+    border-left: 3px solid var(--guest);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 11px;
+    line-height: 1.3;
+    transition: all .15s;
+  }
+  .guest-link:hover {
+    background: #fff;
+    border-color: var(--guest);
+    box-shadow: 0 2px 8px rgba(110,92,255,.18);
+  }
+  .guest-link .gl-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .guest-link .gl-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    color: var(--primary-deep);
+  }
+  .guest-link .gl-arrow {
+    float: right;
+    color: var(--guest);
+    font-weight: 700;
+  }
 
   /* ─── FOOTER ───────────────────────────────────────────────────────────── */
   footer {
@@ -595,6 +633,21 @@ const PORTRAITS = {
   "Tyler Denk":               "tyler-denk",
   "Cathie Wood":              "cathie-wood",
 };
+
+// ─── GUESTS WITH FULL PROFILES ─────────────────────────────────────────────
+// Names that exist in MFM_Guest_Profiles.html — the card-back gets a
+// "View full profile" cross-link when the headliner is in this set.
+const GUEST_PROFILES = new Set([
+  "Sam Parr","Shaan Puri","Dharmesh Shah","Jesse Itzler","Andrew Wilkinson",
+  "Elan Lee","Greg Isenberg","Tyler Denk","Alex Lieberman","Austin Rief",
+  "Jesse Cole","Noah Kagan","Alex Hormozi","Codie Sanchez","Nick Huber",
+  "Naval Ravikant","Tim Ferriss","Scott Galloway","Sahil Bloom","MrBeast",
+  "Gary Vaynerchuk","Ben Horowitz","Palmer Luckey","Balaji Srinivasan",
+  "Robert Greene","Morgan Housel","Pieter Levels","Tommy Mello","Jesse Pujji",
+  "Rob Dyrdek","Brett Adcock","Steph Smith","Nik Sharma","Justin Kan",
+  "Pat Walls","Ryan Petersen","Sheel Mohnot","Peter Rahal","Nick Gray",
+  "Thomas Tull","George Mack","Bill Gurley","Cathie Wood","Demis Hassabis"
+]);
 
 // Map of mood → topic keyword filter
 const MOOD_FILTERS = {
@@ -1367,6 +1420,14 @@ function renderGrid() {
       ? `<div class="back-quote">"${escapeHtml(ep.quotes[0])}"</div>`
       : '';
     const classicCorner = ep.classic ? `<div class="badge-corner" title="Classic">★</div>` : '';
+    const profileGuest = (ep.guests || []).find(g => GUEST_PROFILES.has(g));
+    const guestLink = profileGuest
+      ? `<a class="guest-link" href="MFM_Guest_Profiles.html#guest=${encodeURIComponent(profileGuest)}" onclick="event.stopPropagation()">
+          <span class="gl-arrow">→</span>
+          <span class="gl-label">Guest profile</span>
+          <span class="gl-name">${escapeHtml(profileGuest)}</span>
+        </a>`
+      : '';
 
     return `
     <div class="card-slot">
@@ -1398,6 +1459,7 @@ function renderGrid() {
           <div class="back-title">${escapeHtml(ep.title)}</div>
           <div class="back-insight">${escapeHtml(ep.insight || '')}</div>
           ${quote}
+          ${guestLink}
           <div class="listen-mini">
             <a href="https://www.mfmpod.com/episodes/" target="_blank" onclick="event.stopPropagation()">MFM</a>
             <a href="https://open.spotify.com/show/3mliji9352UAk3XnWElnDV" target="_blank" onclick="event.stopPropagation()">Spotify</a>
