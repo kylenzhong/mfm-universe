@@ -20,6 +20,8 @@
     --teal2: #5fffd4;
     --purple: #c44dff;
     --blue: #5fb3ff;
+    --green: #34d399;
+    --green2: #6ee7b7;
     --text: #e8e8f0;
     --muted: #8888aa;
   }
@@ -35,9 +37,8 @@
       radial-gradient(ellipse 600px 400px at 80% 30%, rgba(255,107,53,0.10), transparent 70%),
       radial-gradient(ellipse 700px 500px at 50% 90%, rgba(196,77,255,0.08), transparent 70%);
   }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 60px 32px 80px; position: relative; z-index: 1; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; position: relative; z-index: 1; }
 
-  .hero { text-align: center; margin-bottom: 60px; }
   .hero-eyebrow {
     color: var(--gold2); font-size: 12px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px;
@@ -53,6 +54,31 @@
   .hero-sub {
     color: var(--muted); font-size: 16px; line-height: 1.7;
     max-width: 680px; margin: 0 auto;
+  }
+
+  /* ─── Hero — interactive walkable world ─── */
+  .hero-world { padding: 60px 16px 40px; position: relative; z-index: 1; }
+  .hero-world-inner { max-width: 1000px; margin: 0 auto; text-align: center; }
+  .hero-world .hero-eyebrow { margin-bottom: 16px; }
+  .hero-world .hero-title { margin-bottom: 16px; }
+  .hero-world .hero-sub { margin-bottom: 32px; }
+  .world-frame-contained {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 12px; overflow: hidden;
+    box-shadow: 0 16px 64px rgba(0,0,0,0.5);
+  }
+  .world-frame-contained iframe {
+    width: 100%; height: 600px; border: 0; display: block; border-radius: 8px;
+    background: #0d0d1a;
+  }
+  .scroll-hint {
+    margin-top: 28px; color: var(--muted); font-size: 11px;
+    letter-spacing: 3px; text-transform: uppercase;
+    animation: cue-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes cue-pulse {
+    0%,100% { opacity: 0.5; transform: translateY(0); }
+    50%     { opacity: 1;   transform: translateY(4px); }
   }
 
   .tile-grid {
@@ -79,6 +105,7 @@
   .tile.rpg { --accent: var(--purple); }
   .tile.starter { --accent: var(--orange); }
   .tile.pipeline { --accent: var(--teal); }
+  .tile.trends { --accent: var(--green); }
   .tile.newsletter { --accent: var(--gold2); }
   .tile-icon { font-size: 36px; margin-bottom: 14px; }
   .tile-title {
@@ -111,13 +138,20 @@
 </head>
 <body>
 
-<div class="wrap">
-  <div class="hero">
+<!-- ── Hero — interactive walkable world ── -->
+<section class="hero-world">
+  <div class="hero-world-inner">
     <div class="hero-eyebrow">An Interactive Intelligence Layer</div>
     <div class="hero-title">🎙 MFM UNIVERSE 🚀</div>
-    <p class="hero-sub">A searchable, mineable view of two of the best founder podcasts on the internet — <strong>My First Million</strong> and <strong>Starter Story</strong>. Every episode tagged with key ideas, every guest profiled, every playbook surfaced.</p>
+    <p class="hero-sub">A searchable, mineable view of two of the best founder podcasts on the internet — <strong>My First Million</strong> and <strong>Starter Story</strong>. Walk around the universe — Stage, Newsstand, Merch, Shark Tank, Gathering — then scroll for the indexed view.</p>
+    <div class="world-frame-contained">
+      <iframe src="interactive-world/" title="MFM Universe — Interactive World"></iframe>
+    </div>
+    <div class="scroll-hint">scroll for the indexed view ↓</div>
   </div>
+</section>
 
+<div class="wrap">
   <div class="tile-grid">
     <a href="MFM_Episodes.html" class="tile episodes">
       <div class="tile-arrow">→</div>
@@ -152,6 +186,18 @@
         <span class="tile-stat"><strong>50</strong> episodes</span>
         <span class="tile-stat"><strong>12</strong> $100K+/mo apps</span>
         <span class="tile-stat"><strong>8</strong> playbooks</span>
+      </div>
+    </a>
+
+    <a href="https://trend-detector-kappa.vercel.app" target="_blank" rel="noopener" class="tile trends">
+      <div class="tile-arrow">↗</div>
+      <div class="tile-icon">📡</div>
+      <div class="tile-title">Trend Detector</div>
+      <div class="tile-desc">Daily multi-source signal engine. Wikipedia pageview velocity cross-validated against TikTok hashtags, X trends, HuggingFace, GitHub, Reddit. Triple-validated entities = maximum signal. Updates daily at 7am.</div>
+      <div class="tile-stats">
+        <span class="tile-stat"><strong>7</strong> source families</span>
+        <span class="tile-stat"><strong>Daily</strong> brief</span>
+        <span class="tile-stat">Triple-validated</span>
       </div>
     </a>
 
