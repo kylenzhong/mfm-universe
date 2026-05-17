@@ -5,71 +5,86 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MFM Universe — Founder Intelligence</title>
 <meta name="description" content="An interactive intelligence layer over My First Million and Starter Story — episodes, guests, playbooks, and the apps that print money.">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
 <style>
   :root {
-    --bg: #0d0d1a;
-    --card: #141428;
-    --card2: #1a1a35;
-    --border: #2a2a4a;
-    --gold: #d4a000;
-    --gold2: #f0c040;
-    --orange: #ff6b35;
-    --orange2: #ff8c5e;
-    --teal: #00d4aa;
-    --teal2: #5fffd4;
-    --purple: #c44dff;
-    --blue: #5fb3ff;
-    --green: #34d399;
-    --green2: #6ee7b7;
-    --text: #e8e8f0;
-    --muted: #8888aa;
+    --bg: #f7fafd;
+    --bg2: #eaf2fb;
+    --card-bg: #ffffff;
+    --card-edge: #d7e3f0;
+    --ink: #0d2540;
+    --ink-soft: #335577;
+    --muted: #5a7a96;
+    --primary: #4a9fff;
+    --primary-deep: #0d4a8c;
+    --primary-shadow: rgba(13,74,140,.12);
+    --solo: #4a9fff;
+    --guest: #6e5cff;
+    --classic: #e2a93b;
+    --classic-2: #ffd76b;
+    --hot: #ff5d6e;
+    --good-green: #1aa971;
+    --radius: 12px;
+    --radius-card: 16px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+  html, body {
+    background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif;
     min-height: 100vh; overflow-x: hidden;
   }
-  body::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  body {
     background:
-      radial-gradient(ellipse 800px 400px at 20% 0%, rgba(212,160,0,0.10), transparent 70%),
-      radial-gradient(ellipse 600px 400px at 80% 30%, rgba(255,107,53,0.10), transparent 70%),
-      radial-gradient(ellipse 700px 500px at 50% 90%, rgba(196,77,255,0.08), transparent 70%);
+      radial-gradient(ellipse 1200px 600px at 50% -10%, rgba(74,159,255,.18) 0%, transparent 60%),
+      radial-gradient(ellipse 800px 500px at 90% 30%, rgba(110,92,255,.10) 0%, transparent 65%),
+      radial-gradient(ellipse 700px 400px at 10% 70%, rgba(226,169,59,.08) 0%, transparent 70%),
+      var(--bg);
+    background-attachment: fixed;
   }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; position: relative; z-index: 1; }
-
-  .hero-eyebrow {
-    color: var(--gold2); font-size: 12px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px;
-  }
-  .hero-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: clamp(20px, 4vw, 36px);
-    background: linear-gradient(135deg, var(--gold2) 0%, var(--orange2) 50%, var(--purple) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; line-height: 1.4;
-    margin-bottom: 18px;
-  }
-  .hero-sub {
-    color: var(--muted); font-size: 16px; line-height: 1.7;
-    max-width: 680px; margin: 0 auto;
-  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 32px 60px; position: relative; z-index: 1; }
+  a { color: inherit; }
 
   /* ─── Hero — interactive walkable world ─── */
-  .hero-world { padding: 60px 16px 40px; position: relative; z-index: 1; }
+  .hero-world { padding: 36px 16px 24px; position: relative; z-index: 1; }
   .hero-world-inner { max-width: 1000px; margin: 0 auto; text-align: center; }
-  .hero-world .hero-eyebrow { margin-bottom: 16px; }
-  .hero-world .hero-title { margin-bottom: 16px; }
-  .hero-world .hero-sub { margin-bottom: 32px; }
+  .brandline {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--primary-deep);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    padding: 6px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-edge);
+    border-radius: 999px;
+  }
+  .brandline .dot { width: 8px; height: 8px; background: var(--primary); border-radius: 2px; box-shadow: 2px 2px 0 var(--primary-deep); display: inline-block; }
+  .hero-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(34px, 5.5vw, 56px);
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.04;
+    letter-spacing: -1.5px;
+    margin-bottom: 14px;
+  }
+  .hero-title .accent { color: var(--primary-deep); }
+  .hero-title .pixel { color: var(--primary); font-family: 'Press Start 2P', monospace; font-size: .6em; vertical-align: 6px; margin: 0 6px; }
+  .hero-sub {
+    color: var(--ink-soft); font-size: 17px; line-height: 1.55;
+    max-width: 700px; margin: 0 auto 28px;
+  }
+  .hero-sub strong { color: var(--primary-deep); font-weight: 700; }
+
   .world-frame-contained {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 12px; overflow: hidden;
-    box-shadow: 0 16px 64px rgba(0,0,0,0.5);
+    background: var(--card-bg); border: 1.5px solid var(--card-edge); border-radius: 18px;
+    padding: 14px; overflow: hidden;
+    box-shadow: 0 16px 48px rgba(13,37,64,.10);
   }
   .world-frame-contained #game {
-    background: #0d0d1a; border-radius: 8px; overflow: hidden;
+    background: #9bc560; /* grass — matches procedural backdrop */
+    border-radius: 10px; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
     min-height: 540px;
   }
@@ -79,92 +94,195 @@
   }
   .world-controls {
     display: flex; gap: 16px; align-items: center;
-    margin-top: 12px; padding-top: 12px;
-    border-top: 1px solid var(--border);
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--card-edge);
     flex-wrap: wrap; font-size: 12px; color: var(--muted);
     justify-content: center;
   }
   .world-controls .key {
-    background: #2a2a4a; color: var(--text);
-    padding: 3px 8px; border-radius: 4px;
-    font-size: 11px; border: 1px solid #404060;
+    background: var(--bg2); color: var(--primary-deep);
+    padding: 3px 8px; border-radius: 5px;
+    font-size: 11px; border: 1px solid var(--card-edge);
     margin: 0 1px; font-family: 'JetBrains Mono', monospace;
+    box-shadow: 0 1px 0 var(--card-edge);
   }
   .scroll-hint {
     margin-top: 28px; color: var(--muted); font-size: 11px;
     letter-spacing: 3px; text-transform: uppercase;
     animation: cue-pulse 2.4s ease-in-out infinite;
+    font-family: 'JetBrains Mono', monospace;
   }
   @keyframes cue-pulse {
     0%,100% { opacity: 0.5; transform: translateY(0); }
     50%     { opacity: 1;   transform: translateY(4px); }
   }
 
+  /* ─── Tile grid ─── */
+  .section-header {
+    display: flex; align-items: baseline; gap: 14px; margin: 8px 0 22px;
+    flex-wrap: wrap;
+  }
+  .section-header h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.5px;
+  }
+  .section-header .stripe-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .section-header .stripe-meta b { color: var(--primary-deep); }
+
   .tile-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 18px;
-    margin-bottom: 48px;
+    margin-bottom: 40px;
   }
   .tile {
-    background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
-    border: 1px solid var(--border);
-    border-radius: 16px; padding: 26px;
-    text-decoration: none; color: var(--text);
-    transition: all .25s; position: relative; overflow: hidden;
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    border-radius: var(--radius-card); padding: 24px;
+    text-decoration: none; color: var(--ink);
+    transition: all .2s; position: relative; overflow: hidden;
     display: flex; flex-direction: column; min-height: 220px;
+    box-shadow: 0 4px 14px rgba(13,37,64,.04);
   }
   .tile::before {
     content: ''; position: absolute; left: 0; top: 0; right: 0; height: 3px;
-    background: var(--accent, var(--gold));
+    background: var(--accent, var(--primary));
   }
-  .tile:hover { transform: translateY(-4px); border-color: var(--accent, var(--gold)); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
-  .tile.episodes { --accent: var(--gold); }
-  .tile.guests { --accent: var(--blue); }
-  .tile.rpg { --accent: var(--purple); }
-  .tile.starter { --accent: var(--orange); }
-  .tile.pipeline { --accent: var(--teal); }
-  .tile.trends { --accent: var(--green); }
-  .tile.newsletter { --accent: var(--gold2); }
-  .tile.activity { --accent: var(--purple); }
-  .tile.unbuilt { --accent: var(--teal2); }
-  .tile.coming-soon {
-    cursor: default; opacity: 0.85;
+  .tile:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent, var(--primary));
+    box-shadow: 0 14px 32px var(--primary-shadow);
   }
+  .tile.episodes  { --accent: var(--classic); }
+  .tile.guests    { --accent: var(--primary); }
+  .tile.rpg       { --accent: var(--guest); }
+  .tile.starter   { --accent: var(--guest); }
+  .tile.pipeline  { --accent: var(--primary-deep); }
+  .tile.trends    { --accent: var(--good-green); }
+  .tile.newsletter{ --accent: var(--classic); }
+  .tile.activity  { --accent: var(--guest); }
+  .tile.unbuilt   { --accent: var(--ink-soft); }
+  .tile.coming-soon { cursor: default; opacity: 0.85; }
   .tile.coming-soon:hover {
-    transform: none; border-color: var(--border);
-    box-shadow: none;
+    transform: none; border-color: var(--card-edge);
+    box-shadow: 0 4px 14px rgba(13,37,64,.04);
   }
-  .tile.coming-soon:hover .tile-arrow {
-    color: var(--muted); transform: none;
-  }
-  .tile-icon { font-size: 36px; margin-bottom: 14px; }
+  .tile.coming-soon:hover .tile-arrow { color: var(--muted); transform: none; }
+  .tile-icon { font-size: 32px; margin-bottom: 12px; line-height: 1; }
   .tile-title {
-    font-weight: 800; font-size: 18px; margin-bottom: 8px;
-    color: var(--accent, var(--gold));
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700; font-size: 19px; margin-bottom: 8px;
+    color: var(--accent, var(--primary-deep));
+    letter-spacing: -0.3px;
   }
   .tile-desc {
-    color: #cdd; font-size: 13.5px; line-height: 1.55; margin-bottom: 16px;
+    color: var(--ink-soft); font-size: 13.5px; line-height: 1.55; margin-bottom: 16px;
     flex: 1;
   }
   .tile-stats {
     display: flex; gap: 12px; flex-wrap: wrap;
-    border-top: 1px solid var(--border); padding-top: 12px;
+    border-top: 1px solid var(--card-edge); padding-top: 12px;
+    font-family: 'JetBrains Mono', monospace;
   }
-  .tile-stat { font-size: 11px; color: var(--muted); }
-  .tile-stat strong { color: var(--text); font-weight: 700; }
+  .tile-stat { font-size: 10.5px; color: var(--muted); }
+  .tile-stat strong { color: var(--primary-deep); font-weight: 700; }
   .tile-arrow {
-    position: absolute; top: 24px; right: 24px;
+    position: absolute; top: 22px; right: 22px;
     color: var(--muted); font-size: 18px; transition: all .2s;
+    font-family: 'JetBrains Mono', monospace;
   }
-  .tile:hover .tile-arrow { color: var(--accent, var(--gold)); transform: translate(2px, -2px); }
+  .tile:hover .tile-arrow { color: var(--accent, var(--primary)); transform: translate(2px, -2px); }
 
-  .footer {
-    text-align: center; color: var(--muted); font-size: 12px;
-    border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px;
+  /* ─── Newsletter callout ─── */
+  .newsletter-callout {
+    background:
+      radial-gradient(ellipse 400px 200px at 90% 0%, rgba(226,169,59,.18) 0%, transparent 60%),
+      var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    border-radius: var(--radius-card);
+    padding: 32px 32px 28px;
+    margin-bottom: 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
   }
-  .footer a { color: var(--gold2); text-decoration: none; }
+  .newsletter-callout::before {
+    content: ''; position: absolute; left: 0; top: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--classic), var(--classic-2), var(--classic));
+  }
+  .newsletter-callout .badge {
+    display: inline-block;
+    color: var(--primary-deep);
+    background: var(--bg2);
+    border: 1px solid var(--card-edge);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .newsletter-callout h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    color: var(--ink);
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+  }
+  .newsletter-callout p {
+    color: var(--ink-soft); font-size: 14.5px; line-height: 1.6;
+    max-width: 560px; margin: 0 auto 18px;
+  }
+  .newsletter-callout .repo-btn {
+    display: inline-block;
+    background: var(--primary-deep);
+    color: #fff;
+    border: 1px solid var(--primary-deep);
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .15s;
+  }
+  .newsletter-callout .repo-btn:hover {
+    background: var(--ink);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px var(--primary-shadow);
+  }
+
+  /* ─── Footer ─── */
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    border-top: 1px solid var(--card-edge);
+    padding-top: 24px;
+    margin-top: 24px;
+    line-height: 1.8;
+  }
+  .footer a { color: var(--primary-deep); text-decoration: none; font-weight: 600; }
   .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 18px 16px 60px; }
+    .hero-world { padding: 22px 12px 16px; }
+    .world-frame-contained { padding: 8px; }
+    .world-frame-contained #game { min-height: 380px; }
+    .section-header h2 { font-size: 24px; }
+    .newsletter-callout { padding: 24px 18px; }
+  }
 </style>
 </head>
 <body>
@@ -172,8 +290,8 @@
 <!-- ── Hero — interactive walkable world ── -->
 <section class="hero-world">
   <div class="hero-world-inner">
-    <div class="hero-eyebrow">An Interactive Intelligence Layer</div>
-    <div class="hero-title">🎙 MFM UNIVERSE 🚀</div>
+    <div class="brandline"><span class="dot"></span>AN INTERACTIVE INTELLIGENCE LAYER</div>
+    <h1 class="hero-title">MFM Universe <span class="pixel">·</span> <span class="accent">walk it. mine it.</span></h1>
     <p class="hero-sub">A searchable, mineable view of two of the best founder podcasts on the internet — <strong>My First Million</strong> and <strong>Starter Story</strong>. Walk around the universe — Stage, Newsstand, Merch, Shark Tank, Gathering — then scroll for the indexed view.</p>
     <div class="world-frame-contained">
       <div id="game"></div>
@@ -189,16 +307,21 @@
 </section>
 
 <div class="wrap">
+  <div class="section-header">
+    <h2>The indexed view</h2>
+    <div class="stripe-meta"><b>5 live</b> · 4 shipped surfaces · 1 launching W19</div>
+  </div>
+
   <div class="tile-grid">
     <a href="MFM_Episodes.html" class="tile episodes">
       <div class="tile-arrow">→</div>
-      <div class="tile-icon">📻</div>
-      <div class="tile-title">MFM Episodes</div>
-      <div class="tile-desc">Every MFM episode with key ideas, guest tagging, and topic search. The brain dump of 800+ episodes, indexed and queryable.</div>
+      <div class="tile-icon">🃏</div>
+      <div class="tile-title">Episode Deck</div>
+      <div class="tile-desc">Every MFM episode reborn as a trading card — pixel portraits, ability lines, foil for classics. Filter by mood, flip for quotes and listen links.</div>
       <div class="tile-stats">
         <span class="tile-stat"><strong>800+</strong> episodes</span>
-        <span class="tile-stat">Key ideas</span>
-        <span class="tile-stat">Topic search</span>
+        <span class="tile-stat">Mood filter</span>
+        <span class="tile-stat">Foil classics</span>
       </div>
     </a>
 
@@ -287,16 +410,16 @@
     </div>
   </div>
 
-  <div id="newsletter-soon" style="background:linear-gradient(135deg,#141428 0%,#1a1a35 100%);border:1px solid #2a2a4a;border-radius:16px;padding:32px;margin-bottom:32px;text-align:center">
-    <div style="color:#f0c040;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px">Coming W19 (May 18–22, 2026)</div>
-    <h2 style="color:#fff;font-size:22px;margin-bottom:10px">The MFM operator's digest</h2>
-    <p style="color:#cdd;font-size:14px;line-height:1.6;max-width:560px;margin:0 auto 18px">A weekly read for people who screenshot ideas from the show and never go back to them. Sign-up form lands W19. Until then: bookmark this page or follow the project on GitHub.</p>
-    <a href="https://github.com/kylenzhong/mfm-universe" style="display:inline-block;background:rgba(212,160,0,0.15);color:#f0c040;border:1px solid #d4a000;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none">Watch the repo →</a>
+  <div id="newsletter-soon" class="newsletter-callout">
+    <div class="badge">Coming W19 · May 18–22, 2026</div>
+    <h2>The MFM operator's digest</h2>
+    <p>A weekly read for people who screenshot ideas from the show and never go back to them. Sign-up form lands W19. Until then: bookmark this page or follow the project on GitHub.</p>
+    <a href="https://github.com/kylenzhong/mfm-universe" class="repo-btn">Watch the repo →</a>
   </div>
 
   <div class="footer">
     Built by <a href="https://github.com/kylenzhong" target="_blank">Kyle Zhong</a> ·
-    Source on <a href="https://github.com/kylenzhong/mfm-universe" target="_blank">GitHub</a> ·
+    Source on <a href="https://github.com/kylenzhong/mfm-universe" target="_blank">GitHub</a><br>
     Not affiliated with My First Million, Starter Story, Sam Parr, Shaan Puri, or Pat Walls — just a fan project.
   </div>
 </div>
@@ -382,8 +505,8 @@ class WorldScene extends Phaser.Scene {
       const shadow = this.add.ellipse(n.x, n.y + 4, 14, 4, 0x000000, 0.4);
       const sprite = this.add.image(n.x, n.y, n.sprite).setOrigin(0.5, 1).setDisplaySize(SPRITE_SIZE, SPRITE_SIZE);
       const label = this.add.text(n.x, n.y + 8, n.handle, {
-        fontFamily: '"JetBrains Mono", monospace', fontSize: '8px', color: '#2a2520',
-        backgroundColor: 'rgba(250,245,232,0.7)', padding: { x: 2, y: 1 }
+        fontFamily: '"JetBrains Mono", monospace', fontSize: '8px', color: '#0d2540',
+        backgroundColor: 'rgba(247,250,253,0.85)', padding: { x: 3, y: 1 }
       }).setOrigin(0.5, 0);
       this.npcs.push({ shadow, sprite, label, ox: n.x, oy: n.y, phase: Math.random() * Math.PI * 2 });
     }
@@ -391,20 +514,21 @@ class WorldScene extends Phaser.Scene {
     this.playerShadow = this.add.ellipse(PLAYER_SPAWN.x, PLAYER_SPAWN.y + 4, 16, 5, 0x000000, 0.5);
     this.player = this.add.image(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 'char_player').setOrigin(0.5, 1).setDisplaySize(SPRITE_SIZE + 4, SPRITE_SIZE + 4);
     this.playerLabel = this.add.text(PLAYER_SPAWN.x, PLAYER_SPAWN.y + 8, 'YOU', {
-      fontFamily: '"Press Start 2P", monospace', fontSize: '7px', color: '#e8b84a',
-      backgroundColor: '#2a2520', padding: { x: 3, y: 2 }
+      fontFamily: '"Press Start 2P", monospace', fontSize: '7px', color: '#ffffff',
+      backgroundColor: '#0d4a8c', padding: { x: 4, y: 2 }
     }).setOrigin(0.5, 0);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D');
 
-    this.dialogBox = this.add.rectangle(W/2, H-30, W-40, 48, 0x2a2520, 0.95)
-      .setStrokeStyle(2, 0xe8b84a).setOrigin(0.5).setVisible(false).setDepth(20000);
+    // Dialog: v2 palette — deep-blue ground, primary-blue accent stroke, white text
+    this.dialogBox = this.add.rectangle(W/2, H-30, W-40, 48, 0x0d2540, 0.96)
+      .setStrokeStyle(2, 0x4a9fff).setOrigin(0.5).setVisible(false).setDepth(20000);
     this.dialogTitle = this.add.text(30, H-48, '', {
-      fontFamily: '"Press Start 2P", monospace', fontSize: '8px', color: '#e8b84a'
+      fontFamily: '"Press Start 2P", monospace', fontSize: '8px', color: '#4a9fff'
     }).setVisible(false).setDepth(20001);
     this.dialogText = this.add.text(30, H-30, '', {
-      fontFamily: '"JetBrains Mono", monospace', fontSize: '11px', color: '#faf5e8',
+      fontFamily: '"JetBrains Mono", monospace', fontSize: '11px', color: '#f7fafd',
       wordWrap: { width: W-60 }
     }).setVisible(false).setDepth(20001);
 
@@ -518,7 +642,7 @@ new Phaser.Game({
 _bootstrap().catch(e => {
   console.error('[mfm] bootstrap failed:', e);
   const el = document.getElementById('game');
-  if (el) el.innerHTML = '<div style="color:#e87a3c;padding:20px;font-family:monospace">Bootstrap failed: ' + e.message + '</div>';
+  if (el) el.innerHTML = '<div style="color:#0d4a8c;padding:20px;font-family:monospace">Bootstrap failed: ' + e.message + '</div>';
 });
 </script>
 

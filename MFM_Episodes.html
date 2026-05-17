@@ -3,231 +3,510 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MFM Episode Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<title>MFM Episode Deck — The Canon</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:wght@600;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0d1a;
-    --card: #141428;
-    --card2: #1a1a35;
-    --border: #2a2a4a;
-    --gold: #d4a000;
-    --gold2: #f0c040;
-    --text: #e8e8f0;
-    --muted: #8888aa;
-    --solo: #3a6fd8;
-    --guest: #c44dff;
-    --hot: #ff4d4d;
-    --radius: 14px;
+    --bg: #f7fafd;
+    --bg2: #eaf2fb;
+    --card-bg: #ffffff;
+    --card-edge: #d7e3f0;
+    --ink: #0d2540;
+    --ink-soft: #335577;
+    --muted: #5a7a96;
+    --primary: #4a9fff;
+    --primary-deep: #0d4a8c;
+    --primary-shadow: rgba(13,74,140,.12);
+    --solo: #4a9fff;
+    --guest: #6e5cff;
+    --classic: #e2a93b;
+    --classic-2: #ffd76b;
+    --hot: #ff5d6e;
+    --good-green: #1aa971;
+    --radius: 12px;
+    --radius-card: 18px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+  html, body { background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+  body {
+    background:
+      radial-gradient(ellipse 1200px 600px at 50% -10%, rgba(74,159,255,.15) 0%, transparent 60%),
+      var(--bg);
+    background-attachment: fixed;
+  }
+  a { color: inherit; }
 
-  /* HEADER */
+  /* ─── HEADER ───────────────────────────────────────────────────────────── */
   header {
-    background: linear-gradient(135deg, #0a0a1f 0%, #1a0a35 50%, #0a1a35 100%);
-    border-bottom: 2px solid var(--gold);
-    padding: 28px 32px 20px;
+    padding: 24px 32px 8px;
+    position: relative;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .header-nav {
+    display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; align-items: center;
+  }
+  .nav-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--card-edge);
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all .15s;
+    display: inline-flex; gap: 6px; align-items: center;
+  }
+  .nav-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary-deep);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--primary-shadow);
+  }
+  .nav-btn .pip {
+    display: inline-block; width: 6px; height: 6px;
+    background: var(--primary); border-radius: 2px;
+  }
+  .brandline {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--primary-deep);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .brandline .dot { width: 8px; height: 8px; background: var(--primary); border-radius: 2px; box-shadow: 2px 2px 0 var(--primary-deep); }
+  h1.header-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.02;
+    color: var(--ink);
+    letter-spacing: -1.5px;
+    margin-bottom: 8px;
+  }
+  h1.header-title .accent { color: var(--primary-deep); }
+  h1.header-title .pixel-icon {
+    display: inline-block; transform: translateY(-6px);
+    margin-right: 8px;
+    width: 44px; height: 44px;
+    background: var(--primary-deep);
+    box-shadow:
+      8px 0 0 var(--primary-deep), 16px 0 0 var(--classic),
+      0 8px 0 var(--primary), 8px 8px 0 var(--card-bg), 16px 8px 0 var(--primary-deep),
+      0 16px 0 var(--primary-deep), 8px 16px 0 var(--primary-deep), 16px 16px 0 var(--classic);
+    /* simplified pixel crest — uses box-shadow trick */
+    width: 8px; height: 8px;
+  }
+  .header-sub {
+    color: var(--ink-soft);
+    font-size: 17px;
+    max-width: 680px;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  .stat-strip {
+    display: flex; gap: 28px; margin-top: 22px; flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .stat-strip b { color: var(--primary-deep); font-weight: 700; }
+
+  /* ─── MOOD ENTRY (UX layer D) ──────────────────────────────────────────── */
+  .mood-entry {
+    max-width: 1280px;
+    margin: 28px auto 12px;
+    padding: 28px 32px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-edge);
+    border-radius: var(--radius-card);
+    box-shadow: 0 8px 28px rgba(13,37,64,.06);
     position: relative;
     overflow: hidden;
   }
-  header::before {
+  .mood-entry::before {
     content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 50% 0%, rgba(212,160,0,0.12) 0%, transparent 70%);
+    position: absolute; right: -40px; top: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(74,159,255,.18), transparent 70%);
     pointer-events: none;
   }
-  .header-nav {
-    display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+  .mood-q {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
   }
-  .nav-btn {
-    background: rgba(212,160,0,0.1); border: 1px solid var(--border);
-    color: var(--muted); text-decoration: none; padding: 6px 14px;
-    border-radius: 20px; font-size: 12px; transition: all .2s;
+  .mood-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
   }
-  .nav-btn:hover { border-color: var(--gold); color: var(--gold); }
-  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
-  .header-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: clamp(16px, 3vw, 26px);
-    color: var(--gold);
-    text-shadow: 0 0 30px rgba(212,160,0,0.5);
-    line-height: 1.4;
+  .mood-row {
+    display: flex; flex-wrap: wrap; gap: 10px;
   }
-  .header-sub { color: var(--muted); font-size: 14px; margin-top: 8px; }
-  .header-stats {
-    display: flex; gap: 20px; margin-top: 16px; flex-wrap: wrap;
+  .mood-btn {
+    background: var(--bg2);
+    border: 1.5px solid transparent;
+    color: var(--ink);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: inherit;
   }
-  .hstat {
-    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 14px; text-align: center;
+  .mood-btn:hover {
+    border-color: var(--primary);
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px var(--primary-shadow);
   }
-  .hstat-val { color: var(--gold2); font-weight: 700; font-size: 20px; }
-  .hstat-lbl { color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .mood-btn.active {
+    background: var(--primary-deep);
+    color: #fff;
+    border-color: var(--primary-deep);
+  }
+  .mood-btn .emoji { font-size: 18px; }
+  .mood-btn.active .emoji { filter: grayscale(.2) brightness(1.5); }
 
-  /* CONTROLS */
+  /* ─── CONTROLS ─────────────────────────────────────────────────────────── */
   .controls {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(13,13,26,0.97); border-bottom: 1px solid var(--border);
-    padding: 14px 32px; backdrop-filter: blur(12px);
+    max-width: 1280px;
+    margin: 18px auto 8px;
+    padding: 0 32px;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
   }
-  .controls-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .search-wrap { flex: 1; min-width: 220px; position: relative; }
-  .search-wrap input {
-    width: 100%; background: var(--card); border: 1px solid var(--border);
-    color: var(--text); padding: 10px 14px 10px 38px; border-radius: 8px;
-    font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border .2s;
+  .search-wrap {
+    flex: 1; min-width: 240px; position: relative;
   }
-  .search-wrap input:focus { border-color: var(--gold); }
   .search-wrap::before {
-    content: '🔍'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
-    font-size: 14px; pointer-events: none;
+    content: '⌕';
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 18px; font-weight: 700;
   }
-  .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-  .fbtn {
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--muted); padding: 7px 13px; border-radius: 20px;
-    font-size: 12px; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif;
+  #searchInput {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    color: var(--ink);
+    padding: 11px 14px 11px 40px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color .15s;
   }
-  .fbtn:hover { border-color: var(--gold); color: var(--text); }
-  .fbtn.active { background: var(--gold); border-color: var(--gold); color: #000; font-weight: 700; }
-  .sort-select {
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--text); padding: 8px 12px; border-radius: 8px;
-    font-size: 13px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer;
+  #searchInput:focus { outline: none; border-color: var(--primary); }
+  #sortSelect {
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    color: var(--ink-soft);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #resultsCount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
   }
 
-  /* GRID */
-  .main { max-width: 1200px; margin: 0 auto; padding: 28px 32px; }
-  .results-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 18px; color: var(--muted); font-size: 13px;
+  /* ─── GRID ─────────────────────────────────────────────────────────────── */
+  .grid-wrap {
+    max-width: 1280px;
+    margin: 14px auto 60px;
+    padding: 0 32px;
   }
-  .episode-grid {
+  .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 22px;
   }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 80px 20px;
+    display: none;
+    font-size: 15px;
+  }
+  .empty .ico { font-size: 36px; margin-bottom: 8px; display: block; opacity: .6; }
 
-  /* CARD */
-  .ep-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px;
-    cursor: pointer; transition: all .2s; position: relative; overflow: hidden;
+  /* ─── TCG CARD ─────────────────────────────────────────────────────────── */
+  .card-slot {
+    perspective: 1200px;
+    aspect-ratio: 5 / 7;
   }
-  .ep-card::before {
-    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-    background: var(--accent, var(--gold));
-  }
-  .ep-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
-  .ep-card-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
-  .ep-num {
-    background: rgba(212,160,0,0.12); color: var(--gold);
-    font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 5px;
-    white-space: nowrap; flex-shrink: 0; margin-top: 2px;
-  }
-  .ep-title { font-weight: 700; font-size: 15px; line-height: 1.35; color: var(--text); }
-  .ep-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-  .ep-type {
-    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: .5px;
-  }
-  .ep-type.solo { background: rgba(58,111,216,0.2); color: #6a9fff; }
-  .ep-type.guest { background: rgba(196,77,255,0.2); color: #d47fff; }
-  .ep-type.hot { background: rgba(255,77,77,0.2); color: #ff8888; }
-  .ep-date { color: var(--muted); font-size: 12px; }
-  .ep-guest {
-    display: flex; align-items: center; gap: 6px;
-    color: var(--gold2); font-size: 13px; font-weight: 600; margin-bottom: 10px;
-  }
-  .ep-guest-icon { font-size: 15px; }
-  .ep-topics { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
-  .ep-topic {
-    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-    color: var(--muted); font-size: 11px; padding: 3px 8px; border-radius: 10px;
-  }
-  .ep-insight {
-    background: rgba(212,160,0,0.06); border-left: 2px solid var(--gold);
-    padding: 8px 10px; border-radius: 0 6px 6px 0;
-    color: #ccc; font-size: 12px; line-height: 1.5;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
-
-  /* MODAL */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.82); z-index: 200;
-    align-items: center; justify-content: center; padding: 20px;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--card2); border: 1px solid var(--border);
-    border-radius: 18px; width: 100%; max-width: 720px;
-    max-height: 88vh; overflow: hidden; display: flex; flex-direction: column;
+  .card {
     position: relative;
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .6s cubic-bezier(.2,.7,.3,1);
+    cursor: pointer;
   }
-  .modal-header {
-    padding: 24px 28px 16px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(135deg, rgba(212,160,0,0.06) 0%, transparent 100%);
-    flex-shrink: 0;
+  .card-slot:hover .card:not(.flipped) {
+    transform: rotateY(2deg) rotateX(-3deg) translateY(-4px);
   }
-  .modal-close {
-    position: absolute; top: 18px; right: 20px;
-    background: rgba(255,255,255,0.1); border: none; color: var(--text);
-    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
-    font-size: 16px; display: flex; align-items: center; justify-content: center; transition: .2s;
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0;
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    border-radius: 14px;
+    box-shadow: 0 6px 22px rgba(13,37,64,.08);
+    backface-visibility: hidden;
+    overflow: hidden;
+    display: flex; flex-direction: column;
   }
-  .modal-close:hover { background: rgba(255,255,255,0.2); }
-  .modal-ep-num { color: var(--gold); font-size: 12px; font-weight: 700; margin-bottom: 6px; }
-  .modal-title { font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
-  .modal-guest-line { color: var(--gold2); font-size: 15px; font-weight: 600; margin-bottom: 12px; }
-  .modal-meta-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .modal-body { overflow-y: auto; flex: 1; padding: 24px 28px; }
-  .modal-section { margin-bottom: 24px; }
-  .modal-section h3 {
-    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--gold); margin-bottom: 10px; padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
+  .back { transform: rotateY(180deg); padding: 16px; }
+  .card-slot:hover .face:not(.back) {
+    box-shadow: 0 18px 40px rgba(13,37,64,.15), 0 4px 8px rgba(13,37,64,.08);
   }
-  .modal-section p { color: #ccc; font-size: 14px; line-height: 1.7; }
-  .modal-topics { display: flex; flex-wrap: wrap; gap: 7px; }
-  .modal-topic {
-    background: rgba(212,160,0,0.1); border: 1px solid rgba(212,160,0,0.3);
-    color: var(--gold2); font-size: 12px; padding: 5px 11px; border-radius: 12px;
-  }
-  .insight-block {
-    background: rgba(212,160,0,0.06); border: 1px solid rgba(212,160,0,0.2);
-    border-radius: 8px; padding: 14px; margin-bottom: 10px;
-  }
-  .insight-block .insight-title {
-    font-size: 13px; font-weight: 700; color: var(--gold2); margin-bottom: 6px;
-  }
-  .insight-block p { font-size: 13px; color: #bbb; line-height: 1.6; }
-  .quote-block {
-    border-left: 3px solid var(--gold); padding: 10px 14px;
-    margin-bottom: 10px; background: rgba(255,255,255,0.03); border-radius: 0 8px 8px 0;
-  }
-  .quote-block p { font-size: 14px; color: #ddd; font-style: italic; line-height: 1.6; }
-  .listen-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-  .listen-link {
-    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-    color: var(--text); text-decoration: none; padding: 8px 14px;
-    border-radius: 8px; font-size: 13px; transition: .2s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .listen-link:hover { border-color: var(--gold); color: var(--gold); }
 
-  /* EMPTY */
-  .empty-state {
-    text-align: center; padding: 60px 20px; color: var(--muted);
+  /* Card top strip */
+  .card-strip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--card-edge);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
   }
-  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .card-strip .setnum { color: var(--primary-deep); }
+  .card-strip .typepill {
+    text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
+    font-size: 9px; letter-spacing: 0.5px;
+  }
+  .typepill.solo { background: rgba(74,159,255,.14); color: var(--primary-deep); }
+  .typepill.guest { background: rgba(110,92,255,.14); color: #4a3aaf; }
+  .typepill.classic { background: linear-gradient(95deg, #ffe9a8, #ffd76b 35%, #e2a93b 65%, #ffd76b); color: #6b4818; font-weight: 800; }
 
-  @media (max-width: 600px) {
-    header, .controls, .main { padding-left: 16px; padding-right: 16px; }
-    .episode-grid { grid-template-columns: 1fr; }
-    .modal { border-radius: 12px; }
-    .modal-header, .modal-body { padding: 18px 20px; }
+  /* Portrait area */
+  .portrait-frame {
+    position: relative;
+    margin: 12px 12px 6px;
+    background: var(--bg2);
+    border-radius: 10px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    border: 1px solid var(--card-edge);
+  }
+  .portrait-frame img {
+    width: 100%; height: 100%; object-fit: cover;
+    image-rendering: -webkit-optimize-contrast;
+    display: block;
+  }
+  .portrait-placeholder {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+    background:
+      repeating-linear-gradient(45deg, transparent 0 8px, rgba(74,159,255,.08) 8px 16px),
+      linear-gradient(180deg, var(--bg2), #e1ecf8);
+    color: var(--primary-deep);
+  }
+  .portrait-placeholder .initial {
+    font-family: 'Fraunces', serif;
+    font-size: 52px;
+    font-weight: 800;
+    text-shadow: 2px 2px 0 #fff, 4px 4px 0 var(--card-edge);
+  }
+  .portrait-placeholder.solo {
+    background:
+      repeating-linear-gradient(45deg, transparent 0 10px, rgba(110,92,255,.07) 10px 20px),
+      linear-gradient(180deg, #f0eafe, #e8e4ff);
+  }
+  .portrait-placeholder.solo .initial { color: #4a3aaf; }
+  .portrait-frame .badge-corner {
+    position: absolute; top: 6px; right: 6px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--classic-2);
+    border: 1.5px solid var(--classic);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    box-shadow: 0 2px 6px rgba(226,169,59,.5);
+  }
+
+  /* Title block */
+  .card-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.18;
+    color: var(--ink);
+    padding: 6px 14px 4px;
+    min-height: 50px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-guest {
+    padding: 0 14px;
+    font-size: 11px;
+    color: var(--primary-deep);
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+  }
+
+  /* Ability lines */
+  .abilities {
+    padding: 4px 14px 8px;
+    flex: 1;
+  }
+  .abil {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    line-height: 1.3;
+    padding: 3px 0 3px 14px;
+    position: relative;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .abil::before {
+    content: ''; position: absolute; left: 0; top: 6px;
+    width: 8px; height: 8px;
+    background: var(--primary);
+    box-shadow: 2px 2px 0 var(--primary-deep);
+  }
+
+  /* Stat block */
+  .stat-block {
+    background: var(--bg2);
+    border-top: 1px solid var(--card-edge);
+    padding: 8px 12px;
+    display: flex; justify-content: space-between; gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+  }
+  .stat-block .stat b { color: var(--primary-deep); font-weight: 700; }
+
+  /* Topic chips */
+  .topic-row {
+    padding: 0 12px 10px;
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .chip {
+    background: var(--bg);
+    border: 1px solid var(--card-edge);
+    color: var(--ink-soft);
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 9.5px;
+    font-weight: 500;
+  }
+
+  /* Foil treatment for classic */
+  .card.classic .face:not(.back)::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: conic-gradient(
+      from 0deg at 50% 50%,
+      rgba(255,200,80,.0) 0deg,
+      rgba(255,200,80,.18) 30deg,
+      rgba(100,180,255,.2) 90deg,
+      rgba(255,120,200,.16) 150deg,
+      rgba(255,200,80,.18) 220deg,
+      rgba(100,180,255,.2) 290deg,
+      rgba(255,200,80,0) 360deg
+    );
+    mix-blend-mode: overlay;
+    opacity: 0;
+    transition: opacity .35s;
+    pointer-events: none;
+  }
+  .card-slot:hover .card.classic .face:not(.back)::after { opacity: 1; }
+  .card.classic .face:not(.back) {
+    border: 1.5px solid var(--classic);
+    box-shadow: 0 6px 22px rgba(226,169,59,.18);
+  }
+
+  /* ─── CARD BACK ────────────────────────────────────────────────────────── */
+  .back .back-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .back .back-setnum {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--primary-deep);
+    font-weight: 700;
+  }
+  .back-close {
+    background: var(--bg2); border: 1px solid var(--card-edge);
+    width: 22px; height: 22px; border-radius: 50%;
+    font-size: 12px; line-height: 1; color: var(--ink-soft);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .back-close:hover { background: var(--bg); color: var(--ink); }
+  .back .back-title {
+    font-family: 'Fraunces', serif; font-weight: 700; font-size: 14px; line-height: 1.2;
+    color: var(--ink); margin-bottom: 8px;
+  }
+  .back .back-insight {
+    font-size: 11px; color: var(--ink-soft); line-height: 1.45;
+    margin-bottom: 8px; flex: 0 0 auto;
+    display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .back .back-quote {
+    font-family: 'Fraunces', serif; font-style: italic; font-size: 12px;
+    color: var(--primary-deep); line-height: 1.35;
+    padding: 8px 10px;
+    background: var(--bg2);
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .listen-mini {
+    margin-top: auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  }
+  .listen-mini a {
+    background: var(--card-bg);
+    border: 1px solid var(--card-edge);
+    color: var(--primary-deep);
+    text-decoration: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-align: center;
+    transition: all .15s;
+  }
+  .listen-mini a:hover { background: var(--primary-deep); color: #fff; border-color: var(--primary-deep); }
+
+  /* ─── FOOTER ───────────────────────────────────────────────────────────── */
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 28px 16px 60px;
+    border-top: 1px solid var(--card-edge);
+    background: var(--card-bg);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  footer .footer-row { max-width: 700px; margin: 0 auto; line-height: 1.8; }
+  footer a { color: var(--primary-deep); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* Mobile tightening */
+  @media (max-width: 640px) {
+    h1.header-title { font-size: 36px; }
+    .header-sub { font-size: 14px; }
+    .mood-row { flex-direction: column; }
+    .mood-btn { width: 100%; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+    header, .controls, .grid-wrap { padding-left: 16px; padding-right: 16px; }
   }
 </style>
 </head>
@@ -236,71 +515,96 @@
 <header>
   <div class="header-inner">
     <div class="header-nav">
-      <a href="MFM_Guest_Profiles.html" class="nav-btn">👤 Guest Profiles</a>
-      <a href="Starter_Story.html" class="nav-btn">🚀 Starter Story</a>
-      <a href="App_Pipeline.html" class="nav-btn">⚡ App Pipeline</a>
+      <a class="nav-btn" href="index.html"><span class="pip"></span>Home</a>
+      <a class="nav-btn" href="MFM_Guest_Profiles.html"><span class="pip"></span>Guests</a>
+      <a class="nav-btn" href="MFM_Universe_Web/index.html"><span class="pip"></span>3D Universe</a>
+      <a class="nav-btn" href="App_Pipeline.html"><span class="pip"></span>App Pipeline</a>
+      <a class="nav-btn" href="Starter_Story.html"><span class="pip"></span>Starter Stories</a>
     </div>
-    <div class="header-title">📻 MFM EPISODE INTELLIGENCE</div>
-    <div class="header-sub">My First Million · Key Ideas, Guests & Insights from Every Episode</div>
-    <div class="header-stats">
-      <div class="hstat"><div class="hstat-val" id="statTotal">—</div><div class="hstat-lbl">Episodes Indexed</div></div>
-      <div class="hstat"><div class="hstat-val" id="statGuest">—</div><div class="hstat-lbl">Guest Episodes</div></div>
-      <div class="hstat"><div class="hstat-val" id="statSolo">—</div><div class="hstat-lbl">Solo Episodes</div></div>
-      <div class="hstat"><div class="hstat-val">800+</div><div class="hstat-lbl">Total Episodes Ever</div></div>
+    <div class="brandline"><span class="dot"></span>THE CANON · SEASON 08 · TRADING CARDS</div>
+    <h1 class="header-title">Episode Deck — <span class="accent">800+ shows, one collection.</span></h1>
+    <p class="header-sub">Every Sam &amp; Shaan episode reborn as a TCG card. Browse by mood, rate the canon, tap a card to flip for quotes and listen links. Foil treatment is reserved for the classics.</p>
+    <div class="stat-strip">
+      <div><b id="statTotal">0</b> total cards</div>
+      <div><b id="statGuest">0</b> guest</div>
+      <div><b id="statSolo">0</b> solo</div>
+      <div><b id="statClassic">0</b> classic <span style="color:var(--classic)">★</span></div>
     </div>
   </div>
 </header>
 
+<!-- MOOD ENTRY -->
+<section class="mood-entry">
+  <div class="mood-q">What do you need right now?</div>
+  <div class="mood-sub">Pick a mood, the deck re-shuffles. Cleared by clicking the active one again.</div>
+  <div class="mood-row" id="moodRow">
+    <button class="mood-btn" data-mood="kick"   onclick="setMood('kick',this)"><span class="emoji">🔥</span>Kick in the ass</button>
+    <button class="mood-btn" data-mood="play"   onclick="setMood('play',this)"><span class="emoji">📖</span>A billionaire's playbook</button>
+    <button class="mood-btn" data-mood="steal"  onclick="setMood('steal',this)"><span class="emoji">💡</span>Something to steal</button>
+    <button class="mood-btn" data-mood="feel"   onclick="setMood('feel',this)"><span class="emoji">🫀</span>Make me feel something</button>
+    <button class="mood-btn" data-mood="random" onclick="setMood('random',this)"><span class="emoji">🎰</span>Surprise me</button>
+  </div>
+</section>
+
+<!-- CONTROLS -->
 <div class="controls">
-  <div class="controls-inner">
-    <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="Search episodes, guests, topics, ideas…" oninput="renderGrid()">
-    </div>
-    <div class="filter-btns" id="filterBtns">
-      <button class="fbtn active" data-filter="all" onclick="setFilter('all',this)">All</button>
-      <button class="fbtn" data-filter="guest" onclick="setFilter('guest',this)">🎙 Guest</button>
-      <button class="fbtn" data-filter="solo" onclick="setFilter('solo',this)">🧠 Solo</button>
-      <button class="fbtn" data-filter="2026" onclick="setFilter('2026',this)">2026</button>
-      <button class="fbtn" data-filter="2025" onclick="setFilter('2025',this)">2025</button>
-      <button class="fbtn" data-filter="2024" onclick="setFilter('2024',this)">2024</button>
-      <button class="fbtn" data-filter="classic" onclick="setFilter('classic',this)">🏆 Classic</button>
-    </div>
-    <select class="sort-select" id="sortSelect" onchange="renderGrid()">
-      <option value="newest">Newest First</option>
-      <option value="oldest">Oldest First</option>
-      <option value="num_desc">Ep # High→Low</option>
-      <option value="num_asc">Ep # Low→High</option>
-    </select>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search title, guest, topic, idea…" oninput="renderGrid()">
+  </div>
+  <select id="sortSelect" onchange="renderGrid()">
+    <option value="newest">Newest first</option>
+    <option value="oldest">Oldest first</option>
+    <option value="num_desc">Episode # ↓</option>
+    <option value="num_asc">Episode # ↑</option>
+    <option value="classic_first">Classics first</option>
+  </select>
+  <div id="resultsCount">0 cards shown</div>
+</div>
+
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="grid" id="episodeGrid"></div>
+  <div class="empty" id="emptyState">
+    <span class="ico">∅</span>
+    <div>Nothing matches that combination yet.</div>
+    <div style="font-size:12px;margin-top:4px;color:var(--muted)">Clear your mood or search, or zoom out the sort.</div>
   </div>
 </div>
 
-<div class="main">
-  <div class="results-bar">
-    <span id="resultsCount"></span>
-    <span style="color:var(--muted); font-size:12px;">Click any card for full details</span>
+<footer>
+  <div class="footer-row">
+    MFM Universe · An unofficial reimagining · Drawn pixel portraits via flux-schnell · Built in a Saturday.<br>
+    <a href="https://www.mfmpod.com/episodes/" target="_blank">official episode index</a> ·
+    <a href="MFM_Guest_Profiles.html">full guest profiles</a> ·
+    <a href="index.html">back to the universe</a>
   </div>
-  <div class="episode-grid" id="episodeGrid"></div>
-  <div class="empty-state" id="emptyState" style="display:none">
-    <div class="empty-icon">🎧</div>
-    <div>No episodes match your search</div>
-  </div>
-</div>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal" id="modalBox">
-    <div class="modal-header">
-      <button class="modal-close" onclick="closeModalBtn()">✕</button>
-      <div class="modal-ep-num" id="mEpNum"></div>
-      <div class="modal-title" id="mTitle"></div>
-      <div class="modal-guest-line" id="mGuest"></div>
-      <div class="modal-meta-row" id="mMeta"></div>
-    </div>
-    <div class="modal-body" id="mBody"></div>
-  </div>
-</div>
+</footer>
 
 <script>
+// ─── PORTRAIT MAP ──────────────────────────────────────────────────────────
+// 10 portraits exist. Rest fall back to monogram placeholder.
+const PORTRAITS = {
+  "David Heinemeier Hansson": "dhh",
+  "Bill Gurley":              "bill-gurley",
+  "Steve Manning":            "steve-manning",
+  "Zach Yadegari":            "zach-yadegari",
+  "Sheel Mohnot":             "sheel-mohnot",
+  "Pat Walls":                "pat-walls",
+  "Scott Galloway":           "scott-galloway",
+  "MrBeast":                  "mrbeast",
+  "Tyler Denk":               "tyler-denk",
+  "Cathie Wood":              "cathie-wood",
+};
+
+// Map of mood → topic keyword filter
+const MOOD_FILTERS = {
+  kick:  ["Agency", "Mental Toughness", "Founder Mindset", "Self-Reliance", "Lifestyle Design", "Reinvention", "Voluntary Discomfort"],
+  play:  ["Wealth", "Billionaire", "Investing", "Venture Capital", "Wealth Building", "Wealth Psychology", "Net Worth", "Wealth Management"],
+  steal: ["Business Ideas", "Indie Hacking", "App Business", "SaaS", "Solo Founders", "Newsletter", "Category Design", "Boring Industries", "Starter Story"],
+  feel:  ["Sam", "Shaan", "Relationships", "Happiness", "Personal", "Money Philosophy", "Life Philosophy", "Lifestyle Design", "Mental Toughness"],
+  random: "RANDOM",
+};
+
 // ─── EPISODE DATABASE ────────────────────────────────────────────────────────
 const EPISODES = [
   {
@@ -927,8 +1231,8 @@ const EPISODES = [
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
-let activeFilter = 'all';
-let activeModal = null;
+let activeMood = null;
+let randomShuffleSeed = 0;
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 window.onload = () => {
@@ -937,33 +1241,38 @@ window.onload = () => {
 };
 
 function updateStats() {
-  const total = EPISODES.length;
-  const guest = EPISODES.filter(e => e.type === 'guest').length;
-  const solo = EPISODES.filter(e => e.type === 'solo').length;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statGuest').textContent = guest;
-  document.getElementById('statSolo').textContent = solo;
+  document.getElementById('statTotal').textContent = EPISODES.length;
+  document.getElementById('statGuest').textContent = EPISODES.filter(e => e.type === 'guest').length;
+  document.getElementById('statSolo').textContent = EPISODES.filter(e => e.type === 'solo').length;
+  document.getElementById('statClassic').textContent = EPISODES.filter(e => e.classic).length;
 }
 
-// ─── FILTER / SORT ───────────────────────────────────────────────────────────
-function setFilter(f, btn) {
-  activeFilter = f;
-  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+// ─── MOOD ENTRY ──────────────────────────────────────────────────────────────
+function setMood(m, btn) {
+  if (activeMood === m) {
+    activeMood = null;
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  } else {
+    activeMood = m;
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (m === 'random') randomShuffleSeed = Date.now();
+  }
   renderGrid();
+  // Scroll grid into view
+  document.querySelector('.grid-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function matchesFilter(ep) {
-  if (activeFilter === 'all') return true;
-  if (activeFilter === 'guest') return ep.type === 'guest';
-  if (activeFilter === 'solo') return ep.type === 'solo';
-  if (activeFilter === 'classic') return ep.classic === true;
-  if (activeFilter === '2026') return ep.date.startsWith('2026');
-  if (activeFilter === '2025') return ep.date.startsWith('2025');
-  if (activeFilter === '2024') return ep.date.startsWith('2024');
-  return true;
+function matchesMood(ep) {
+  if (!activeMood) return true;
+  const filter = MOOD_FILTERS[activeMood];
+  if (filter === "RANDOM") return true; // random just reorders
+  // Match by topic keyword (case-insensitive, partial)
+  const hay = [...ep.topics, ep.insight, ...(ep.keyIdeas||[]).map(k=>k.title+' '+k.detail)].join(' ').toLowerCase();
+  return filter.some(kw => hay.includes(kw.toLowerCase()));
 }
 
+// ─── SEARCH ──────────────────────────────────────────────────────────────────
 function matchesSearch(ep) {
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
   if (!q) return true;
@@ -976,24 +1285,56 @@ function matchesSearch(ep) {
   return q.split(' ').every(word => hay.includes(word));
 }
 
+// ─── SORT ────────────────────────────────────────────────────────────────────
 function sortEpisodes(arr) {
-  const s = document.getElementById('sortSelect').value;
+  let s = document.getElementById('sortSelect').value;
+  if (activeMood === 'random') {
+    // Deterministic shuffle from seed
+    const seed = randomShuffleSeed || 1;
+    return [...arr].sort((a,b) => {
+      const ah = (a.title.charCodeAt(0) + seed) % 997;
+      const bh = (b.title.charCodeAt(0) + seed) % 997;
+      return ah - bh;
+    });
+  }
   return [...arr].sort((a, b) => {
     if (s === 'newest') return new Date(b.date) - new Date(a.date);
     if (s === 'oldest') return new Date(a.date) - new Date(b.date);
     if (s === 'num_desc') return (b.num || 0) - (a.num || 0);
     if (s === 'num_asc') return (a.num || 0) - (b.num || 0);
+    if (s === 'classic_first') return (b.classic ? 1 : 0) - (a.classic ? 1 : 0);
     return 0;
   });
 }
 
-// ─── RENDER GRID ─────────────────────────────────────────────────────────────
+// ─── PORTRAIT RENDER ────────────────────────────────────────────────────────
+function renderPortrait(ep) {
+  if (ep.type === 'solo' || !ep.guests.length) {
+    return `<div class="portrait-placeholder solo"><div class="initial">S&amp;S</div></div>`;
+  }
+  const headliner = ep.guests[0];
+  const slug = PORTRAITS[headliner];
+  if (slug) {
+    return `<img src="portraits/${slug}.png" alt="${headliner}" loading="lazy">`;
+  }
+  // Initial monogram fallback
+  const initials = headliner.split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase();
+  return `<div class="portrait-placeholder"><div class="initial">${initials}</div></div>`;
+}
+
+// ─── CARD RENDER ────────────────────────────────────────────────────────────
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function renderGrid() {
-  const filtered = sortEpisodes(EPISODES.filter(ep => matchesFilter(ep) && matchesSearch(ep)));
+  const filtered = sortEpisodes(
+    EPISODES.filter(ep => matchesMood(ep) && matchesSearch(ep))
+  );
   const grid = document.getElementById('episodeGrid');
   const empty = document.getElementById('emptyState');
   const rc = document.getElementById('resultsCount');
-  rc.textContent = `${filtered.length} episode${filtered.length !== 1 ? 's' : ''} shown`;
+  rc.textContent = `${filtered.length} card${filtered.length !== 1 ? 's' : ''} shown`;
 
   if (filtered.length === 0) {
     grid.innerHTML = '';
@@ -1002,136 +1343,90 @@ function renderGrid() {
   }
   empty.style.display = 'none';
 
-  grid.innerHTML = filtered.map(ep => {
-    const typeLabel = ep.type === 'solo' ? 'Solo' : 'Guest';
-    const typeClass = ep.type;
-    const accentColor = ep.type === 'solo' ? 'var(--solo)' : ep.classic ? 'var(--gold)' : 'var(--guest)';
-    const guestLine = ep.guests.length ? `<div class="ep-guest"><span class="ep-guest-icon">🎙</span>${ep.guests.join(', ')}</div>` : '';
-    const topicsHtml = ep.topics.slice(0, 4).map(t => `<span class="ep-topic">${t}</span>`).join('');
-    const insightPreview = ep.insight ? `<div class="ep-insight">${ep.insight}</div>` : '';
+  grid.innerHTML = filtered.map((ep, idx) => {
+    const setnum = ep.num ? `S08 · #${ep.num}` : 'CLASSIC · NO #';
+    const typePill = ep.classic
+      ? '<span class="typepill classic">★ CLASSIC</span>'
+      : ep.type === 'solo'
+        ? '<span class="typepill solo">SOLO</span>'
+        : '<span class="typepill guest">GUEST</span>';
+    const headliner = ep.guests[0] || 'Sam &amp; Shaan';
+    const guestLine = ep.guests.length
+      ? `<div class="card-guest">${escapeHtml(ep.guests.join(', '))}</div>`
+      : `<div class="card-guest">Sam Parr · Shaan Puri</div>`;
+    const abilities = (ep.keyIdeas || []).slice(0, 3).map(k =>
+      `<div class="abil"><b>${escapeHtml(k.title)}</b> — ${escapeHtml(k.detail.replace(/^([^.]{0,90})\.?.*/, '$1.'))}</div>`
+    ).join('');
+    const topics = (ep.topics || []).slice(0, 3).map(t =>
+      `<span class="chip">${escapeHtml(t)}</span>`
+    ).join('');
+    const dt = new Date(ep.date + 'T12:00:00');
+    const yr = dt.getFullYear();
+    const monthDay = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const quote = (ep.quotes && ep.quotes.length)
+      ? `<div class="back-quote">"${escapeHtml(ep.quotes[0])}"</div>`
+      : '';
+    const classicCorner = ep.classic ? `<div class="badge-corner" title="Classic">★</div>` : '';
 
     return `
-    <div class="ep-card" style="--accent:${accentColor}" onclick="openModal('${ep.title.replace(/'/g,"\\'")}')">
-      <div class="ep-card-top">
-        ${ep.num ? `<div class="ep-num">EP ${ep.num}</div>` : '<div class="ep-num">CLASSIC</div>'}
-        <div class="ep-title">${ep.title}</div>
+    <div class="card-slot">
+      <div class="card ${ep.classic ? 'classic' : ''}" onclick="flipCard(this, event)">
+        <div class="face front">
+          <div class="card-strip">
+            <span class="setnum">${setnum}</span>
+            ${typePill}
+          </div>
+          <div class="portrait-frame">
+            ${renderPortrait(ep)}
+            ${classicCorner}
+          </div>
+          <div class="card-title">${escapeHtml(ep.title)}</div>
+          ${guestLine}
+          <div class="abilities">${abilities}</div>
+          <div class="topic-row">${topics}</div>
+          <div class="stat-block">
+            <div class="stat">${monthDay} <b>${yr}</b></div>
+            <div class="stat"><b>${ep.topics.length}</b> topics</div>
+            <div class="stat"><b>${(ep.keyIdeas||[]).length}</b> ideas</div>
+          </div>
+        </div>
+        <div class="face back">
+          <div class="back-head">
+            <span class="back-setnum">${setnum}</span>
+            <button class="back-close" onclick="closeFlip(event)">×</button>
+          </div>
+          <div class="back-title">${escapeHtml(ep.title)}</div>
+          <div class="back-insight">${escapeHtml(ep.insight || '')}</div>
+          ${quote}
+          <div class="listen-mini">
+            <a href="https://www.mfmpod.com/episodes/" target="_blank" onclick="event.stopPropagation()">MFM</a>
+            <a href="https://open.spotify.com/show/3mliji9352UAk3XnWElnDV" target="_blank" onclick="event.stopPropagation()">Spotify</a>
+            <a href="https://podcasts.apple.com/us/podcast/my-first-million/id1469759170" target="_blank" onclick="event.stopPropagation()">Apple</a>
+            <a href="https://www.youtube.com/@thesamshaanshow" target="_blank" onclick="event.stopPropagation()">YouTube</a>
+          </div>
+        </div>
       </div>
-      <div class="ep-meta">
-        <span class="ep-type ${typeClass}">${typeLabel}</span>
-        ${ep.classic ? '<span class="ep-type hot">🏆 Classic</span>' : ''}
-        <span class="ep-date">${formatDate(ep.date)}</span>
-      </div>
-      ${guestLine}
-      <div class="ep-topics">${topicsHtml}</div>
-      ${insightPreview}
     </div>`;
   }).join('');
 }
 
-function formatDate(d) {
-  const dt = new Date(d + 'T12:00:00');
-  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+function flipCard(cardEl, ev) {
+  // Don't flip if user clicked a link inside back face
+  if (ev && ev.target.tagName === 'A') return;
+  cardEl.classList.toggle('flipped');
 }
 
-// ─── MODAL ───────────────────────────────────────────────────────────────────
-function openModal(title) {
-  const ep = EPISODES.find(e => e.title === title);
-  if (!ep) return;
-  activeModal = ep;
-
-  document.getElementById('mEpNum').textContent = ep.num ? `Episode ${ep.num}` : 'Classic Episode';
-  document.getElementById('mTitle').textContent = ep.title;
-  document.getElementById('mGuest').textContent = ep.guests.length
-    ? '🎙 ' + ep.guests.join(' · ')
-    : '🧠 Sam Parr & Shaan Puri';
-
-  const meta = document.getElementById('mMeta');
-  const typeClass = ep.type === 'solo' ? 'solo' : 'guest';
-  meta.innerHTML = `
-    <span class="ep-type ${typeClass}">${ep.type === 'solo' ? 'Solo Episode' : 'Guest Episode'}</span>
-    ${ep.classic ? '<span class="ep-type hot">🏆 Classic</span>' : ''}
-    <span class="ep-date" style="font-size:13px">${formatDate(ep.date)}</span>
-  `;
-
-  const body = document.getElementById('mBody');
-  let html = '';
-
-  // Overview
-  if (ep.insight) {
-    html += `
-    <div class="modal-section">
-      <h3>Episode Overview</h3>
-      <p>${ep.insight}</p>
-    </div>`;
-  }
-
-  // Topics
-  if (ep.topics.length) {
-    html += `
-    <div class="modal-section">
-      <h3>Topics Covered</h3>
-      <div class="modal-topics">${ep.topics.map(t => `<span class="modal-topic">${t}</span>`).join('')}</div>
-    </div>`;
-  }
-
-  // Key Ideas
-  if (ep.keyIdeas && ep.keyIdeas.length) {
-    html += `<div class="modal-section"><h3>Key Ideas & Insights</h3>`;
-    ep.keyIdeas.forEach(idea => {
-      html += `
-      <div class="insight-block">
-        <div class="insight-title">💡 ${idea.title}</div>
-        <p>${idea.detail}</p>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  // Quotes
-  if (ep.quotes && ep.quotes.length) {
-    html += `<div class="modal-section"><h3>Best Quotes</h3>`;
-    ep.quotes.forEach(q => {
-      html += `<div class="quote-block"><p>"${q}"</p></div>`;
-    });
-    html += `</div>`;
-  }
-
-  // Listen
-  html += `
-  <div class="modal-section">
-    <h3>Listen to this Episode</h3>
-    <div class="listen-links">
-      <a class="listen-link" href="https://www.mfmpod.com/episodes/" target="_blank">🌐 MFM Website</a>
-      <a class="listen-link" href="https://open.spotify.com/show/3mliji9352UAk3XnWElnDV" target="_blank">🎵 Spotify</a>
-      <a class="listen-link" href="https://podcasts.apple.com/us/podcast/my-first-million/id1469759170" target="_blank">🎧 Apple Podcasts</a>
-      <a class="listen-link" href="https://www.youtube.com/@thesamshaanshow" target="_blank">📺 YouTube</a>
-    </div>
-  </div>`;
-
-  // Guest profile link
-  if (ep.guests.length) {
-    html += `
-    <div class="modal-section">
-      <h3>Guest Profiles</h3>
-      <div class="listen-links">
-        ${ep.guests.map(g => `<a class="listen-link" href="MFM_Guest_Profiles.html" target="_blank">👤 ${g} Profile</a>`).join('')}
-      </div>
-    </div>`;
-  }
-
-  body.innerHTML = html;
-  document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+function closeFlip(ev) {
+  ev.stopPropagation();
+  const card = ev.target.closest('.card');
+  if (card) card.classList.remove('flipped');
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
-}
-function closeModalBtn() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.card.flipped').forEach(c => c.classList.remove('flipped'));
+  }
+});
 </script>
 </body>
 </html>
