@@ -1,7 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#070710"/>
+  <!-- Shield shape -->
   <path d="M256,42 L420,108 L420,270 Q420,390 256,462 Q92,390 92,270 L92,108 Z" fill="none" stroke="#C9A84C" stroke-width="10"/>
   <path d="M256,68 L396,128 L396,272 Q396,378 256,440 Q116,378 116,272 L116,128 Z" fill="rgba(201,168,76,0.06)"/>
+  <!-- H -->
   <text x="256" y="320" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="180" font-weight="900" fill="#C9A84C">H</text>
   <text x="256" y="474" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="34" font-weight="900" fill="#C9A84C" letter-spacing="6">HAMPTON</text>
 </svg>

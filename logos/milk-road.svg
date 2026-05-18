@@ -1,11 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#020e14"/>
+  <!-- Milk carton body -->
   <rect x="146" y="230" width="220" height="230" rx="10" fill="#0096c7"/>
+  <!-- Carton gable top -->
   <polygon points="146,230 256,145 366,230" fill="#0077a8"/>
+  <!-- Gable fold lines -->
   <polygon points="146,230 256,188 256,230" fill="#005f89"/>
   <polygon points="366,230 256,188 256,230" fill="#005f89"/>
+  <!-- Text on carton -->
   <text x="256" y="318" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="36" font-weight="900" fill="white">MILK</text>
   <text x="256" y="362" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="36" font-weight="900" fill="white">ROAD</text>
+  <!-- Road line at base of carton -->
   <line x1="146" y1="415" x2="366" y2="415" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="12,8"/>
+  <!-- Name below -->
   <text x="256" y="490" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="28" font-weight="900" fill="#0096c7" letter-spacing="2">The Milk Road</text>
 </svg>

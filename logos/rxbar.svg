@@ -1,7 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#1a0000"/>
+  <!-- RXBAR wrapper bar shape -->
   <rect x="40" y="160" width="432" height="200" rx="18" fill="#CC2200"/>
   <rect x="52" y="172" width="408" height="176" rx="12" fill="#aa1a00"/>
+  <!-- Clean ingredient-style layout (RXBAR's brutal transparency concept) -->
   <text x="256" y="272" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-size="88" font-weight="900" fill="white" letter-spacing="-2">RXBAR</text>
   <line x1="80" y1="295" x2="432" y2="295" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
   <text x="256" y="324" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="rgba(255,255,255,0.6)" letter-spacing="3">PROTEIN BAR</text>

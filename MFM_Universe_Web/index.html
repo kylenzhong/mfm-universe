@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MFM Universe</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; background: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        canvas { display: block; }
+
+        #loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; color: white;
+        }
+        #loading h1 { font-size: 48px; margin-bottom: 10px; color: #ff4444; font-weight: 900; }
+        #loading h2 { font-size: 24px; margin-bottom: 40px; color: #aaa; font-weight: 300; }
+        #progress-bar { width: 300px; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #ff4444, #ff8844); transition: width 0.3s; }
+        #progress-text { margin-top: 15px; color: #666; font-size: 14px; }
+
+        #hud {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+            padding: 12px 24px; border-radius: 12px; color: white;
+            font-size: 13px; z-index: 100; text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        #hud kbd {
+            background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 4px;
+            font-family: monospace; margin: 0 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen -->
+    <div id="loading">
+        <h1>MFM UNIVERSE</h1>
+        <h2>Loading World...</h2>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <p id="progress-text">Initializing...</p>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud" style="display:none;">
+        <kbd>Left Drag</kbd> Rotate &nbsp;&bull;&nbsp;
+        <kbd>Right Drag</kbd> Pan &nbsp;&bull;&nbsp;
+        <kbd>Scroll</kbd> Zoom &nbsp;&bull;&nbsp;
+        <kbd>R</kbd> Reset View
+    </div>
+
+    <!-- Three.js from CDN -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // ── Scene Setup ──
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.FogExp2(0x87CEEB, 0.002);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 0.9;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        document.body.appendChild(renderer.domElement);
+
+        // ── Camera (Orbit — like Blender) ──
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(0, 72, 95);  // ISO_Cam-like starting angle
+
+        // ── OrbitControls ──
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 10, 0);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.minDistance = 10;
+        controls.maxDistance = 500;
+        controls.maxPolarAngle = Math.PI / 2.05;  // Prevent going below ground
+        controls.update();
+
+        // Reset view on R key
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyR') {
+                camera.position.set(0, 72, 95);
+                controls.target.set(0, 10, 0);
+                controls.update();
+            }
+        });
+
+        // ── Lighting ──
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffeedd, 1.5);
+        sunLight.position.set(50, 80, -30);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 300;
+        sunLight.shadow.camera.left = -100;
+        sunLight.shadow.camera.right = 100;
+        sunLight.shadow.camera.top = 100;
+        sunLight.shadow.camera.bottom = -100;
+        scene.add(sunLight);
+
+        const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x362e1f, 0.4);
+        scene.add(hemiLight);
+
+        // ── Load GLB Scene ──
+        const loader = new GLTFLoader();
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        loader.load(
+            './MFM_Universe_Web.glb',
+            (gltf) => {
+                const model = gltf.scene;
+
+                // Process all meshes
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        // Safety cap: clamp overly bright emissive materials
+                        if (child.material) {
+                            const mats = Array.isArray(child.material) ? child.material : [child.material];
+                            mats.forEach(mat => {
+                                if (mat.emissiveIntensity > 2) {
+                                    mat.emissiveIntensity = 1.0;
+                                }
+                            });
+                        }
+                    }
+                });
+
+                scene.add(model);
+
+                // Hide loading, show HUD
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('hud').style.display = 'block';
+
+                console.log('MFM Universe loaded!', model);
+            },
+            (progress) => {
+                if (progress.total > 0) {
+                    const pct = (progress.loaded / progress.total) * 100;
+                    progressFill.style.width = pct + '%';
+                    const mb = (progress.loaded / 1024 / 1024).toFixed(1);
+                    const totalMb = (progress.total / 1024 / 1024).toFixed(1);
+                    progressText.textContent = `Loading ${mb} / ${totalMb} MB`;
+                }
+            },
+            (error) => {
+                progressText.textContent = 'Error loading scene: ' + error.message;
+                console.error('GLB load error:', error);
+            }
+        );
+
+        // ── Render Loop ──
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // ── Resize Handler ──
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

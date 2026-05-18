@@ -1,16 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#001a4d"/>
+  <!-- Truck silhouette -->
+  <!-- Cab -->
   <rect x="30" y="210" width="160" height="175" rx="14" fill="#0055cc"/>
+  <!-- Body -->
   <rect x="185" y="155" width="270" height="230" rx="8" fill="#0055cc"/>
+  <!-- Cab detail line -->
   <line x1="185" y1="210" x2="185" y2="385" stroke="#003399" stroke-width="4"/>
+  <!-- Windshield -->
   <rect x="44" y="222" width="132" height="95" rx="8" fill="#66aaff" opacity="0.7"/>
+  <!-- Wheels -->
   <circle cx="112" cy="390" r="44" fill="#111"/>
   <circle cx="112" cy="390" r="24" fill="#333"/>
   <circle cx="340" cy="390" r="44" fill="#111"/>
   <circle cx="340" cy="390" r="24" fill="#333"/>
+  <!-- Wheel arch -->
   <path d="M68,385 Q112,340 156,385" fill="#003399"/>
   <path d="M296,385 Q340,340 384,385" fill="#003399"/>
+  <!-- Text on truck body -->
   <text x="322" y="248" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="22" font-weight="900" fill="white">1-800-</text>
   <text x="322" y="282" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="26" font-weight="900" fill="#FF6600">GOT-JUNK?</text>
+  <!-- Orange stripe -->
   <rect x="185" y="290" width="270" height="12" fill="#FF6600" opacity="0.8"/>
 </svg>

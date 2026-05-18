@@ -1,8 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#1a0500"/>
+  <!-- Bold H mark -->
   <rect x="88"  y="110" width="80" height="295" rx="8" fill="#FF6B35"/>
   <rect x="344" y="110" width="80" height="295" rx="8" fill="#FF6B35"/>
   <rect x="88"  y="222" width="336" height="80"  rx="8" fill="#FF6B35"/>
+  <!-- Lightning bolt overlay (hustle energy) -->
   <polygon points="282,88 228,272 268,272 218,424 340,218 296,218 346,88" fill="#FF6B35" opacity="0.55"/>
+  <!-- Name -->
   <text x="256" y="472" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="38" font-weight="900" fill="#FF6B35" letter-spacing="3">THE HUSTLE</text>
 </svg>
