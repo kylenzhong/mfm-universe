@@ -225,10 +225,16 @@
   const SUPPRESS_DAYS = 30;
   const DELAY_MS = 60 * 1000;
 
+  // Per-source dismissal: each page's popup variant suppresses independently.
+  // Signed-up stays global — once on the list, no popup variant should fire.
+  function dismissKey() {
+    return POPUP_KEY_DISMISSED + ':' + popupConfig().source;
+  }
+
   function popupSuppressed() {
     try {
       if (localStorage.getItem(POPUP_KEY_SIGNED_UP) === '1') return true;
-      const until = parseInt(localStorage.getItem(POPUP_KEY_DISMISSED) || '0', 10);
+      const until = parseInt(localStorage.getItem(dismissKey()) || '0', 10);
       return until && Date.now() < until;
     } catch (e) {
       return false;
@@ -237,7 +243,7 @@
 
   function markDismissed() {
     try {
-      localStorage.setItem(POPUP_KEY_DISMISSED, String(Date.now() + SUPPRESS_DAYS * 86400 * 1000));
+      localStorage.setItem(dismissKey(), String(Date.now() + SUPPRESS_DAYS * 86400 * 1000));
     } catch (e) {}
   }
 
