@@ -6,6 +6,33 @@ Format: each entry is dated, newest first. Same shape as Keep-a-Changelog but li
 
 ---
 
+## 2026-05-18 — Launch instrumentation + newsletter signup
+
+**Summary.** Launch day. The "newsletter coming soon" callout is now a real email-capture form, a modal popup catches engaged visitors at 60s or on exit-intent, and every page is wired to Vercel Web Analytics + Speed Insights with custom event tracking.
+
+### Added
+- `api/subscribe.js` — Vercel Serverless Function for newsletter signups. Validates email, forwards to beehiiv when `BEEHIIV_API_KEY` + `BEEHIIV_PUB_ID` env vars are set, falls back to a Resend notification (`RESEND_API_KEY` → email to OWNER_EMAIL), then to function-log capture so no submission is dropped while the provider is being wired.
+- `assets/mfm-launch.css` — newsletter form + modal popup styles. Re-declares the locked v2 design tokens (cream-blue / deep-blue / white, Fraunces / Inter / JBM) under `--mfm-*` namespaces so it works on every page regardless of host token availability.
+- `assets/mfm-launch.js` — analytics + popup + form layer:
+  - Bootstraps `window.va`/`window.si` queues so events buffered before scripts load are not lost.
+  - Exposes `window.mfm.track(name, props)` as the single chokepoint for custom events.
+  - Auto-instruments **tile_click**, **outbound_click**, **scroll_depth** (25/50/75/100), and **page_view**. Form events: **newsletter_submit_attempt/success/error**. Popup events: **newsletter_popup_shown/dismissed** with trigger reason.
+  - Injects the popup when the page opts in via `<body data-mfm-popup="newsletter">`. Triggers: 60s after pageload OR exit-intent (top-edge mouseout), whichever fires first. ESC + X + overlay click dismiss. 30-day localStorage suppression after dismiss; permanent after successful submit.
+
+### Changed
+- `index.html` — replaced the "Watch the repo →" placeholder CTA in the newsletter callout with a real `<form>` posting to `/api/subscribe`. Newsletter tile in the grid now smooth-scrolls to the form and focuses the input. Header stripe updated: "1 launching W19" → "1 newsletter (signup open)". Added Vercel Analytics scripts in `<head>`.
+- `MFM_Episodes.html`, `MFM_Guest_Profiles.html` — wired Vercel Analytics + the launch asset bundle in `<head>`; opted into the popup via `<body data-mfm-popup="newsletter">`. Both already use the locked cream-blue v2 design system so the popup matches.
+- `App_Pipeline.html` — wired Vercel Analytics only (popup deferred — this page still uses the older dark theme and is excluded until it's migrated to v2).
+
+### Notes for the operator
+- Vercel Analytics is cookieless, so no consent banner is required.
+- Set `BEEHIIV_API_KEY` and `BEEHIIV_PUB_ID` as Vercel project env vars to start forwarding signups to beehiiv automatically — the client form does not need to change.
+- Interim path: set `RESEND_API_KEY` (+ optional `OWNER_EMAIL`, `FROM_EMAIL`) to receive every submission as an email until beehiiv is configured.
+
+---
+
+---
+
 ## 2026-05-16 — Consolidation: v1.0
 
 **Summary.** Merged the standalone `mfm-guest-tracker` repo into this one, archived all RPG/game/3D/intro work into `archive/`, deployed the site behind the custom domain `mfmuniverse.com` (DNS flip pending), and elevated this repo to be the public hub for the active MFM Service workstream against the secondary goal in `manager/contract.md`.

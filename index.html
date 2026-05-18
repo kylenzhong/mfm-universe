@@ -6,7 +6,12 @@
 <title>MFM Universe — Founder Intelligence</title>
 <meta name="description" content="An interactive intelligence layer over My First Million and Starter Story — episodes, guests, playbooks, and the apps that print money.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/mfm-launch.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
+<!-- Vercel Web Analytics + Speed Insights — auto-resolve in production, no-op on localhost -->
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+<script defer src="/assets/mfm-launch.js"></script>
 <style>
   :root {
     --bg: #f7fafd;
@@ -285,7 +290,7 @@
   }
 </style>
 </head>
-<body>
+<body data-mfm-popup="newsletter">
 
 <!-- ── Hero — interactive walkable world ── -->
 <section class="hero-world">
@@ -309,7 +314,7 @@
 <div class="wrap">
   <div class="section-header">
     <h2>The indexed view</h2>
-    <div class="stripe-meta"><b>4 live</b> · 1 launching W19 · 2 coming soon</div>
+    <div class="stripe-meta"><b>4 live</b> · 1 newsletter (signup open) · 2 coming soon</div>
   </div>
 
   <div class="tile-grid">
@@ -361,13 +366,13 @@
       </div>
     </a>
 
-    <a href="#newsletter" class="tile newsletter" style="cursor:default;opacity:0.92" onclick="event.preventDefault();document.getElementById('newsletter-soon').scrollIntoView({behavior:'smooth'})">
-      <div class="tile-arrow">✨</div>
+    <a href="#newsletter-soon" class="tile newsletter" data-mfm-click="tile_click_newsletter" onclick="event.preventDefault();document.getElementById('newsletter-soon').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){var i=document.querySelector('#newsletter-soon input[type=email]');if(i)i.focus();},420);">
+      <div class="tile-arrow">→</div>
       <div class="tile-icon">✉️</div>
       <div class="tile-title">Newsletter</div>
-      <div class="tile-desc">A weekly digest for operators — each new MFM episode broken into a TL;DR, an idea-density riff, and "if you wanted to do this, start here." Launching W19 — May 2026.</div>
+      <div class="tile-desc">A weekly digest for operators — each new MFM episode broken into a TL;DR, an idea-density riff, and "if you wanted to do this, start here." First issue ships W19.</div>
       <div class="tile-stats">
-        <span class="tile-stat">Coming soon</span>
+        <span class="tile-stat"><strong>Sign up</strong> below</span>
         <span class="tile-stat">Weekly</span>
         <span class="tile-stat">Free</span>
       </div>
@@ -399,10 +404,15 @@
   </div>
 
   <div id="newsletter-soon" class="newsletter-callout">
-    <div class="badge">Coming W19 · May 18–22, 2026</div>
-    <h2>The MFM operator's digest</h2>
-    <p>A weekly read for people who screenshot ideas from the show and never go back to them. Sign-up form lands W19. Until then: bookmark this page or follow the project on GitHub.</p>
-    <a href="https://github.com/kylenzhong/mfm-universe" class="repo-btn">Watch the repo →</a>
+    <div class="badge">Newsletter · Launching W19</div>
+    <h2>The MFM operator&rsquo;s digest</h2>
+    <p>A weekly read for people who screenshot ideas from the show and never go back to them. Each new MFM episode broken into a TL;DR, an idea-density riff, and &ldquo;if you wanted to do this, start here.&rdquo; One email, every Friday.</p>
+    <form class="mfm-form" data-mfm-form="newsletter" data-source="inline_callout" novalidate>
+      <input class="mfm-input" type="email" name="email" placeholder="you@working-on-it.com" autocomplete="email" required>
+      <button class="mfm-submit" type="submit">Subscribe</button>
+    </form>
+    <div class="mfm-form-status" aria-live="polite"></div>
+    <p class="mfm-form-note">First issue ships W19 · No spam · Unsubscribe in one click</p>
   </div>
 
   <div class="footer">

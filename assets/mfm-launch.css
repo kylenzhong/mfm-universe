@@ -1,0 +1,168 @@
+/* MFM Universe launch widgets — newsletter form + modal popup.
+   Inherits the locked v2 design system tokens declared in index.html's :root.
+   Re-declares them as fallbacks so this stylesheet also works on subpages
+   that don't import the v2 tokens (e.g. App_Pipeline, MFM_Episodes).
+*/
+
+:root {
+  --mfm-bg:           #f7fafd;
+  --mfm-bg2:          #eaf2fb;
+  --mfm-card-bg:      #ffffff;
+  --mfm-card-edge:    #d7e3f0;
+  --mfm-ink:          #0d2540;
+  --mfm-ink-soft:     #335577;
+  --mfm-muted:        #5a7a96;
+  --mfm-primary:      #4a9fff;
+  --mfm-primary-deep: #0d4a8c;
+  --mfm-classic:      #e2a93b;
+  --mfm-good-green:   #1aa971;
+  --mfm-radius:       12px;
+  --mfm-radius-card:  16px;
+  --mfm-primary-shadow: rgba(13,74,140,.12);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Form — used both inline (on index.html) and inside the popup.
+   ──────────────────────────────────────────────────────────────── */
+.mfm-form {
+  display: flex; gap: 8px;
+  max-width: 460px; margin: 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.mfm-form .mfm-input {
+  flex: 1 1 240px; min-width: 0;
+  padding: 11px 14px;
+  font: 500 14px/1.4 'Inter', system-ui, sans-serif;
+  color: var(--mfm-ink);
+  background: var(--mfm-card-bg);
+  border: 1.5px solid var(--mfm-card-edge);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.mfm-form .mfm-input::placeholder { color: var(--mfm-muted); }
+.mfm-form .mfm-input:focus {
+  border-color: var(--mfm-primary);
+  box-shadow: 0 0 0 3px rgba(74,159,255,.15);
+}
+.mfm-form .mfm-input[aria-invalid="true"] {
+  border-color: #ff5d6e;
+  box-shadow: 0 0 0 3px rgba(255,93,110,.15);
+}
+.mfm-form .mfm-submit {
+  padding: 11px 22px;
+  font: 700 13px/1.4 'Inter', system-ui, sans-serif;
+  color: #fff;
+  background: var(--mfm-primary-deep);
+  border: 1px solid var(--mfm-primary-deep);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .15s, background .15s, box-shadow .15s;
+  white-space: nowrap;
+}
+.mfm-form .mfm-submit:hover { background: var(--mfm-ink); transform: translateY(-1px); box-shadow: 0 6px 16px var(--mfm-primary-shadow); }
+.mfm-form .mfm-submit:active { transform: translateY(0); }
+.mfm-form .mfm-submit[disabled] { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.mfm-form-note {
+  margin-top: 10px;
+  font: 500 11.5px/1.55 'JetBrains Mono', monospace;
+  color: var(--mfm-muted);
+  text-align: center;
+  letter-spacing: .2px;
+}
+.mfm-form-status {
+  margin-top: 12px; min-height: 18px;
+  font: 600 13px/1.5 'Inter', system-ui, sans-serif;
+  text-align: center;
+}
+.mfm-form-status.is-error   { color: #c83448; }
+.mfm-form-status.is-success { color: var(--mfm-good-green); }
+
+/* ────────────────────────────────────────────────────────────────
+   Modal — overlay + dialog. Fires at 60s OR exit-intent.
+   ──────────────────────────────────────────────────────────────── */
+.mfm-modal-root {
+  position: fixed; inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  font-family: 'Inter', system-ui, sans-serif;
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.mfm-modal-root[data-open="true"] { display: flex; opacity: 1; }
+.mfm-modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(13, 37, 64, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.mfm-modal-card {
+  position: relative;
+  max-width: 480px; width: 100%;
+  background: var(--mfm-card-bg);
+  border: 1.5px solid var(--mfm-card-edge);
+  border-radius: var(--mfm-radius-card);
+  padding: 36px 32px 28px;
+  box-shadow: 0 24px 60px rgba(13, 37, 64, .25);
+  text-align: center;
+  transform: translateY(8px);
+  transition: transform .25s ease;
+  overflow: hidden;
+}
+.mfm-modal-root[data-open="true"] .mfm-modal-card { transform: translateY(0); }
+.mfm-modal-card::before {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--mfm-classic), #ffd76b, var(--mfm-classic));
+}
+.mfm-modal-close {
+  position: absolute; top: 10px; right: 12px;
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 0;
+  font: 700 20px/1 'Inter', sans-serif;
+  color: var(--mfm-muted);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background .15s, color .15s;
+}
+.mfm-modal-close:hover { background: var(--mfm-bg2); color: var(--mfm-ink); }
+.mfm-modal-badge {
+  display: inline-block;
+  color: var(--mfm-primary-deep);
+  background: var(--mfm-bg2);
+  border: 1px solid var(--mfm-card-edge);
+  font: 700 11px/1 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+.mfm-modal-title {
+  font: 700 24px/1.2 'Fraunces', Georgia, serif;
+  color: var(--mfm-ink);
+  margin-bottom: 10px;
+  letter-spacing: -.4px;
+}
+.mfm-modal-body {
+  color: var(--mfm-ink-soft);
+  font: 400 14px/1.55 'Inter', system-ui, sans-serif;
+  max-width: 380px; margin: 0 auto 18px;
+}
+.mfm-modal-body strong { color: var(--mfm-primary-deep); font-weight: 700; }
+
+@media (max-width: 540px) {
+  .mfm-modal-card { padding: 28px 20px 22px; }
+  .mfm-modal-title { font-size: 21px; }
+  .mfm-form { flex-direction: column; }
+  .mfm-form .mfm-input, .mfm-form .mfm-submit { width: 100%; }
+}
+
+/* Respect motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  .mfm-modal-root, .mfm-modal-card { transition: none; }
+}
