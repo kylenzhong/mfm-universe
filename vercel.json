@@ -9,11 +9,6 @@
     { "source": "/App_Pipeline.html",       "destination": "/app_pipeline", "permanent": true },
     { "source": "/App_Pipeline",            "destination": "/app_pipeline", "permanent": true }
   ],
-  "rewrites": [
-    { "source": "/guests",       "destination": "/MFM_Guest_Profiles.html" },
-    { "source": "/episodes",     "destination": "/MFM_Episodes.html" },
-    { "source": "/app_pipeline", "destination": "/App_Pipeline.html" }
-  ],
   "headers": [
     {
       "source": "/(.*).html",
