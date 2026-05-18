@@ -181,7 +181,7 @@
       <div class="mfm-modal-overlay" data-mfm-dismiss="overlay"></div>
       <div class="mfm-modal-card">
         <button class="mfm-modal-close" type="button" aria-label="Close" data-mfm-dismiss="close">&times;</button>
-        <div class="mfm-modal-badge">Newsletter · Launching W19</div>
+        <div class="mfm-modal-badge">Newsletter · Launching soon</div>
         <h2 class="mfm-modal-title" id="mfm-modal-title">Get the operator&rsquo;s digest</h2>
         <p class="mfm-modal-body">A weekly read for people who screenshot ideas from MFM and never go back to them. <strong>One email, every Friday.</strong> No spam, unsubscribe in one click.</p>
         <form class="mfm-form" data-mfm-form="newsletter" data-source="popup" novalidate>
@@ -189,7 +189,7 @@
           <button class="mfm-submit" type="submit">Subscribe</button>
         </form>
         <div class="mfm-form-status" aria-live="polite"></div>
-        <p class="mfm-form-note">Built by a 4-year listener, not the MFM team.</p>
+        <p class="mfm-form-note">Built by a 4-year fan, not the MFM team.</p>
       </div>
     </div>
   `;
