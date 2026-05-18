@@ -176,15 +176,40 @@
   }
 
   // ── Popup ──────────────────────────────────────────────────────────────
-  const POPUP_HTML = `
+  // The default copy lives here; pages can override via body data attrs:
+  //   data-mfm-popup-badge="…"
+  //   data-mfm-popup-title="…"
+  //   data-mfm-popup-body="…"           (plain text; <strong>foo</strong> is safe)
+  //   data-mfm-popup-source="…"          (analytics source label)
+  //   data-mfm-popup-delay-ms="1800000"  (override the default 60s timer)
+  const POPUP_DEFAULTS = {
+    badge:  'Newsletter · Launching soon',
+    title:  'Get the operator’s digest',
+    body:   'A weekly read for people who screenshot ideas from MFM and never go back to them. <strong>One email, every Friday.</strong> No spam, unsubscribe in one click.',
+    source: 'popup',
+  };
+
+  function popupConfig() {
+    const b = document.body;
+    return {
+      badge:  b.getAttribute('data-mfm-popup-badge')  || POPUP_DEFAULTS.badge,
+      title:  b.getAttribute('data-mfm-popup-title')  || POPUP_DEFAULTS.title,
+      body:   b.getAttribute('data-mfm-popup-body')   || POPUP_DEFAULTS.body,
+      source: b.getAttribute('data-mfm-popup-source') || POPUP_DEFAULTS.source,
+    };
+  }
+
+  function buildPopupHTML() {
+    const c = popupConfig();
+    return `
     <div class="mfm-modal-root" id="mfm-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mfm-modal-title">
       <div class="mfm-modal-overlay" data-mfm-dismiss="overlay"></div>
       <div class="mfm-modal-card">
         <button class="mfm-modal-close" type="button" aria-label="Close" data-mfm-dismiss="close">&times;</button>
-        <div class="mfm-modal-badge">Newsletter · Launching soon</div>
-        <h2 class="mfm-modal-title" id="mfm-modal-title">Get the operator&rsquo;s digest</h2>
-        <p class="mfm-modal-body">A weekly read for people who screenshot ideas from MFM and never go back to them. <strong>One email, every Friday.</strong> No spam, unsubscribe in one click.</p>
-        <form class="mfm-form" data-mfm-form="newsletter" data-source="popup" novalidate>
+        <div class="mfm-modal-badge">${c.badge}</div>
+        <h2 class="mfm-modal-title" id="mfm-modal-title">${c.title}</h2>
+        <p class="mfm-modal-body">${c.body}</p>
+        <form class="mfm-form" data-mfm-form="newsletter" data-source="${c.source}" novalidate>
           <input class="mfm-input" type="email" name="email" placeholder="you@working-on-it.com" autocomplete="email" required>
           <button class="mfm-submit" type="submit">Subscribe</button>
         </form>
@@ -192,7 +217,8 @@
         <p class="mfm-form-note">Built by a 4-year fan, not the MFM team.</p>
       </div>
     </div>
-  `;
+    `;
+  }
 
   const POPUP_KEY_DISMISSED = 'mfm_newsletter_popup_dismissed_until';
   const POPUP_KEY_SIGNED_UP = 'mfm_newsletter_signed_up';
@@ -218,7 +244,7 @@
   function injectPopup() {
     if (popupSuppressed()) return null;
     const host = document.createElement('div');
-    host.innerHTML = POPUP_HTML;
+    host.innerHTML = buildPopupHTML();
     const root = host.firstElementChild;
     document.body.appendChild(root);
     return root;
@@ -263,8 +289,10 @@
       if (e.key === 'Escape' && shown) close('esc');
     });
 
-    // Trigger 1 — 60s timer.
-    timer = setTimeout(function () { open('timer'); }, DELAY_MS);
+    // Trigger 1 — timer (default 60s; override via body data-mfm-popup-delay-ms).
+    const customDelay = parseInt(document.body.getAttribute('data-mfm-popup-delay-ms') || '', 10);
+    const delay = Number.isFinite(customDelay) && customDelay > 0 ? customDelay : DELAY_MS;
+    timer = setTimeout(function () { open('timer'); }, delay);
 
     // Trigger 2 — exit-intent (desktop).
     function onMouseOut(e) {

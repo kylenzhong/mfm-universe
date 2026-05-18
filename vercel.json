@@ -1,6 +1,14 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/MFM_Guest_Profiles.html", "destination": "/guests",       "permanent": true },
+    { "source": "/MFM_Guest_Profiles",      "destination": "/guests",       "permanent": true },
+    { "source": "/MFM_Episodes.html",       "destination": "/episodes",     "permanent": true },
+    { "source": "/MFM_Episodes",            "destination": "/episodes",     "permanent": true },
+    { "source": "/App_Pipeline.html",       "destination": "/app_pipeline", "permanent": true },
+    { "source": "/App_Pipeline",            "destination": "/app_pipeline", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/(.*).html",

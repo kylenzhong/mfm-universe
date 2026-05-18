@@ -559,9 +559,9 @@
   <div class="header-inner">
     <div class="header-nav">
       <a class="nav-btn" href="index.html"><span class="pip"></span>Home</a>
-      <a class="nav-btn" href="MFM_Guest_Profiles.html"><span class="pip"></span>Guests</a>
+      <a class="nav-btn" href="/guests"><span class="pip"></span>Guests</a>
       <a class="nav-btn" href="MFM_Universe_Web/index.html"><span class="pip"></span>3D Universe</a>
-      <a class="nav-btn" href="App_Pipeline.html"><span class="pip"></span>App Pipeline</a>
+      <a class="nav-btn" href="/app_pipeline"><span class="pip"></span>App Pipeline</a>
     </div>
     <div class="brandline"><span class="dot"></span>THE CANON · SEASON 08 · TRADING CARDS</div>
     <h1 class="header-title">Episode Deck — <span class="accent">800+ shows, one collection.</span></h1>
@@ -617,7 +617,7 @@
   <div class="footer-row">
     MFM Universe · An unofficial reimagining · Drawn pixel portraits via flux-schnell · Built in a Saturday.<br>
     <a href="https://www.mfmpod.com/episodes/" target="_blank">official episode index</a> ·
-    <a href="MFM_Guest_Profiles.html">full guest profiles</a> ·
+    <a href="/guests">full guest profiles</a> ·
     <a href="index.html">back to the universe</a>
   </div>
 </footer>
@@ -1462,7 +1462,7 @@ function renderGrid() {
     const classicCorner = ep.classic ? `<div class="badge-corner" title="Classic">★</div>` : '';
     const profileGuest = (ep.guests || []).find(g => GUEST_PROFILES.has(g));
     const guestLink = profileGuest
-      ? `<a class="guest-link" href="MFM_Guest_Profiles.html#guest=${encodeURIComponent(profileGuest)}" onclick="event.stopPropagation()">
+      ? `<a class="guest-link" href="/guests#guest=${encodeURIComponent(profileGuest)}" onclick="event.stopPropagation()">
           <span class="gl-arrow">→</span>
           <span class="gl-label">Guest profile</span>
           <span class="gl-name">${escapeHtml(profileGuest)}</span>

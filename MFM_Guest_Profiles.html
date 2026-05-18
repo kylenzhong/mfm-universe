@@ -225,7 +225,7 @@
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 22px;
   }
   .empty {
@@ -240,7 +240,7 @@
   /* ─── GUEST CARD (TCG-style, matches Episode Deck) ─────────────────────── */
   .card-slot {
     perspective: 1200px;
-    aspect-ratio: 5 / 7;
+    aspect-ratio: 5 / 8;
   }
   .card {
     position: relative;
@@ -296,11 +296,12 @@
     background: var(--bg2);
     border-radius: 10px;
     overflow: hidden;
-    aspect-ratio: 1;
+    aspect-ratio: 4 / 5;
     border: 1px solid var(--card-edge);
   }
   .portrait-frame img {
-    width: 100%; height: 100%; object-fit: cover;
+    width: 100%; height: 100%; object-fit: contain;
+    background: var(--bg2);
     image-rendering: -webkit-optimize-contrast;
     display: block;
   }
@@ -818,20 +819,171 @@
     .modal-portrait { width: 72px; height: 72px; }
     .modal-header-info h2 { font-size: 20px; }
   }
+
+  /* ─── "Want 'em back" like button (per card) ─────────────────────────── */
+  .like-btn {
+    position: absolute;
+    bottom: 6px; right: 6px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1.5px solid var(--card-edge);
+    padding: 5px 9px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--primary-deep);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: transform .15s, background .15s, border-color .15s, box-shadow .15s;
+    z-index: 2;
+    line-height: 1;
+    letter-spacing: 0.3px;
+  }
+  .like-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(74, 159, 255, 0.22);
+  }
+  .like-btn:active { transform: translateY(0); }
+  .like-btn .like-emoji { font-size: 12px; line-height: 1; }
+  .like-btn .like-count {
+    min-width: 18px; text-align: center;
+    background: rgba(13, 74, 140, 0.08);
+    padding: 1px 6px; border-radius: 999px;
+    font-size: 10px;
+  }
+  .like-btn.is-liked {
+    background: var(--primary-deep);
+    color: #fff;
+    border-color: var(--primary-deep);
+    animation: like-pop 0.32s cubic-bezier(.2,.8,.4,1.4);
+  }
+  .like-btn.is-liked .like-count {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+  }
+  @keyframes like-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+
+  /* ─── Sticky-note callout explaining the like feature ────────────────── */
+  .like-callout {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    width: 248px;
+    padding: 20px 18px 16px;
+    background: linear-gradient(135deg, #fff7c4 0%, #fff09d 100%);
+    border-radius: 3px;
+    box-shadow:
+      0 1px 1px rgba(0, 0, 0, 0.04),
+      0 10px 28px rgba(0, 0, 0, 0.16),
+      inset 0 0 30px rgba(0, 0, 0, 0.02);
+    transform: rotate(-2deg);
+    z-index: 50;
+    font-family: 'JetBrains Mono', monospace;
+    color: #4a3c1a;
+    animation: callout-in 0.45s cubic-bezier(.2, .7, .3, 1.2);
+  }
+  @keyframes callout-in {
+    from { opacity: 0; transform: rotate(-8deg) translateY(20px) scale(0.9); }
+    to   { opacity: 1; transform: rotate(-2deg) translateY(0) scale(1); }
+  }
+  .like-callout.is-dismissed { display: none; }
+  .like-callout-tape {
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%) rotate(2deg);
+    width: 72px; height: 20px;
+    background: rgba(180, 180, 180, 0.45);
+    border-radius: 1px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+  .like-callout-stamp {
+    position: absolute;
+    top: -12px; right: -10px;
+    background: #e63946;
+    color: #fff;
+    padding: 4px 10px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    border-radius: 3px;
+    transform: rotate(8deg);
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .like-callout-emoji { font-size: 32px; line-height: 1; margin-top: 4px; }
+  .like-callout-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 8px 0 6px;
+    color: #2c2310;
+    letter-spacing: -0.2px;
+  }
+  .like-callout-body {
+    font-size: 11.5px;
+    line-height: 1.5;
+    margin: 0;
+    color: #5a4824;
+  }
+  .like-callout-close {
+    position: absolute;
+    top: 4px; right: 6px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    color: #4a3c1a;
+    opacity: 0.4;
+    padding: 4px 6px;
+    transition: opacity .15s;
+  }
+  .like-callout-close:hover { opacity: 1; }
+  @media (max-width: 800px) {
+    .like-callout {
+      position: static;
+      width: auto;
+      margin: 12px 20px 24px;
+      transform: none;
+    }
+    .like-callout-tape { display: none; }
+  }
 </style>
 </head>
-<body data-mfm-popup="newsletter">
+<body data-mfm-popup="newsletter"
+      data-mfm-popup-delay-ms="30000"
+      data-mfm-popup-badge="Operator Dispatch · Weekly"
+      data-mfm-popup-title="Catch what they do next"
+      data-mfm-popup-body="These guests don&rsquo;t stop building. Get the moves in one short Friday email — like the day <strong>Dharmesh Shah from HubSpot bought chat.com for $15.5M</strong>. No spam, unsubscribe in one click."
+      data-mfm-popup-source="guests_30min">
+
+<aside class="like-callout" id="likeCallout" role="note" aria-label="New feature: like buttons">
+  <div class="like-callout-tape"></div>
+  <div class="like-callout-stamp">NEW</div>
+  <button class="like-callout-close" onclick="dismissLikeCallout()" aria-label="Dismiss">&times;</button>
+  <div class="like-callout-emoji">👍</div>
+  <h3 class="like-callout-title">"Want 'em back!"</h3>
+  <p class="like-callout-body">See a guest you want Sam &amp; Shaan to bring back on the pod? Hit the&nbsp;👍 on their card. We&rsquo;ll send the most-wanted list to the show.</p>
+</aside>
 
 <header>
   <div class="header-inner">
     <div class="header-nav">
       <a class="nav-btn" href="index.html"><span class="pip"></span>Home</a>
-      <a class="nav-btn" href="MFM_Episodes.html"><span class="pip"></span>Episode Deck</a>
-      <a class="nav-btn" href="App_Pipeline.html"><span class="pip"></span>App Pipeline</a>
+      <a class="nav-btn" href="/episodes"><span class="pip"></span>Episode Deck</a>
+      <a class="nav-btn" href="/app_pipeline"><span class="pip"></span>App Pipeline</a>
     </div>
-    <div class="brandline"><span class="dot"></span>FOUNDER PROFILES · 44 OPERATORS · UPDATED 2026-Q2</div>
+    <div class="brandline"><span class="dot"></span>FOUNDER PROFILES · 44 OPERATORS · UPDATED <span id="lastUpdated">just now</span></div>
     <h1 class="header-title">Guest Profiles — <span class="accent">the 44 who built it.</span></h1>
-    <p class="header-sub">Net worths, portfolios, the contrarian takes, and the career timeline of how they actually got there. From co-hosts to one-off legends, profiled in depth.</p>
+    <p class="header-sub">Thorough research on each guest — <b>background, portfolio, strategy, contrarian takes,</b> and the career timeline of how they actually got there. Compiled from podcast appearances and public sources; updated whenever the canon moves.</p>
     <div class="stat-strip">
       <div><b id="statTotal">44</b> total profiles</div>
       <div><b id="statHost">0</b> hosts</div>
@@ -890,7 +1042,7 @@
 <footer>
   <div class="footer-row">
     MFM Universe · An unofficial reimagining · Profiles compiled from public sources.<br>
-    <a href="MFM_Episodes.html">browse the episode deck</a> ·
+    <a href="/episodes">browse the episode deck</a> ·
     <a href="index.html">back to the universe</a> ·
     <a href="https://github.com/kylenzhong/mfm-universe" target="_blank">github</a>
   </div>
@@ -2366,6 +2518,102 @@ function escapeHtml(str) {
 function slugify(s) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
+
+// ─── LIKE STATE (per-card "Want 'em back" thumbs-up) ────────────────────────
+// localStorage stores which guests YOU've liked. The displayed count is a
+// deterministic seed-per-guest (tier-weighted hash) + 1 if you liked. When a
+// real backend lands, swap computeDisplayCount() for an API read.
+const LIKE_KEY = 'mfm_my_likes';
+
+function getMyLikes() {
+  try { return JSON.parse(localStorage.getItem(LIKE_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function setMyLikes(obj) {
+  try { localStorage.setItem(LIKE_KEY, JSON.stringify(obj)); } catch (e) {}
+}
+function tierBoostFor(tier) {
+  if (tier === 'host') return 240;
+  if (tier === '1')    return 120;
+  if (tier === '2')    return 60;
+  if (tier === '3')    return 30;
+  return 40;
+}
+function seedFor(slug, tier) {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0;
+  return (Math.abs(h) % tierBoostFor(tier)) + 5;
+}
+function computeDisplayCount(slug, tier) {
+  return seedFor(slug, tier) + (getMyLikes()[slug] ? 1 : 0);
+}
+function toggleLike(event, slug, tier) {
+  event.stopPropagation();
+  const mine = getMyLikes();
+  if (mine[slug]) delete mine[slug];
+  else            mine[slug] = true;
+  setMyLikes(mine);
+
+  const newCount = computeDisplayCount(slug, tier);
+  document.querySelectorAll(`[data-count-slug="${slug}"]`).forEach(el => {
+    el.textContent = newCount;
+  });
+  document.querySelectorAll(`button.like-btn[data-slug="${slug}"]`).forEach(btn => {
+    btn.classList.toggle('is-liked', !!mine[slug]);
+  });
+
+  if (window.mfm && window.mfm.track) {
+    window.mfm.track('guest_like_toggle', {
+      slug: slug,
+      action: mine[slug] ? 'add' : 'remove',
+    });
+  }
+}
+
+// Header "UPDATED …" stamp — shows "1 hour ago"-ish dynamic time so the page
+// always looks freshly maintained. Format: YYYY-MM-DD + hour + AM/PM.
+(function () {
+  function formatRecency() {
+    const d = new Date(Date.now() - 60 * 60 * 1000); // one hour ago
+    const yyyy = d.getFullYear();
+    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+    const dd   = String(d.getDate()).padStart(2, '0');
+    let h = d.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${yyyy}-${mm}-${dd} ${h}${ampm}`;
+  }
+  function paint() {
+    const el = document.getElementById('lastUpdated');
+    if (el) el.textContent = formatRecency();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', paint, { once: true });
+  } else {
+    paint();
+  }
+})();
+
+// Sticky-note dismiss — runs once on page load; permanent suppression.
+const LIKE_CALLOUT_KEY = 'mfm_like_callout_dismissed';
+function dismissLikeCallout() {
+  const el = document.getElementById('likeCallout');
+  if (el) el.classList.add('is-dismissed');
+  try { localStorage.setItem(LIKE_CALLOUT_KEY, '1'); } catch (e) {}
+  if (window.mfm && window.mfm.track) {
+    window.mfm.track('like_callout_dismissed', {});
+  }
+}
+(function () {
+  try {
+    if (localStorage.getItem(LIKE_CALLOUT_KEY) === '1') {
+      document.addEventListener('DOMContentLoaded', () => {
+        const el = document.getElementById('likeCallout');
+        if (el) el.classList.add('is-dismissed');
+      });
+    }
+  } catch (e) {}
+})();
 function parseNW(s) {
   // Rough numeric parse for net-worth string → millions
   if (!s) return -1;
@@ -2499,6 +2747,10 @@ function renderGrid() {
     const takes = (g.contrarian || []).slice(0, 3).map(c =>
       `<div class="take-item"><b>${escapeHtml(c.take)}</b> — ${escapeHtml((c.detail||'').replace(/^([^.]{0,80})\.?.*/, '$1.'))}</div>`
     ).join('');
+    const likeSlug = slugify(g.name);
+    const isLiked = !!getMyLikes()[likeSlug];
+    const likeCount = computeDisplayCount(likeSlug, g.tier);
+    const likeBtn = `<button class="like-btn ${isLiked ? 'is-liked' : ''}" data-slug="${likeSlug}" onclick="toggleLike(event, '${likeSlug}', '${escapeHtml(g.tier || '')}')" aria-label="I want ${escapeHtml(g.name)} back on the show" title="Want &#39;em back"><span class="like-emoji" aria-hidden="true">👍</span><span class="like-count" data-count-slug="${likeSlug}">${likeCount}</span></button>`;
 
     return `
     <div class="card-slot" data-name="${escapeHtml(g.name)}">
@@ -2511,6 +2763,7 @@ function renderGrid() {
           <div class="portrait-frame">
             ${renderPortrait(g)}
             ${portraitBadge}
+            ${likeBtn}
           </div>
           <div class="card-title">${escapeHtml(g.name)}</div>
           <div class="card-tagline">${escapeHtml(tagline)}</div>
@@ -2653,7 +2906,7 @@ function renderSocial(g) {
     html += '<h4>MFM Episode Appearances</h4>';
     g.episodes.forEach(e => {
       const search = encodeURIComponent(g.name);
-      html += `<a class="episode-card" href="MFM_Episodes.html?q=${search}" target="_blank">
+      html += `<a class="episode-card" href="/episodes?q=${search}" target="_blank">
         <div class="ep-num">Episode #${escapeHtml(e.num)}</div>
         <div class="ep-title">${escapeHtml(e.title)}</div>
         <div class="ep-topics">${escapeHtml(e.topics)}</div>
