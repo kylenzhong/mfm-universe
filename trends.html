@@ -143,6 +143,84 @@
   }
   .section-sub strong { color: var(--primary-deep); font-weight: 700; }
 
+  /* ─── HEADLINE OF THE DAY ─────────────────────────────────────────────── */
+  .headline-callout {
+    background:
+      radial-gradient(ellipse 520px 240px at 92% -10%, rgba(74,159,255,.20) 0%, transparent 60%),
+      radial-gradient(ellipse 400px 200px at 0% 110%, rgba(226,169,59,.10) 0%, transparent 60%),
+      var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    border-radius: var(--radius-card);
+    padding: 30px 34px;
+    margin: 18px 0 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 18px 44px rgba(13,74,140,.10);
+  }
+  .headline-callout::before {
+    content: ''; position: absolute; left: 0; top: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--primary-deep), var(--primary), var(--classic), var(--primary-deep));
+  }
+  .headline-callout .badge {
+    display: inline-block;
+    color: #fff;
+    background: var(--primary-deep);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9.5px;
+    letter-spacing: 1.4px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 0 var(--classic);
+  }
+  .headline-callout .badge-meta {
+    color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-left: 10px;
+  }
+  .headline-body { color: var(--ink); font-size: 15.5px; line-height: 1.68; margin-top: 8px; }
+  .headline-body h1 {
+    font-family: 'Fraunces', Georgia, serif; color: var(--ink);
+    font-weight: 800; letter-spacing: -1.0px; line-height: 1.08;
+    font-size: clamp(24px, 3.4vw, 34px);
+    margin: 14px 0 14px;
+  }
+  .headline-body h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--primary-deep);
+    text-transform: uppercase; letter-spacing: 1.6px;
+    font-weight: 700;
+    margin: 28px 0 10px;
+  }
+  .headline-body h3 {
+    font-family: 'Fraunces', Georgia, serif; font-size: 19px; font-weight: 700;
+    color: var(--primary-deep); margin: 18px 0 8px; letter-spacing: -.3px;
+  }
+  .headline-body h4 {
+    font-size: 13px; font-weight: 700; color: var(--ink); margin: 14px 0 4px;
+  }
+  .headline-body p { margin: 10px 0; }
+  .headline-body ul { margin: 10px 0 12px; padding-left: 22px; }
+  .headline-body li { margin-bottom: 8px; }
+  .headline-body strong { color: var(--primary-deep); font-weight: 700; }
+  .headline-body code {
+    background: var(--bg2); color: var(--ink); padding: 2px 6px;
+    border-radius: 5px; font-family: 'JetBrains Mono', monospace; font-size: .88em;
+  }
+  .headline-body blockquote {
+    border-left: 3px solid var(--primary); padding: 8px 0 8px 16px;
+    color: var(--ink-soft); font-style: italic; margin: 14px 0;
+    font-size: 15px; line-height: 1.6;
+    background: linear-gradient(90deg, rgba(74,159,255,.05) 0%, transparent 100%);
+  }
+  .headline-body hr {
+    border: 0; border-top: 1px solid var(--card-edge); margin: 26px 0;
+  }
+  .headline-body a {
+    color: var(--primary-deep); text-decoration: underline; text-underline-offset: 2px;
+    text-decoration-color: rgba(13,74,140,.35);
+    transition: text-decoration-color .15s;
+  }
+  .headline-body a:hover { text-decoration-color: var(--primary-deep); }
+
   /* ─── DAILY BRIEF CALLOUT ─────────────────────────────────────────────── */
   .brief-callout {
     background:
@@ -638,6 +716,15 @@
 </header>
 
 <div class="wrap">
+
+  <!-- HEADLINE OF THE DAY -->
+  <section id="headline-section" class="headline-callout" style="display:none;">
+    <div>
+      <span class="badge">★ Headline of the day</span>
+      <span class="badge-meta" id="headline-meta">a long-form read from today's signal</span>
+    </div>
+    <div id="headline-body" class="headline-body"></div>
+  </section>
 
   <!-- DAILY BRIEF -->
   <section id="brief-section" class="brief-callout" style="display:none;">
@@ -1258,10 +1345,11 @@ function copyPrompt(btn) {
 
 /* ─── BOOT ──────────────────────────────────────────────────────────────── */
 async function loadData() {
-  // Fetch trends data + daily brief in parallel
-  const [dataRes, briefRes] = await Promise.allSettled([
+  // Fetch trends data + daily brief + headline of the day in parallel
+  const [dataRes, briefRes, headlineRes] = await Promise.allSettled([
     fetch('/data/trends-latest.json', {cache: 'no-store'}),
     fetch('/data/trends-daily-brief.md', {cache: 'no-store'}),
+    fetch('/data/trends-headline-latest.md', {cache: 'no-store'}),
   ]);
 
   let latest = null;
@@ -1272,11 +1360,21 @@ async function loadData() {
   if (briefRes.status === 'fulfilled' && briefRes.value.ok) {
     try { brief = await briefRes.value.text(); } catch(e) { /* ignore */ }
   }
+  let headline = null;
+  if (headlineRes.status === 'fulfilled' && headlineRes.value.ok) {
+    try { headline = await headlineRes.value.text(); } catch(e) { /* ignore */ }
+  }
+
+  if (headline && headline.trim().length > 0) {
+    $('#headline-body').innerHTML = renderMarkdown(headline);
+    $('#headline-section').style.display = '';
+  }
 
   if (brief && brief.trim().length > 0) {
     $('#brief-body').innerHTML = renderMarkdown(brief);
     $('#brief-section').style.display = '';
-  } else {
+  } else if (!headline) {
+    // Only show the "no brief loaded" empty state if we have NEITHER a headline NOR a brief
     $('#brief-empty').style.display = '';
   }
 
