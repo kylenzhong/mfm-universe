@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Paper Trail #1 — Greg Isenberg's quiet enterprise pivot — MFM Universe</title>
+<meta name="description" content="Greg Isenberg's Late Checkout went quiet for 30 months, then provisioned 6 named-brand client subdomains in 53 days. Loblaw, Lightspeed, Poka, Moving Mountains — and a 'LCAX' tell that suggests a productized enterprise program.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="Greg Isenberg's quiet enterprise pivot">
+<meta property="og:description" content="Late Checkout went quiet for 30 months, then provisioned 6 named-brand client subdomains in 53 days. Loblaw. Lightspeed. Poka. Here's the paper trail.">
+<meta property="og:url" content="https://mfmuniverse.com/paper_trail">
+<meta property="og:site_name" content="MFM Universe — The Paper Trail">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Greg Isenberg's quiet enterprise pivot">
+<meta name="twitter:description" content="Late Checkout's 53-day client cluster — the receipts.">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/mfm-launch.css">
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+<script defer src="/assets/mfm-launch.js"></script>
+
+<style>
+  :root {
+    --bg: #f7fafd;
+    --bg2: #eaf2fb;
+    --card-bg: #ffffff;
+    --card-edge: #d7e3f0;
+    --ink: #0d2540;
+    --ink-soft: #335577;
+    --muted: #5a7a96;
+    --primary: #4a9fff;
+    --primary-deep: #0d4a8c;
+    --primary-shadow: rgba(13,74,140,.12);
+    --guest: #6e5cff;
+    --classic: #e2a93b;
+    --classic-2: #ffd76b;
+    --hot: #ff5d6e;
+    --hot-soft: rgba(255,93,110,.10);
+    --good-green: #1aa971;
+    --radius: 12px;
+    --radius-card: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 1200px 600px at 50% -10%, rgba(74,159,255,.18) 0%, transparent 60%),
+      radial-gradient(ellipse 800px 500px at 90% 30%, rgba(110,92,255,.10) 0%, transparent 65%),
+      var(--bg);
+    background-attachment: fixed;
+  }
+  a { color: var(--primary-deep); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ─── Header ──────────────────────────────────────────────────────── */
+  header { padding: 24px 32px 8px; position: relative; }
+  .header-inner { max-width: 880px; margin: 0 auto; }
+  .header-nav { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+  .nav-btn {
+    background: var(--card-bg); border: 1px solid var(--card-edge); color: var(--ink-soft);
+    padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 500;
+    transition: all .15s; display: inline-flex; gap: 6px; align-items: center;
+  }
+  .nav-btn:hover {
+    border-color: var(--primary); color: var(--primary-deep);
+    transform: translateY(-1px); box-shadow: 0 4px 12px var(--primary-shadow);
+    text-decoration: none;
+  }
+  .nav-btn .pip { display: inline-block; width: 6px; height: 6px; background: var(--primary); border-radius: 2px; }
+  .nav-btn.active { border-color: var(--primary); color: var(--primary-deep); background: var(--bg2); }
+
+  .brandline {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; color: var(--primary-deep); letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    padding: 6px 12px;
+    background: var(--card-bg); border: 1px solid var(--card-edge); border-radius: 999px;
+  }
+  .brandline .dot { width: 8px; height: 8px; background: var(--primary); border-radius: 2px; box-shadow: 2px 2px 0 var(--primary-deep); display: inline-block; }
+
+  h1.header-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(34px, 5vw, 52px); font-weight: 800;
+    line-height: 1.04; color: var(--ink); letter-spacing: -1.5px;
+    margin-bottom: 14px;
+  }
+  h1.header-title .accent { color: var(--primary-deep); }
+  .header-sub {
+    color: var(--ink-soft); font-size: 17px; line-height: 1.55;
+    max-width: 700px; margin-bottom: 22px;
+  }
+  .dateline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--muted);
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .dateline a { color: var(--primary-deep); font-weight: 600; }
+  .dateline .sep { color: var(--card-edge); }
+
+  /* ─── Main container ─────────────────────────────────────────────── */
+  .wrap { max-width: 720px; margin: 0 auto 80px; padding: 0 32px; position: relative; z-index: 1; }
+
+  /* ─── BREAKING BLOCK — screenshot-friendly ───────────────────────── */
+  .breaking {
+    background: var(--card-bg);
+    border: 2px solid var(--hot);
+    border-radius: var(--radius-card);
+    padding: 28px 30px 26px;
+    margin: 8px 0 36px;
+    box-shadow: 0 16px 36px rgba(255,93,110,.10), 0 4px 12px rgba(13,37,64,.05);
+    position: relative;
+  }
+  .breaking::before {
+    content: ""; position: absolute; top: -1px; left: -1px; right: -1px; height: 4px;
+    background: linear-gradient(90deg, var(--hot), var(--classic) 60%, var(--primary));
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+  .breaking-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--hot-soft); color: var(--hot);
+    font-family: 'Press Start 2P', monospace; font-size: 9px; letter-spacing: 1.5px;
+    padding: 6px 11px; border-radius: 6px; margin-bottom: 14px;
+  }
+  .breaking-tag .pulse {
+    width: 8px; height: 8px; background: var(--hot); border-radius: 50%;
+    box-shadow: 0 0 0 0 var(--hot); animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255,93,110,.6); }
+    70%  { box-shadow: 0 0 0 8px rgba(255,93,110,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,93,110,0); }
+  }
+  .breaking h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px; font-weight: 700; line-height: 1.15;
+    color: var(--ink); margin-bottom: 14px; letter-spacing: -0.5px;
+  }
+  .breaking p {
+    color: var(--ink); font-size: 16px; line-height: 1.6; margin-bottom: 14px;
+  }
+  .breaking p strong { color: var(--primary-deep); font-weight: 700; }
+  .client-table {
+    width: 100%; border-collapse: collapse; margin: 16px 0 18px;
+    background: var(--bg2); border-radius: 10px; overflow: hidden;
+    font-size: 14px;
+  }
+  .client-table th, .client-table td {
+    padding: 10px 14px; text-align: left;
+    border-bottom: 1px solid var(--card-edge);
+  }
+  .client-table th {
+    background: var(--bg2); font-size: 11px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    color: var(--primary-deep); letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .client-table td {
+    background: var(--card-bg); color: var(--ink); vertical-align: top;
+  }
+  .client-table td.date { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
+  .client-table td.brand { font-weight: 600; }
+  .client-table td.brand .small { color: var(--muted); font-weight: 400; font-size: 12.5px; display: block; margin-top: 2px; }
+  .client-table tr:last-child td { border-bottom: none; }
+
+  .breaking .why-it-matters {
+    background: var(--bg2); border-left: 3px solid var(--primary-deep);
+    padding: 13px 18px; margin: 20px 0 8px; border-radius: 0 8px 8px 0;
+    font-size: 15px; color: var(--ink); line-height: 1.55;
+  }
+  .breaking .why-it-matters strong { color: var(--primary-deep); }
+  .breaking .read-more {
+    margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--card-edge);
+    text-align: center; color: var(--muted); font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── Body article ───────────────────────────────────────────────── */
+  article h2.section {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 26px; font-weight: 700; color: var(--ink);
+    margin: 44px 0 16px; letter-spacing: -0.5px;
+  }
+  article h3.subsection {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 19px; font-weight: 700; color: var(--ink);
+    margin: 28px 0 10px;
+  }
+  article p {
+    font-size: 16px; line-height: 1.65; color: var(--ink); margin-bottom: 16px;
+  }
+  article p strong { color: var(--primary-deep); font-weight: 700; }
+  article ul { padding-left: 0; list-style: none; margin-bottom: 16px; }
+  article ul li {
+    font-size: 16px; line-height: 1.65; color: var(--ink); margin-bottom: 10px;
+    padding-left: 22px; position: relative;
+  }
+  article ul li::before {
+    content: ""; position: absolute; left: 0; top: 10px;
+    width: 6px; height: 6px; background: var(--primary); border-radius: 2px;
+    box-shadow: 2px 2px 0 var(--primary-deep);
+  }
+  article ul li strong { color: var(--primary-deep); }
+  article blockquote {
+    border-left: 3px solid var(--guest); padding: 4px 0 4px 18px;
+    margin: 16px 0; color: var(--ink-soft); font-style: italic;
+  }
+
+  /* ─── Footer CTA ─────────────────────────────────────────────────── */
+  .footer-cta {
+    background: var(--card-bg); border: 1.5px solid var(--card-edge);
+    border-radius: var(--radius-card); padding: 28px 30px;
+    margin-top: 48px; text-align: center;
+  }
+  .footer-cta h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 8px;
+  }
+  .footer-cta p {
+    color: var(--ink-soft); font-size: 15px; line-height: 1.55; margin-bottom: 16px;
+    max-width: 540px; margin-left: auto; margin-right: auto;
+  }
+  .footer-cta-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .cta-btn {
+    background: var(--primary-deep); color: var(--card-bg);
+    padding: 11px 22px; border-radius: 999px;
+    font-size: 14px; font-weight: 600;
+    transition: all .15s; display: inline-flex; gap: 6px; align-items: center;
+  }
+  .cta-btn:hover { background: var(--ink); transform: translateY(-1px); text-decoration: none; box-shadow: 0 6px 18px var(--primary-shadow); }
+  .cta-btn.secondary { background: var(--card-bg); color: var(--ink-soft); border: 1.5px solid var(--card-edge); }
+  .cta-btn.secondary:hover { border-color: var(--primary); color: var(--primary-deep); background: var(--card-bg); }
+
+  /* ─── Method footer ──────────────────────────────────────────────── */
+  .method {
+    background: transparent; padding: 22px 0 0; margin-top: 24px;
+    border-top: 1px solid var(--card-edge);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--muted); line-height: 1.6;
+  }
+  .method strong { color: var(--ink-soft); font-weight: 700; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 20px; }
+    header { padding: 18px 20px 8px; }
+    .breaking { padding: 22px 20px; }
+    .breaking h2 { font-size: 24px; }
+    .client-table { font-size: 13px; }
+    .client-table th, .client-table td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <nav class="header-nav">
+      <a class="nav-btn" href="/"><span class="pip"></span>Home</a>
+      <a class="nav-btn" href="/episodes"><span class="pip"></span>Episodes</a>
+      <a class="nav-btn" href="/guests"><span class="pip"></span>Guests</a>
+      <a class="nav-btn active" href="/paper_trail"><span class="pip"></span>The Paper Trail</a>
+      <a class="nav-btn" href="/app_pipeline"><span class="pip"></span>App Pipeline</a>
+    </nav>
+
+    <div class="brandline"><span class="dot"></span>THE PAPER TRAIL · ISSUE #1</div>
+
+    <h1 class="header-title"><span class="accent">Greg Isenberg's</span> quiet enterprise pivot</h1>
+
+    <p class="header-sub">Late Checkout went quiet for thirty months. Then it provisioned six client subdomains in fifty-three days — three of them with brand names you'll recognize. Here's what the paper trail shows.</p>
+
+    <div class="dateline">
+      <span>2026-05-18</span>
+      <span class="sep">·</span>
+      <span>Operators in Motion</span>
+      <span class="sep">·</span>
+      <a href="/guests#greg-isenberg">Greg's MFM Universe profile ↗</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ─── BREAKING BLOCK — screenshot-friendly ─── -->
+  <section class="breaking">
+    <div class="breaking-tag"><span class="pulse"></span>BREAKING</div>
+    <h2>Six named-brand clients on Late Checkout's domain in fifty-three days.</h2>
+
+    <p>Between <strong>March 5 and April 27, 2026</strong>, six new client subdomains were provisioned on <code>latecheckout.agency</code>. Three of them belong to companies you've heard of.</p>
+
+    <table class="client-table">
+      <thead><tr><th>Date</th><th>Subdomain</th><th>Client</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="date">2026-03-05</td>
+          <td><a href="https://crt.sh/?id=24790381083" target="_blank" rel="noopener">movingmountains.*</a></td>
+          <td class="brand">Moving Mountains <span class="small">UK plant-based meat brand</span></td>
+        </tr>
+        <tr>
+          <td class="date">2026-03-11</td>
+          <td><a href="https://crt.sh/?id=24926550582" target="_blank" rel="noopener">loblawtools.*</a> + <a href="https://crt.sh/?id=24926587142" target="_blank" rel="noopener">lcaxloblawtools.*</a></td>
+          <td class="brand">Loblaw <span class="small">Canada's largest grocer (TSX:L)</span></td>
+        </tr>
+        <tr>
+          <td class="date">2026-04-21</td>
+          <td><a href="https://crt.sh/?id=25644212573" target="_blank" rel="noopener">daltonmills.*</a></td>
+          <td class="brand">Dalton Mills</td>
+        </tr>
+        <tr>
+          <td class="date">2026-04-23</td>
+          <td><a href="https://crt.sh/?id=25711804152" target="_blank" rel="noopener">showcase.*</a></td>
+          <td class="brand">(likely internal portfolio)</td>
+        </tr>
+        <tr>
+          <td class="date">2026-04-24</td>
+          <td><a href="https://crt.sh/?id=25756447147" target="_blank" rel="noopener">lightspeed.*</a></td>
+          <td class="brand">Lightspeed Commerce <span class="small">TSX:LSPD / NYSE:LSPD</span></td>
+        </tr>
+        <tr>
+          <td class="date">2026-04-27</td>
+          <td><a href="https://crt.sh/?id=25853927029" target="_blank" rel="noopener">poka.*</a></td>
+          <td class="brand">Poka <span class="small">Acquired by IFS in 2024</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>How we know:</strong> every time Late Checkout starts a project for a new client, they provision a project subdomain on <code>latecheckout.agency</code>. The subdomain triggers an SSL certificate that appears in public Certificate Transparency logs within hours.</p>
+
+    <p><strong>Why it's interesting:</strong> before March 2026, the <em>only</em> certificates ever issued on <code>latecheckout.agency</code> were the apex and <code>www</code> — both on the day the agency launched, <strong>September 27, 2023</strong>. The current cluster is the first cert activity on the domain in <strong>thirty months</strong>.</p>
+
+    <div class="why-it-matters">
+      <strong>The strategic tell:</strong> the <code>loblawtools</code> and <code>lcaxloblawtools</code> naming — particularly the <strong>"lcax"</strong> prefix — suggests Late Checkout has productized this work into a named cohort or accelerator program. If true, Greg has quietly turned his community-products studio into the AI design partner for established mid-cap brands.
+    </div>
+
+    <div class="read-more">Full profile below ↓</div>
+  </section>
+
+  <!-- ─── Body article ─── -->
+  <article>
+
+    <h2 class="section">Who is Greg Isenberg?</h2>
+    <p>Greg Isenberg is one of the most-public operators in the My First Million orbit — and the one most likely to be the <em>next</em> MFM guest a listener would search for and not find anywhere. He's been on MFM multiple times, runs his own popular podcast (<em>The Startup Ideas Podcast</em>), and posts daily startup-idea threads on X to a six-figure follower count.</p>
+
+    <p>His career has three chapters, each ending in a deliberate pivot:</p>
+
+    <ul>
+      <li><strong>2010s — Islands.</strong> Founder of Islands (originally 5by, a video-discovery app), which became a community platform for school groups. Acquired by WeWork in 2019. Greg stayed on briefly as head of community product before WeWork's collapse.</li>
+      <li><strong>Post-Islands — Reddit + advisory.</strong> Joined Reddit's product team, then transitioned into a heavy advisory practice. Public advisor / consultant to Reddit, TikTok, and a long list of consumer-tech and community platforms.</li>
+      <li><strong>2021–present — Late Checkout.</strong> Founded Late Checkout as a studio that builds and acquires community-led internet products. Portfolio has included Pickup, Marble, and several other community-shaped tools.</li>
+    </ul>
+
+    <p>He's also a heavy content operator. The <em>Startup Ideas Podcast</em> is among the most-listened independent business podcasts in the operator-class niche. His newsletter — hosted on Beehiiv, Tyler Denk's company — reaches a six-figure subscriber list. His daily idea threads on X have made "[product] + community is a billion-dollar business" into a recognizable Greg-format.</p>
+
+    <h2 class="section">The Late Checkout story (so far)</h2>
+
+    <p>Late Checkout's original thesis: <strong>communities are the unmoated product moat.</strong> The studio built and bought niche internet products whose primary value was the community around them — the kind of thing the big platforms can't easily replicate because the moat is human, not software.</p>
+
+    <p>For about three years that was the public story. Late Checkout shipped a series of small community-led tools, Greg talked about each on his podcast and in his newsletter, and the studio grew its profile without ever pretending to be a hot-stage startup.</p>
+
+    <p>Two things appear to have changed in late 2024:</p>
+
+    <ul>
+      <li><strong>AI became the new community.</strong> Greg has been increasingly public about AI agents, "vibe coding," and the idea that the agency model is being reinvented around AI design and prototyping. His content cadence around AI ramped sharply in 2025.</li>
+      <li><strong>The studio's website infrastructure went quiet.</strong> From the second half of 2023 to early 2026, there were <em>zero new subdomains</em> provisioned on <code>latecheckout.agency</code> beyond the launch-day pair. Either client work was being done off-domain on custom client domains, or there wasn't much client work happening. Either way: thirty silent months.</li>
+    </ul>
+
+    <p>Then, in March 2026, that changed.</p>
+
+    <h2 class="section">The 2026 pivot the data caught</h2>
+
+    <p>In a fifty-three-day window, Late Checkout went from "no public client infrastructure" to "five recognizable brands provisioned." That's not a marketing campaign — it's an <em>operational footprint change</em>. Someone on Greg's team configured DNS for each of those brands. That's a real commitment, even if the engagements differ in size and scope.</p>
+
+    <p>The brands themselves tell a coherent story:</p>
+
+    <ul>
+      <li><strong>Loblaw</strong> — $60B revenue, Canada's largest grocer, public on the TSX. The <code>loblawtools</code> naming says <em>internal product</em>, not marketing site. The natural read: Late Checkout is building internal AI tooling for Loblaw store operations, buyers, or merchandising. This is the kind of engagement that anchors a studio's positioning for years.</li>
+      <li><strong>Lightspeed Commerce</strong> — Montreal-based POS platform, dual-listed on TSX and NYSE, ~$1B revenue. Has been publicly pushing AI features for the last eighteen months. Plausible engagement: AI feature design and prototyping, the kind of work in-house product orgs ship slowly.</li>
+      <li><strong>Poka</strong> — Quebec-based industrial frontline-worker SaaS, acquired by Swedish enterprise giant IFS in 2024. Post-acquisition is exactly when companies engage outside studios for brand-integration and AI-positioning work.</li>
+      <li><strong>Moving Mountains</strong> — UK plant-based meat brand, operating in a category that's been in distress since 2022. Repositioning, marketing AI, or a new go-to-market wedge are all plausible.</li>
+      <li><strong>Dalton Mills + Showcase</strong> — the two ambiguous ones. <code>showcase.*</code> is most likely Late Checkout's own internal portfolio site, not a client. <code>daltonmills.*</code> could refer to several real businesses; the most prominent match is the heritage mill complex in Keighley, UK, now operating as a mixed-use venue.</li>
+    </ul>
+
+    <p>Three of the five real clients are <strong>Canadian</strong> — Loblaw, Lightspeed, Poka. Greg is Canadian. The early client base appears to be following his network, which is the normal pattern when a studio scales sales muscle for the first time.</p>
+
+    <h3 class="subsection">The "LCAX" tell</h3>
+
+    <p>The single most strategically revealing string in the entire dataset is <code>lcaxloblawtools.latecheckout.agency</code>. <strong>"LCAX"</strong> is almost certainly a named program — most plausibly <em>Late Checkout Accelerator X</em> or <em>Late Checkout AX</em>. If Late Checkout has bundled enterprise AI engagements into a named cohort or accelerator, that's a meaningful business-model shift: from one-off agency work toward a productized, repeatable service.</p>
+
+    <p>The two activity bursts — Mar 5–11 (two clients in six days) and Apr 21–27 (four clients in seven days) — are consistent with cohort onboardings, not steady continuous-sales cadence. The pattern is <em>batched intake</em>, which is what productized programs look like in the wild.</p>
+
+    <p>This part is hypothesis, not fact. The subdomain name strongly suggests it; a single public confirmation from Greg, the Late Checkout website, or a job posting would convert this from suggestive into confirmed.</p>
+
+    <h2 class="section">The Swiftmerge connection nobody talks about</h2>
+
+    <p>A separate finding the same scan surfaced: Greg Isenberg is named in <strong>fourteen SEC EDGAR filings</strong> related to <em>Swiftmerge Acquisition Corp</em> — a publicly-traded SPAC. <a href="https://efts.sec.gov/LATEST/search-index?q=%22Greg+Isenberg%22" target="_blank" rel="noopener">Filings indexed on EDGAR ↗</a>.</p>
+
+    <p>This is a public-record fact that gets almost zero coverage in MFM-listener discourse. SPAC filings of this kind name directors, advisors, sponsors, and other related persons. The size and frequency of Greg's mentions suggest a substantive role — probably advisor or director-class. If Greg is or was a Swiftmerge advisor in a meaningful role, that's a piece of his operator profile most of his audience wouldn't know.</p>
+
+    <h2 class="section">What we're watching next</h2>
+
+    <p>This piece is the first installment of <strong>The Paper Trail</strong> — a recurring profile series where we read the public-record footprint of MFM's most-watched operators and tell you what we see. Greg's the lead because his footprint changed dramatically in the last sixty days. Every operator on the MFM Universe watch list gets the same treatment in coming issues.</p>
+
+    <p>If Greg responds publicly to this piece, the next story is the verification of LCAX. If he doesn't, the next story is the parallel pivot at one of the other nine guests on the watch list.</p>
+
+    <p>Either way: the data was always public. Nobody was reading it.</p>
+
+    <!-- ─── Footer CTA ─── -->
+    <div class="footer-cta">
+      <h3>The Paper Trail · Issue #1</h3>
+      <p>If you found this interesting, share it. Issue #2 lands when the next operator's footprint changes.</p>
+      <div class="footer-cta-row">
+        <a class="cta-btn" href="/guests#greg-isenberg">View Greg's full profile →</a>
+        <a class="cta-btn secondary" href="/">← MFM Universe home</a>
+      </div>
+    </div>
+
+    <!-- ─── Method footer ─── -->
+    <div class="method">
+      <p><strong>Method.</strong> This piece is sourced entirely from public APIs — Certificate Transparency logs (<a href="https://crt.sh">crt.sh</a>), SEC EDGAR full-text search, the Wayback Machine, and RDAP. No scraping requiring login. Nothing behind a paywall. The underlying pipeline is open-source: see the <code>mfm-guest-watch</code> repo.</p>
+      <p><strong>Caveat.</strong> Subdomain provisioning is consistent with active client work but does not, on its own, confirm the size or nature of any individual engagement. Each subdomain implies someone on Late Checkout's team configured DNS for that brand, which is a meaningful operational commitment, but the depth of any specific relationship is not asserted here.</p>
+    </div>
+
+  </article>
+
+</div>
+
+</body>
+</html>
