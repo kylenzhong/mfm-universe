@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trend Detector — MFM Universe</title>
+<meta name="description" content="A daily multi-source signal engine. Wikipedia pageview velocity cross-validated against TikTok hashtags, X trends, HuggingFace, and GitHub. Triple-validated entities = maximum signal.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/mfm-launch.css">
+<!-- Vercel Web Analytics + Speed Insights + MFM custom-event layer -->
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+<script defer src="/assets/mfm-launch.js"></script>
+<style>
+  :root {
+    --bg: #f7fafd;
+    --bg2: #eaf2fb;
+    --card-bg: #ffffff;
+    --card-edge: #d7e3f0;
+    --ink: #0d2540;
+    --ink-soft: #335577;
+    --muted: #5a7a96;
+    --primary: #4a9fff;
+    --primary-deep: #0d4a8c;
+    --primary-shadow: rgba(13,74,140,.12);
+    --solo: #4a9fff;
+    --guest: #6e5cff;
+    --classic: #e2a93b;
+    --classic-2: #ffd76b;
+    --hot: #ff5d6e;
+    --good-green: #1aa971;
+    --tiktok: #ff2d77;
+    --hf: #ffb547;
+    --gh: #6e5cff;
+    --radius: 12px;
+    --radius-card: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+  body {
+    background:
+      radial-gradient(ellipse 1200px 600px at 50% -10%, rgba(74,159,255,.15) 0%, transparent 60%),
+      radial-gradient(ellipse 800px 500px at 90% 30%, rgba(26,169,113,.08) 0%, transparent 65%),
+      radial-gradient(ellipse 700px 400px at 10% 70%, rgba(226,169,59,.08) 0%, transparent 70%),
+      var(--bg);
+    background-attachment: fixed;
+  }
+  a { color: inherit; }
+
+  /* ─── HEADER ──────────────────────────────────────────────────────────── */
+  header { padding: 24px 32px 8px; position: relative; }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .header-nav {
+    display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; align-items: center;
+  }
+  .nav-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--card-edge);
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all .15s;
+    display: inline-flex; gap: 6px; align-items: center;
+  }
+  .nav-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary-deep);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--primary-shadow);
+  }
+  .nav-btn.active {
+    background: var(--primary-deep); border-color: var(--primary-deep); color: #fff;
+  }
+  .nav-btn.active .pip { background: #fff; box-shadow: 1px 1px 0 rgba(0,0,0,.18); }
+  .nav-btn .pip {
+    display: inline-block; width: 6px; height: 6px;
+    background: var(--primary); border-radius: 2px;
+  }
+  .brandline {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--primary-deep);
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    padding: 6px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-edge);
+    border-radius: 999px;
+  }
+  .brandline .dot { width: 8px; height: 8px; background: var(--good-green); border-radius: 2px; box-shadow: 2px 2px 0 var(--primary-deep); display: inline-block; }
+  .header-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(30px, 4.6vw, 48px);
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.04;
+    letter-spacing: -1.2px;
+    margin-bottom: 12px;
+  }
+  .header-title .accent { color: var(--primary-deep); }
+  .header-sub {
+    color: var(--ink-soft); font-size: 15px; line-height: 1.55;
+    max-width: 760px; margin-bottom: 20px;
+  }
+  .header-sub strong { color: var(--primary-deep); font-weight: 700; }
+  .stat-strip {
+    display: flex; gap: 22px; flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    padding: 12px 0 4px;
+    border-top: 1px solid var(--card-edge);
+    margin-top: 6px;
+  }
+  .stat-strip > div b { color: var(--primary-deep); font-weight: 700; font-size: 12px; }
+  .stat-strip .stat-hot b { color: var(--hot); }
+  .stat-strip .stat-good b { color: var(--good-green); }
+  .stat-strip .stat-classic b { color: var(--classic); }
+
+  /* ─── SECTION SCAFFOLD ────────────────────────────────────────────────── */
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 32px 60px; position: relative; z-index: 1; }
+  .section { margin-bottom: 40px; }
+  .section-head {
+    display: flex; align-items: baseline; gap: 14px; margin: 8px 0 18px;
+    flex-wrap: wrap;
+  }
+  .section-head h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px; font-weight: 700;
+    color: var(--ink); letter-spacing: -0.5px;
+  }
+  .section-head .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted);
+  }
+  .section-head .meta b { color: var(--primary-deep); }
+  .section-sub {
+    color: var(--ink-soft); font-size: 13.5px; line-height: 1.55;
+    margin-bottom: 18px; max-width: 800px;
+  }
+  .section-sub strong { color: var(--primary-deep); font-weight: 700; }
+
+  /* ─── DAILY BRIEF CALLOUT ─────────────────────────────────────────────── */
+  .brief-callout {
+    background:
+      radial-gradient(ellipse 460px 220px at 90% 0%, rgba(26,169,113,.16) 0%, transparent 60%),
+      var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    border-radius: var(--radius-card);
+    padding: 30px 32px 28px;
+    margin-bottom: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .brief-callout::before {
+    content: ''; position: absolute; left: 0; top: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--good-green), #4be0a8, var(--good-green));
+  }
+  .brief-callout .badge {
+    display: inline-block;
+    color: var(--good-green);
+    background: rgba(26,169,113,.08);
+    border: 1px solid rgba(26,169,113,.25);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .brief-callout .badge-meta {
+    color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-left: 8px;
+  }
+  .brief-body { color: var(--ink); font-size: 14.5px; line-height: 1.65; }
+  .brief-body h1, .brief-body h2 {
+    font-family: 'Fraunces', Georgia, serif; color: var(--ink);
+    font-weight: 700; letter-spacing: -0.3px;
+  }
+  .brief-body h1 { font-size: 22px; margin: 4px 0 10px; }
+  .brief-body h2 {
+    font-size: 12px; font-family: 'JetBrains Mono', monospace;
+    color: var(--good-green); text-transform: uppercase; letter-spacing: 1.5px;
+    margin: 22px 0 8px; font-weight: 700;
+  }
+  .brief-body h3 {
+    font-family: 'Fraunces', Georgia, serif; font-size: 17px; font-weight: 700;
+    color: var(--primary-deep); margin: 14px 0 6px; letter-spacing: -.2px;
+  }
+  .brief-body h4 {
+    font-size: 13px; font-weight: 700; color: var(--ink); margin: 12px 0 4px;
+  }
+  .brief-body p { margin: 8px 0; }
+  .brief-body ul { margin: 8px 0; padding-left: 22px; }
+  .brief-body li { margin-bottom: 4px; }
+  .brief-body strong { color: var(--primary-deep); font-weight: 700; }
+  .brief-body code {
+    background: var(--bg2); color: var(--ink); padding: 2px 6px;
+    border-radius: 5px; font-family: 'JetBrains Mono', monospace; font-size: .88em;
+  }
+  .brief-body blockquote {
+    border-left: 3px solid var(--good-green); padding: 4px 0 4px 14px;
+    color: var(--ink-soft); font-style: italic; margin: 12px 0;
+  }
+  .brief-body hr {
+    border: 0; border-top: 1px solid var(--card-edge); margin: 22px 0;
+  }
+  .brief-empty {
+    background: var(--card-bg); border: 1px dashed var(--card-edge);
+    border-radius: var(--radius-card); padding: 28px;
+    text-align: center; color: var(--muted); font-size: 13px;
+    margin-bottom: 36px;
+  }
+  .brief-empty code { background: var(--bg2); padding: 3px 7px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── SOURCE FILTER PILLS ─────────────────────────────────────────────── */
+  .source-filter {
+    display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 28px;
+    align-items: center;
+  }
+  .source-filter .filter-lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px;
+    margin-right: 6px;
+  }
+  .src-pill {
+    background: var(--card-bg); border: 1px solid var(--card-edge);
+    color: var(--ink-soft); padding: 6px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
+    font-family: 'Inter', sans-serif;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .src-pill .src-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .src-pill[data-src="all"]  .src-dot { background: var(--ink); }
+  .src-pill[data-src="wiki"] .src-dot { background: var(--primary); }
+  .src-pill[data-src="tiktok"] .src-dot { background: var(--tiktok); }
+  .src-pill[data-src="x"] .src-dot { background: var(--ink); }
+  .src-pill[data-src="hf"] .src-dot { background: var(--hf); }
+  .src-pill[data-src="gh"] .src-dot { background: var(--gh); }
+  .src-pill:hover { border-color: var(--primary); color: var(--primary-deep); }
+  .src-pill.active {
+    background: var(--ink); color: #fff; border-color: var(--ink);
+  }
+  .src-pill.active .src-dot { background: #fff; box-shadow: 1px 1px 0 rgba(0,0,0,.18); }
+
+  /* ─── ENTITY CARDS ────────────────────────────────────────────────────── */
+  .entity-grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  .entity-grid.compact { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .entity-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    border-radius: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all .15s;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .entity-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--accent, var(--primary));
+  }
+  .entity-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent, var(--primary));
+    box-shadow: 0 10px 24px var(--primary-shadow);
+  }
+  .entity-card.tier-triple { --accent: var(--hot); }
+  .entity-card.tier-tiktok { --accent: var(--tiktok); }
+  .entity-card.tier-x      { --accent: var(--ink-soft); }
+  .entity-card.tier-build  { --accent: var(--good-green); }
+  .entity-card.tier-wiki   { --accent: var(--primary); }
+  .ent-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+  .ent-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 3px 7px; border-radius: 4px;
+    color: var(--ink-soft); background: var(--bg2);
+    font-weight: 600;
+  }
+  .ent-tag.tag-cat   { background: var(--bg2);            color: var(--primary-deep); }
+  .ent-tag.tag-stage { background: transparent;            color: var(--muted); padding-left: 0; }
+  .ent-tag.tag-tiktok{ background: rgba(255,45,119,.10);   color: var(--tiktok); }
+  .ent-tag.tag-x     { background: rgba(13,37,64,.08);     color: var(--ink); }
+  .ent-tag.tag-triple{ background: rgba(255,93,110,.10);   color: var(--hot); }
+  .ent-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700; font-size: 17px;
+    color: var(--ink); letter-spacing: -.2px;
+    line-height: 1.2; margin-bottom: 6px;
+  }
+  .ent-brief {
+    font-size: 13px; line-height: 1.5; color: var(--ink-soft);
+    margin-bottom: 10px; flex: 1;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .ent-meta-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    border-top: 1px solid var(--card-edge); padding-top: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted);
+  }
+  .vel-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--card-edge); background: var(--bg2);
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .vel-chip.hot { background: rgba(226,169,59,.12); color: #a87800; border-color: rgba(226,169,59,.4); }
+  .vel-chip.warm{ background: rgba(26,169,113,.10); color: var(--good-green); border-color: rgba(26,169,113,.35); }
+  .ent-sources { display: flex; gap: 8px; }
+  .ent-sources strong { color: var(--primary-deep); }
+  .spark-host { display: inline-block; vertical-align: middle; }
+
+  /* ─── COMPACT WIKI LIST ───────────────────────────────────────────────── */
+  .entity-card.compact-row {
+    padding: 12px 14px;
+    flex-direction: row; align-items: center; gap: 10px;
+  }
+  .entity-card.compact-row .ent-title {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 13.5px; margin: 0; flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .entity-card.compact-row::before { width: 2px; }
+
+  /* ─── TWO-COLUMN FEEDS ────────────────────────────────────────────────── */
+  .feed-cols {
+    display: grid; gap: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  }
+  .feed-col h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px; font-weight: 700;
+    color: var(--ink); letter-spacing: -.2px;
+    margin-bottom: 6px;
+  }
+  .feed-col .lbl-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 2px;
+    margin-right: 7px; vertical-align: middle; box-shadow: 2px 2px 0 var(--primary-deep);
+  }
+  .feed-col .meta-line {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted); font-size: 11px; margin-bottom: 12px;
+  }
+  .feed-col .empty {
+    border: 1px dashed var(--card-edge); border-radius: 12px;
+    padding: 18px; color: var(--muted); font-size: 12px; text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .tt-list, .x-list { display: grid; gap: 8px; }
+  .tt-row, .x-row {
+    background: var(--card-bg); border: 1px solid var(--card-edge);
+    border-radius: 10px; padding: 10px 12px;
+    text-decoration: none; color: var(--ink);
+    display: flex; align-items: center; gap: 10px;
+    transition: all .15s;
+  }
+  .tt-row:hover { border-color: var(--tiktok); transform: translateY(-1px); }
+  .x-row:hover  { border-color: var(--ink); transform: translateY(-1px); }
+  .tt-row .tt-rank, .x-row .x-rank {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); min-width: 28px; text-align: right; flex-shrink: 0;
+  }
+  .tt-row .tt-name { font-weight: 700; flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tt-row .tt-stats {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--muted); white-space: nowrap;
+  }
+  .tt-row .tt-stats b { color: var(--ink); }
+  .x-row .x-name { font-weight: 600; flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .x-row .x-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--tiktok); text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* ─── HF + GH ROWS ────────────────────────────────────────────────────── */
+  .ai-list { display: grid; gap: 8px; }
+  .ai-row {
+    background: var(--card-bg); border: 1px solid var(--card-edge);
+    border-radius: 10px; padding: 11px 13px;
+    text-decoration: none; color: var(--ink);
+    display: block; transition: all .15s;
+  }
+  .ai-row.hf:hover { border-color: var(--hf); transform: translateY(-1px); }
+  .ai-row.gh:hover { border-color: var(--gh); transform: translateY(-1px); }
+  .ai-row .ai-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+  .ai-row .ai-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; font-weight: 700; color: var(--ink);
+    flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ai-row .ai-stat {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--muted); white-space: nowrap;
+  }
+  .ai-row .ai-stat b { color: var(--primary-deep); }
+  .ai-row .ai-desc {
+    font-size: 12px; color: var(--ink-soft); line-height: 1.45;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ai-tags { margin-top: 5px; display: flex; gap: 4px; flex-wrap: wrap; }
+  .ai-tags .tg {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    color: var(--muted); background: var(--bg2);
+    padding: 2px 6px; border-radius: 4px;
+  }
+
+  /* ─── MODAL (entity detail) ───────────────────────────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(13,37,64,.55);
+    backdrop-filter: blur(4px);
+    z-index: 9990;
+    display: none;
+    align-items: flex-start; justify-content: center;
+    padding: 4vh 16px 4vh;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    border-radius: 20px;
+    max-width: 760px; width: 100%;
+    padding: 0;
+    box-shadow: 0 32px 72px rgba(13,37,64,.32);
+    position: relative;
+    overflow: hidden;
+  }
+  .modal-card::before {
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--good-green), var(--classic));
+  }
+  .modal-close {
+    position: absolute; top: 12px; right: 14px;
+    width: 34px; height: 34px;
+    background: var(--bg2); color: var(--ink); border: 0; border-radius: 8px;
+    font-size: 18px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .15s;
+    z-index: 2;
+  }
+  .modal-close:hover { background: var(--card-edge); }
+  .modal-body { padding: 32px 32px 28px; }
+  .modal-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .modal-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px; font-weight: 800; color: var(--ink);
+    letter-spacing: -0.6px; margin-bottom: 8px; line-height: 1.1;
+  }
+  .modal-wiki {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--muted); text-decoration: underline; word-break: break-all;
+  }
+  .modal-brief {
+    background: rgba(26,169,113,.07);
+    border: 1px solid rgba(26,169,113,.22);
+    border-radius: 12px; padding: 14px 16px;
+    margin: 16px 0;
+  }
+  .modal-brief .lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--good-green); text-transform: uppercase; letter-spacing: 1.5px;
+    font-weight: 700; margin-right: 4px;
+  }
+  .modal-brief .text { color: var(--ink); font-size: 14.5px; line-height: 1.55; }
+  .modal-brief .scores {
+    margin-top: 10px;
+    display: flex; gap: 14px; flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted);
+  }
+  .modal-brief .scores b { color: var(--good-green); }
+  .stat-row {
+    display: grid; gap: 12px; margin-top: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+  .stat-cell {
+    background: var(--bg2); border: 1px solid var(--card-edge);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .stat-cell .lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .stat-cell .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px; font-weight: 700; color: var(--ink);
+  }
+  .stat-cell .sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .modal-chart {
+    margin-top: 18px;
+    border: 1px solid var(--card-edge); border-radius: 12px;
+    background: var(--card-bg); padding: 14px 18px;
+  }
+  .modal-chart .lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .modal-section-h {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px; font-weight: 700;
+    color: var(--ink); margin: 22px 0 10px;
+  }
+  .angle-card {
+    background: var(--card-bg); border: 1px solid var(--card-edge);
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+  }
+  .angle-card .hyp {
+    font-weight: 700; color: var(--ink); margin-bottom: 8px; font-size: 14px;
+  }
+  .angle-card .grid {
+    display: grid; gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  .angle-card .cell .lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px;
+    margin-bottom: 2px;
+  }
+  .angle-card .cell .val {
+    font-size: 12.5px; color: var(--ink-soft); line-height: 1.45;
+  }
+  .source-link {
+    display: block; background: var(--card-bg); border: 1px solid var(--card-edge);
+    border-radius: 10px; padding: 10px 13px; margin-bottom: 6px;
+    text-decoration: none; color: var(--ink);
+    transition: all .15s;
+  }
+  .source-link:hover { border-color: var(--primary); transform: translateY(-1px); }
+  .source-link .src-name {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 3px;
+  }
+  .source-link .src-title { font-weight: 500; font-size: 13px; }
+  .brainstorm-actions {
+    display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--primary-deep); color: #fff;
+    border: 1px solid var(--primary-deep);
+    padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+    text-decoration: none; cursor: pointer;
+    transition: all .15s;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-primary:hover { background: var(--ink); transform: translateY(-1px); box-shadow: 0 6px 16px var(--primary-shadow); }
+  .btn-ghost {
+    background: var(--card-bg); color: var(--ink-soft);
+    border: 1px solid var(--card-edge);
+    padding: 10px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: all .15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-ghost:hover { border-color: var(--primary); color: var(--primary-deep); }
+
+  /* ─── FOOTER ──────────────────────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--card-edge);
+    padding: 28px 32px 36px;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    margin-top: 40px;
+  }
+  footer a { color: var(--primary-deep); text-decoration: none; font-weight: 600; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ─── LOADING ─────────────────────────────────────────────────────────── */
+  .loading {
+    text-align: center; padding: 60px 24px; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .loading .pulse {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--primary); margin-right: 8px; vertical-align: middle;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.3;transform:scale(.8);} 50%{opacity:1;transform:scale(1.1);} }
+
+  /* ─── RESPONSIVE ──────────────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .wrap { padding: 0 16px 50px; }
+    header { padding: 18px 16px 6px; }
+    footer { padding: 24px 16px 28px; }
+    .brief-callout { padding: 22px 18px; }
+    .modal-body { padding: 24px 20px 22px; }
+    .modal-title { font-size: 22px; }
+    .stat-strip { gap: 14px; }
+  }
+</style>
+</head>
+<body data-mfm-popup="newsletter">
+
+<header>
+  <div class="header-inner">
+    <div class="header-nav">
+      <a class="nav-btn" href="index.html"><span class="pip"></span>Home</a>
+      <a class="nav-btn" href="/episodes"><span class="pip"></span>Episode Deck</a>
+      <a class="nav-btn" href="/guests"><span class="pip"></span>Guests</a>
+      <a class="nav-btn active" href="/trends"><span class="pip"></span>Trends</a>
+      <a class="nav-btn" href="/app_pipeline"><span class="pip"></span>App Pipeline</a>
+    </div>
+    <div class="brandline"><span class="dot"></span>WIKI · TIKTOK · X · HF · GITHUB · UPDATED <span id="brand-updated">just now</span></div>
+    <h1 class="header-title">Trend Detector — <span class="accent">today&rsquo;s signal, validated.</span></h1>
+    <p class="header-sub">Anchored on <strong>Wikipedia pageview velocity</strong>, cross-validated against <strong>TikTok hashtags</strong>, <strong>X trends</strong>, <strong>HuggingFace</strong>, and <strong>GitHub</strong>. Entities that spike across <em>three</em> independent signals are the maximum-conviction calls. Re-run daily at 7am ET.</p>
+    <div class="stat-strip" id="stat-strip">
+      <div><b id="stat-sources">—</b> source families</div>
+      <div><b id="stat-items">—</b> items scanned</div>
+      <div class="stat-hot"><b id="stat-triple">—</b> triple-validated</div>
+      <div class="stat-classic"><b id="stat-tt">—</b> TikTok hashtags</div>
+      <div><b id="stat-x">—</b> X trends</div>
+      <div class="stat-good"><b id="stat-hf">—</b> HF models</div>
+      <div><b id="stat-gh">—</b> GH repos</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- DAILY BRIEF -->
+  <section id="brief-section" class="brief-callout" style="display:none;">
+    <div>
+      <span class="badge">📋 Daily Brief</span>
+      <span class="badge-meta">generated each morning · uses Claude · zero API cost</span>
+    </div>
+    <div id="brief-body" class="brief-body"></div>
+  </section>
+
+  <div id="brief-empty" class="brief-empty" style="display:none;">
+    No daily brief loaded. Run <code>scripts/refresh-trends.sh</code> to pull the latest from the trend-detector repo.
+  </div>
+
+  <!-- SOURCE FILTER -->
+  <div class="source-filter">
+    <span class="filter-lbl">filter sources:</span>
+    <button class="src-pill active" data-src="all"><span class="src-dot"></span>All</button>
+    <button class="src-pill" data-src="wiki"><span class="src-dot"></span>Wikipedia</button>
+    <button class="src-pill" data-src="tiktok"><span class="src-dot"></span>TikTok</button>
+    <button class="src-pill" data-src="x"><span class="src-dot"></span>X</button>
+    <button class="src-pill" data-src="hf"><span class="src-dot"></span>HuggingFace</button>
+    <button class="src-pill" data-src="gh"><span class="src-dot"></span>GitHub</button>
+  </div>
+
+  <!-- TRIPLE VALIDATED -->
+  <section class="section" data-src-tags="wiki tiktok x" id="sec-triple" style="display:none;">
+    <div class="section-head">
+      <h2>🔥🔥 Triple-validated</h2>
+      <div class="meta"><b id="cnt-triple">0</b> entities · Wikipedia + TikTok + X agreement</div>
+    </div>
+    <p class="section-sub">Spiking on <strong>Wikipedia</strong>, trending on <strong>TikTok</strong>, AND on <strong>X</strong>. Maximum signal — these are the calls to act on.</p>
+    <div class="entity-grid" id="grid-triple"></div>
+  </section>
+
+  <!-- TWO-LANE VALIDATED (TikTok-validated + X-validated side by side) -->
+  <section class="section" data-src-tags="wiki tiktok x" id="sec-validated" style="display:none;">
+    <div class="section-head">
+      <h2>Cross-validated</h2>
+      <div class="meta">Wikipedia + one social signal · mid-conviction</div>
+    </div>
+    <div class="feed-cols">
+      <div class="feed-col" id="col-tt-val" style="display:none;">
+        <h3><span class="lbl-dot" style="background:var(--tiktok);"></span>TikTok-validated <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:400;">(<span id="cnt-tt-val">0</span>)</span></h3>
+        <div class="meta-line">Wikipedia + TikTok agreement. Cultural + video-distribution signal.</div>
+        <div class="entity-grid" id="grid-tt-val"></div>
+      </div>
+      <div class="feed-col" id="col-x-val" style="display:none;">
+        <h3><span class="lbl-dot" style="background:var(--ink);"></span>X-validated <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:400;">(<span id="cnt-x-val">0</span>)</span></h3>
+        <div class="meta-line">Wikipedia + X agreement. Often news-cycle but worth watching.</div>
+        <div class="entity-grid" id="grid-x-val"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STANDALONE TIKTOK + X FEEDS -->
+  <section class="section" data-src-tags="tiktok x" id="sec-feeds">
+    <div class="section-head">
+      <h2>Live social feeds</h2>
+      <div class="meta">Raw top lists, no cross-validation required</div>
+    </div>
+    <div class="feed-cols">
+      <div class="feed-col" id="col-tt">
+        <h3><span class="lbl-dot" style="background:var(--tiktok);"></span>TikTok trending hashtags</h3>
+        <div class="meta-line">Top by video views (US, 7d)</div>
+        <div class="tt-list" id="list-tt"></div>
+      </div>
+      <div class="feed-col" id="col-x">
+        <h3><span class="lbl-dot" style="background:var(--ink);"></span>X trending topics</h3>
+        <div class="meta-line">Top right now (US, live)</div>
+        <div class="x-list" id="list-x"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI ECOSYSTEM (HuggingFace + GitHub) -->
+  <section class="section" data-src-tags="hf gh" id="sec-ai">
+    <div class="section-head">
+      <h2>AI builder ecosystem</h2>
+      <div class="meta">Supply-side signal · what AI builders pull and star</div>
+    </div>
+    <p class="section-sub"><strong>HuggingFace trending</strong> = which models devs pull / fine-tune. <strong>GitHub trending</strong> = which AI tools people are starring this week. Together: what capabilities are coming online.</p>
+    <div class="feed-cols">
+      <div class="feed-col" id="col-hf">
+        <h3><span class="lbl-dot" style="background:var(--hf);"></span>HuggingFace trending models</h3>
+        <div class="meta-line"><span id="cnt-hf">0</span> models</div>
+        <div class="ai-list" id="list-hf"></div>
+      </div>
+      <div class="feed-col" id="col-gh">
+        <h3><span class="lbl-dot" style="background:var(--gh);"></span>GitHub trending AI repos</h3>
+        <div class="meta-line"><span id="cnt-gh">0</span> repos</div>
+        <div class="ai-list" id="list-gh"></div>
+      </div>
+    </div>
+    <div class="feed-col" id="col-hf-ds" style="margin-top:22px;display:none;">
+      <h3><span class="lbl-dot" style="background:var(--hf);"></span>HuggingFace trending datasets</h3>
+      <div class="meta-line"><span id="cnt-hfds">0</span> datasets</div>
+      <div class="ai-list" id="list-hfds" style="grid-template-columns:repeat(auto-fill,minmax(360px,1fr));display:grid;"></div>
+    </div>
+  </section>
+
+  <!-- BUILDABLE -->
+  <section class="section" data-src-tags="wiki" id="sec-buildable" style="display:none;">
+    <div class="section-head">
+      <h2>Buildable from Wikipedia</h2>
+      <div class="meta"><b id="cnt-build">0</b> entities · velocity + cross-source filtered</div>
+    </div>
+    <p class="section-sub">Wikipedia entities filtered to remove news-cycle people. Score factors in pageview velocity, cross-source mentions, and TikTok/X validation.</p>
+    <div class="entity-grid" id="grid-build"></div>
+  </section>
+
+  <!-- ALL WIKI (compact) -->
+  <section class="section" data-src-tags="wiki" id="sec-allwiki" style="display:none;">
+    <div class="section-head">
+      <h2>All Wikipedia trending</h2>
+      <div class="meta"><b id="cnt-all">0</b> entities · compact view</div>
+    </div>
+    <div class="entity-grid compact" id="grid-all"></div>
+  </section>
+
+  <!-- LOADING STATE -->
+  <div id="loading" class="loading">
+    <span class="pulse"></span>Loading today&rsquo;s signal…
+  </div>
+
+</div>
+
+<!-- MODAL (entity detail) -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card" id="modal-card">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<footer>
+  MFM Universe · Trend Detector · Updated daily at 7am ET<br>
+  <a href="index.html">back to the universe</a> ·
+  <a href="/episodes">browse the episode deck</a> ·
+  <a href="/guests">browse guests</a>
+</footer>
+
+<script>
+/* ─── HELPERS ────────────────────────────────────────────────────────────── */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+const CATEGORY_LABELS = {
+  "sport":"Sport","drug":"Drug","supplement":"Supplement","technology":"Technology",
+  "lifestyle-behavior":"Lifestyle","consumer-product":"Consumer product","brand":"Brand",
+  "public-figure":"Public figure","media-property":"Media","political-event":"Politics",
+  "place":"Place","scientific-concept":"Science","food-trend":"Food","other":"Other"
+};
+
+function fmtBig(n) {
+  if (n == null) return '—';
+  if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'k';
+  return String(n);
+}
+function fmtNum(n) {
+  if (n == null) return '—';
+  return Math.round(n).toLocaleString();
+}
+function fmtVel(v) {
+  if (v == null) return '—';
+  return v.toFixed(v >= 10 ? 0 : 2) + '×';
+}
+function relativeTime(iso) {
+  try {
+    const d = new Date(iso);
+    const mins = (Date.now() - d.getTime()) / 60000;
+    if (mins < 60) return Math.round(mins) + ' min ago';
+    if (mins < 60*24) return Math.round(mins/60) + ' hr ago';
+    return Math.round(mins/1440) + ' d ago';
+  } catch(e) { return 'recently'; }
+}
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ─── SPARKLINE ─────────────────────────────────────────────────────────── */
+function sparkSvg(points, w, h, color) {
+  if (!points || points.length < 2) return '';
+  const vals = points.map(p => Number(p.views ?? p.value ?? 0));
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = max - min || 1;
+  const step = w / (vals.length - 1);
+  const path = vals.map((v, i) => {
+    const x = i * step;
+    const y = h - ((v - min) / range) * (h - 2) - 1;
+    return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="spark-host">
+    <path d="${path}" fill="none" stroke="${color || 'var(--primary-deep)'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+/* ─── ENTITY CARD ───────────────────────────────────────────────────────── */
+function entityCardHtml(e, tier, compact) {
+  const synth = e.synthesis || {};
+  const tags = [];
+  if (synth.category && !compact) {
+    tags.push(`<span class="ent-tag tag-cat">${escapeHtml(CATEGORY_LABELS[synth.category] || synth.category)}</span>`);
+  }
+  if (synth.adoption_stage && !compact) {
+    tags.push(`<span class="ent-tag tag-stage">${escapeHtml(synth.adoption_stage.replace(/-/g, ' '))}</span>`);
+  }
+  if (e.tiktok_match && !compact) tags.push(`<span class="ent-tag tag-tiktok">📱 TikTok</span>`);
+  if (e.x_match && !compact)      tags.push(`<span class="ent-tag tag-x">𝕏</span>`);
+
+  const v = Number(e.velocity || 0);
+  const velClass = v >= 5 ? 'hot' : v >= 1.5 ? 'warm' : '';
+  const velText = fmtVel(v) + (v >= 1.5 ? ' ↑' : '');
+
+  const brief = synth.one_line_brief || '';
+  const spark = (e.pageview_history && e.pageview_history.length > 1)
+    ? sparkSvg(e.pageview_history, 70, 18, 'var(--ink-soft)')
+    : '';
+  const sources = e.cross_source_distinct
+    ? `<span><strong>${e.cross_source_distinct}</strong> src · <strong>${e.cross_categories || 1}</strong> cat</span>`
+    : '';
+
+  if (compact) {
+    return `<div class="entity-card compact-row tier-${tier}" data-entity-id="${escapeHtml(e.id)}" title="${escapeHtml(e.title)}">
+      <span class="ent-title">${escapeHtml(e.title)}</span>
+      <span class="vel-chip ${velClass}">${velText}</span>
+    </div>`;
+  }
+
+  return `<div class="entity-card tier-${tier}" data-entity-id="${escapeHtml(e.id)}">
+    ${tags.length ? `<div class="ent-tags">${tags.join('')}</div>` : ''}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">
+      <div class="ent-title" style="margin:0;">${escapeHtml(e.title)}</div>
+      <span class="vel-chip ${velClass}">${velText}</span>
+    </div>
+    ${brief ? `<div class="ent-brief">${escapeHtml(brief)}</div>` : ''}
+    <div class="ent-meta-row">
+      <div class="ent-sources">
+        <span>${fmtNum(e.recent_avg)}/d <span style="color:var(--muted);">was ${fmtNum(e.prior_avg)}</span></span>
+        ${sources}
+      </div>
+      ${spark}
+    </div>
+  </div>`;
+}
+
+/* ─── DAILY BRIEF RENDER ────────────────────────────────────────────────── */
+function renderInline(text) {
+  let html = escapeHtml(text);
+  // bold
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  // inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // links [text](url) — strict pattern
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  return html;
+}
+function renderMarkdown(md) {
+  if (!md) return '';
+  const lines = md.split('\n');
+  const out = [];
+  let listBuf = null;
+  let inBlockquote = false;
+  const flushList = () => {
+    if (listBuf) { out.push('<ul>' + listBuf.map(l => `<li>${renderInline(l)}</li>`).join('') + '</ul>'); listBuf = null; }
+  };
+  const flushQuote = (buf) => {
+    if (buf.length) out.push('<blockquote>' + buf.map(renderInline).join(' ') + '</blockquote>');
+  };
+  let quoteBuf = [];
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (/^>\s?/.test(line)) {
+      flushList();
+      inBlockquote = true;
+      quoteBuf.push(line.replace(/^>\s?/, ''));
+      continue;
+    }
+    if (inBlockquote && line.trim() === '') {
+      flushQuote(quoteBuf); quoteBuf = []; inBlockquote = false; continue;
+    }
+    if (inBlockquote) { quoteBuf.push(line); continue; }
+
+    if (/^####\s+/.test(line)) { flushList(); out.push(`<h4>${renderInline(line.replace(/^####\s+/, ''))}</h4>`); continue; }
+    if (/^###\s+/.test(line))  { flushList(); out.push(`<h3>${renderInline(line.replace(/^###\s+/, ''))}</h3>`); continue; }
+    if (/^##\s+/.test(line))   { flushList(); out.push(`<h2>${renderInline(line.replace(/^##\s+/, ''))}</h2>`); continue; }
+    if (/^#\s+/.test(line))    { flushList(); out.push(`<h1>${renderInline(line.replace(/^#\s+/, ''))}</h1>`); continue; }
+    if (/^[-*]\s+/.test(line)) { (listBuf ??= []).push(line.replace(/^[-*]\s+/, '')); continue; }
+    if (/^---+$/.test(line))   { flushList(); out.push('<hr>'); continue; }
+    if (line.trim() === '')    { flushList(); continue; }
+    flushList();
+    out.push(`<p>${renderInline(line)}</p>`);
+  }
+  flushList();
+  if (quoteBuf.length) flushQuote(quoteBuf);
+  return out.join('\n');
+}
+
+/* ─── STATE ─────────────────────────────────────────────────────────────── */
+let LATEST = null;
+let ENTITY_INDEX = {};   // id → entity (across all lists)
+let ACTIVE_SRC = 'all';
+
+/* ─── RENDER ────────────────────────────────────────────────────────────── */
+function renderAll(latest) {
+  LATEST = latest;
+  ENTITY_INDEX = {};
+  const indexAll = (arr) => (arr || []).forEach(e => { ENTITY_INDEX[e.id] = e; });
+  indexAll(latest.triple_validated);
+  indexAll(latest.tiktok_validated);
+  indexAll(latest.x_validated);
+  indexAll(latest.top_entities);
+  indexAll(latest.buildable_only);
+
+  // Header stats
+  $('#stat-sources').textContent = latest.sources_scanned ?? '—';
+  $('#stat-items').textContent = latest.items_scanned ? latest.items_scanned.toLocaleString() : '—';
+  $('#stat-triple').textContent = (latest.triple_validated || []).length || 0;
+  $('#stat-tt').textContent = latest.tiktok_hashtags_count ?? '0';
+  $('#stat-x').textContent = latest.x_trends_count ?? '0';
+  $('#stat-hf').textContent = latest.huggingface_models_count ?? '0';
+  $('#stat-gh').textContent = latest.github_repos_count ?? '0';
+  $('#brand-updated').textContent = relativeTime(latest.generated_at);
+
+  // Triple-validated
+  const triple = latest.triple_validated || [];
+  if (triple.length) {
+    $('#sec-triple').style.display = '';
+    $('#cnt-triple').textContent = triple.length;
+    $('#grid-triple').innerHTML = triple.map(e => entityCardHtml(e, 'triple', false)).join('');
+  }
+
+  // Cross-validated (dedupe vs triple)
+  const tripleIds = new Set(triple.map(e => e.id));
+  const ttVal = (latest.tiktok_validated || []).filter(e => !tripleIds.has(e.id));
+  const xVal  = (latest.x_validated || []).filter(e => !tripleIds.has(e.id));
+  if (ttVal.length || xVal.length) $('#sec-validated').style.display = '';
+  if (ttVal.length) {
+    $('#col-tt-val').style.display = '';
+    $('#cnt-tt-val').textContent = ttVal.length;
+    $('#grid-tt-val').innerHTML = ttVal.map(e => entityCardHtml(e, 'tiktok', false)).join('');
+  }
+  if (xVal.length) {
+    $('#col-x-val').style.display = '';
+    $('#cnt-x-val').textContent = xVal.length;
+    $('#grid-x-val').innerHTML = xVal.map(e => entityCardHtml(e, 'x', false)).join('');
+  }
+
+  // TikTok feed
+  const ttTop = (latest.tiktok_top || []).slice(0, 18);
+  if (ttTop.length === 0) {
+    $('#list-tt').innerHTML = '<div class="empty">No TikTok data this run.</div>';
+  } else {
+    $('#list-tt').innerHTML = ttTop.map(h => {
+      const url = h.tiktok_url || `https://www.tiktok.com/tag/${encodeURIComponent(h.hashtag_clean || h.hashtag)}`;
+      const spark = (h.trend_data && h.trend_data.length > 1)
+        ? sparkSvg(h.trend_data.map(d => ({views: d.value})), 60, 16, 'var(--tiktok)') : '';
+      return `<a class="tt-row" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+        <span class="tt-rank">${h.rank ? '#'+h.rank : ''}</span>
+        <span class="tt-name">${escapeHtml(h.hashtag)}</span>
+        <span class="tt-stats"><b>${fmtBig(h.video_views)}</b> views</span>
+        ${spark}
+      </a>`;
+    }).join('');
+  }
+
+  // X feed
+  const xTop = (latest.x_top || []).slice(0, 25);
+  if (xTop.length === 0) {
+    $('#list-x').innerHTML = '<div class="empty">No X data this run.</div>';
+  } else {
+    $('#list-x').innerHTML = xTop.map(t => {
+      const url = `https://x.com/search?q=${encodeURIComponent(t.trend)}`;
+      return `<a class="x-row" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+        <span class="x-rank">${t.rank ? '#'+t.rank : ''}</span>
+        <span class="x-name">${escapeHtml(t.trend)}</span>
+        ${t.is_hashtag ? `<span class="x-tag">tag</span>` : ''}
+      </a>`;
+    }).join('');
+  }
+
+  // HuggingFace models
+  const hfModels = (latest.huggingface_models || []).slice(0, 15);
+  $('#cnt-hf').textContent = hfModels.length;
+  if (hfModels.length === 0) {
+    $('#list-hf').innerHTML = '<div class="empty">No HuggingFace data.</div>';
+  } else {
+    $('#list-hf').innerHTML = hfModels.map(m => aiRowHtml(m, 'hf')).join('');
+  }
+
+  // GitHub repos
+  const ghTop = (latest.github_top || []).slice(0, 15);
+  $('#cnt-gh').textContent = ghTop.length;
+  if (ghTop.length === 0) {
+    $('#list-gh').innerHTML = '<div class="empty">No GitHub data.</div>';
+  } else {
+    $('#list-gh').innerHTML = ghTop.map(r => aiRowHtml(r, 'gh')).join('');
+  }
+
+  // HF datasets
+  const hfDs = (latest.huggingface_datasets || []).slice(0, 8);
+  if (hfDs.length) {
+    $('#col-hf-ds').style.display = '';
+    $('#cnt-hfds').textContent = hfDs.length;
+    $('#list-hfds').innerHTML = hfDs.map(d => aiRowHtml(d, 'hf')).join('');
+  }
+
+  // Buildable
+  const build = (latest.buildable_only || []).filter(e => !e.synthesis || !e.synthesis.error).slice(0, 30);
+  if (build.length) {
+    $('#sec-buildable').style.display = '';
+    $('#cnt-build').textContent = build.length;
+    $('#grid-build').innerHTML = build.map(e => entityCardHtml(e, 'build', false)).join('');
+  }
+
+  // All Wikipedia trending (compact)
+  const all = (latest.top_entities || []).slice(0, 60);
+  if (all.length) {
+    $('#sec-allwiki').style.display = '';
+    $('#cnt-all').textContent = all.length;
+    $('#grid-all').innerHTML = all.map(e => entityCardHtml(e, 'wiki', true)).join('');
+  }
+
+  $('#loading').style.display = 'none';
+  applySourceFilter();
+}
+
+function aiRowHtml(item, type) {
+  const stars = item.stars != null ? `<span class="ai-stat"><b>${fmtBig(item.stars)}</b> ★</span>` : '';
+  const dls   = item.downloads != null ? `<span class="ai-stat"><b>${fmtBig(item.downloads)}</b> dl</span>` : '';
+  const likes = item.likes != null ? `<span class="ai-stat"><b>${fmtBig(item.likes)}</b> ♥</span>` : '';
+  const score = item.trending_score != null ? `<span class="ai-stat">trend <b>${Math.round(item.trending_score)}</b></span>` : '';
+  const stat = type === 'gh' ? stars : (score || likes || dls);
+  const url = item.url || (type === 'gh' ? `https://github.com/${item.full_name}` : `https://huggingface.co/${item.id}`);
+  const name = item.full_name || item.id || item.name;
+  const desc = item.description || (item.pipeline_tag ? `${item.pipeline_tag}${item.library_name ? ' · ' + item.library_name : ''}` : '');
+  const tags = (item.topics || item.tags || []).slice(0, 4).map(t => `<span class="tg">${escapeHtml(t)}</span>`).join('');
+  return `<a class="ai-row ${type}" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+    <div class="ai-top">
+      <span class="ai-name">${escapeHtml(name)}</span>
+      ${stat}
+    </div>
+    ${desc ? `<div class="ai-desc">${escapeHtml(desc)}</div>` : ''}
+    ${tags ? `<div class="ai-tags">${tags}</div>` : ''}
+  </a>`;
+}
+
+/* ─── SOURCE FILTER ─────────────────────────────────────────────────────── */
+function applySourceFilter() {
+  const src = ACTIVE_SRC;
+  $$('.section[data-src-tags]').forEach(sec => {
+    if (src === 'all') {
+      // Don't override naturally hidden sections (those with no data)
+      // We rely on the data renderer to have set display correctly already.
+      // Filter pill only affects which we actively HIDE.
+      sec.classList.remove('filter-hidden');
+      sec.style.display = sec.dataset.preFilterDisplay ?? sec.style.display ?? '';
+      // Use a marker to remember the original
+      if (sec.dataset.preFilterDisplay) {
+        sec.style.display = sec.dataset.preFilterDisplay;
+      }
+    } else {
+      const tags = (sec.dataset.srcTags || '').split(/\s+/);
+      if (!sec.dataset.preFilterDisplay) sec.dataset.preFilterDisplay = sec.style.display;
+      if (tags.includes(src)) {
+        sec.style.display = sec.dataset.preFilterDisplay;
+      } else {
+        sec.style.display = 'none';
+      }
+    }
+  });
+}
+$$('.src-pill').forEach(p => p.addEventListener('click', () => {
+  $$('.src-pill').forEach(x => x.classList.remove('active'));
+  p.classList.add('active');
+  ACTIVE_SRC = p.dataset.src;
+  applySourceFilter();
+}));
+
+// Delegated entity-card click → open modal. Avoids inline onclick (safer for IDs with quotes).
+document.addEventListener('click', (ev) => {
+  const card = ev.target.closest('[data-entity-id]');
+  if (card) openModal(card.dataset.entityId);
+});
+
+/* ─── MODAL ─────────────────────────────────────────────────────────────── */
+function openModal(id) {
+  const e = ENTITY_INDEX[id];
+  if (!e) return;
+  const synth = e.synthesis || {};
+  const tags = [];
+  if (synth.category) tags.push(`<span class="ent-tag tag-cat">${escapeHtml(CATEGORY_LABELS[synth.category] || synth.category)}</span>`);
+  if (synth.adoption_stage) tags.push(`<span class="ent-tag tag-stage">${escapeHtml(synth.adoption_stage.replace(/-/g, ' '))}</span>`);
+  if (e.tiktok_match) tags.push(`<span class="ent-tag tag-tiktok">📱 TikTok #${escapeHtml(e.tiktok_match.hashtag)}</span>`);
+  if (e.x_match) tags.push(`<span class="ent-tag tag-x">𝕏 ${escapeHtml(e.x_match.trend)}</span>`);
+
+  const scores = synth.scores || {};
+  const scoreLine = [];
+  if (scores.signal_strength != null) scoreLine.push(`Signal <b>${scores.signal_strength}/5</b>`);
+  if (scores.indie_fit != null) scoreLine.push(`Indie fit <b>${scores.indie_fit}/5</b>`);
+  if (scores.distribution_tailwind != null) scoreLine.push(`Distribution <b>${scores.distribution_tailwind}/5</b>`);
+
+  const chart = (e.pageview_history && e.pageview_history.length > 1)
+    ? sparkSvg(e.pageview_history, 680, 70, 'var(--primary-deep)') : '';
+
+  const angles = (synth.angles || []).map((a, i) => `
+    <div class="angle-card">
+      <div class="hyp">${i+1}. ${escapeHtml(a.hypothesis)}</div>
+      <div class="grid">
+        <div class="cell"><div class="lbl">Target</div><div class="val">${escapeHtml(a.target_user || '—')}</div></div>
+        <div class="cell"><div class="lbl">MVP</div><div class="val">${escapeHtml(a.mvp || '—')}</div></div>
+        <div class="cell"><div class="lbl">Model</div><div class="val">${escapeHtml(a.business_model || '—')}</div></div>
+      </div>
+    </div>`).join('');
+
+  const samples = (e.sample_items || []).slice(0, 8).map(it => `
+    <a class="source-link" href="${escapeHtml(it.link)}" target="_blank" rel="noopener">
+      <div class="src-name">${escapeHtml(it.source_name)}</div>
+      <div class="src-title">${escapeHtml(it.title)}</div>
+    </a>`).join('');
+
+  const prompt = buildBrainstormPrompt(e);
+
+  $('#modal-body').innerHTML = `
+    ${tags.length ? `<div class="modal-tags">${tags.join('')}</div>` : ''}
+    <div class="modal-title">${escapeHtml(e.title)}</div>
+    <a class="modal-wiki" href="${escapeHtml(e.wikipedia_url)}" target="_blank" rel="noopener">${escapeHtml(e.wikipedia_url)} ↗</a>
+
+    ${synth.one_line_brief && !synth.error ? `
+      <div class="modal-brief">
+        <div class="text"><span class="lbl">Why now:</span>${escapeHtml(synth.one_line_brief)}</div>
+        ${synth.why_now ? `<div class="text" style="margin-top:8px;">${escapeHtml(synth.why_now)}</div>` : ''}
+        ${scoreLine.length ? `<div class="scores">${scoreLine.map(s => `<span>${s}</span>`).join(' · ')}</div>` : ''}
+      </div>` : ''}
+
+    <div class="stat-row">
+      <div class="stat-cell">
+        <div class="lbl">Pageview velocity</div>
+        <div class="val">${fmtVel(e.velocity)}</div>
+        <div class="sub">last 7d vs prior 23d</div>
+      </div>
+      <div class="stat-cell">
+        <div class="lbl">Recent daily avg</div>
+        <div class="val">${fmtNum(e.recent_avg)}</div>
+        <div class="sub">was ${fmtNum(e.prior_avg)}/day</div>
+      </div>
+      <div class="stat-cell">
+        <div class="lbl">Cross-source</div>
+        <div class="val">${e.cross_source_distinct ?? 0}</div>
+        <div class="sub">${e.cross_categories ?? 0} categor${(e.cross_categories ?? 0) === 1 ? 'y' : 'ies'}</div>
+      </div>
+    </div>
+
+    ${chart ? `<div class="modal-chart">
+      <div class="lbl">Wikipedia pageviews — last 30 days</div>
+      <div>${chart}</div>
+    </div>` : ''}
+
+    ${angles ? `<div class="modal-section-h">Startup angles</div>${angles}` : ''}
+
+    ${samples ? `<div class="modal-section-h">Source posts (${e.sample_items.length})</div>${samples}` : ''}
+
+    <div class="brainstorm-actions">
+      <button class="btn-primary" onclick="copyPrompt(this)" data-prompt="${escapeHtml(prompt)}">📋 Copy brainstorm prompt</button>
+      <a class="btn-ghost" href="https://claude.ai/new" target="_blank" rel="noopener">Open claude.ai →</a>
+    </div>
+  `;
+  $('#modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  $('#modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+function buildBrainstormPrompt(e) {
+  const samples = (e.sample_items || []).slice(0, 8)
+    .map((it, i) => `${i+1}. [${it.source_name}] ${it.title}`).join('\n');
+  const ctx = e.cross_source_distinct
+    ? `Cross-validated across ${e.cross_source_distinct} distinct source feeds spanning ${e.cross_categories} categories.`
+    : `No cross-source mentions — Wikipedia spike only. Be skeptical: might be news-cycle attention rather than buildable trend.`;
+  const synth = e.synthesis?.one_line_brief ? `\nPrior take: ${e.synthesis.one_line_brief}\n` : '';
+  return `You're helping a solo entrepreneur evaluate a trend for buildable startup opportunities.
+
+ENTITY: ${e.title}
+Wikipedia: ${e.wikipedia_url}
+Pageview velocity: ${fmtVel(e.velocity)} (recent avg ${fmtNum(e.recent_avg)}/day vs prior ${fmtNum(e.prior_avg)}/day)
+${ctx}
+${synth}
+Sample posts mentioning it across our source feeds:
+${samples || '(no cross-source posts)'}
+
+Generate 5 distinct startup ideas riding this wave. For each, give me:
+
+- **Hypothesis** — one sentence: who has what problem, why current solutions are bad
+- **Target user** — specific persona, not "everyone"
+- **MVP scope** — the smallest thing that would prove or disprove this in 1 week
+- **Business model** — how it makes money, at what price, how many users for $1k MRR
+- **Distribution** — one specific channel where I'd find the first 100 users
+- **Why now** — what changed that makes this viable today
+- **Why this could fail** — strongest reason to NOT build this
+
+Be brutal about killing weak ideas. End with a ranked-by-signal × indie-fit ordering of your 5, and explicitly call out any ideas you'd kill.`;
+}
+
+function copyPrompt(btn) {
+  const prompt = btn.dataset.prompt;
+  navigator.clipboard.writeText(prompt).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied — paste into Claude';
+    setTimeout(() => { btn.textContent = orig; }, 2200);
+  });
+}
+
+/* ─── BOOT ──────────────────────────────────────────────────────────────── */
+async function loadData() {
+  // Fetch trends data + daily brief in parallel
+  const [dataRes, briefRes] = await Promise.allSettled([
+    fetch('/data/trends-latest.json', {cache: 'no-store'}),
+    fetch('/data/trends-daily-brief.md', {cache: 'no-store'}),
+  ]);
+
+  let latest = null;
+  if (dataRes.status === 'fulfilled' && dataRes.value.ok) {
+    try { latest = await dataRes.value.json(); } catch(e) { /* ignore */ }
+  }
+  let brief = null;
+  if (briefRes.status === 'fulfilled' && briefRes.value.ok) {
+    try { brief = await briefRes.value.text(); } catch(e) { /* ignore */ }
+  }
+
+  if (brief && brief.trim().length > 0) {
+    $('#brief-body').innerHTML = renderMarkdown(brief);
+    $('#brief-section').style.display = '';
+  } else {
+    $('#brief-empty').style.display = '';
+  }
+
+  if (latest) {
+    renderAll(latest);
+  } else {
+    $('#loading').innerHTML = `
+      <div style="max-width:520px;margin:0 auto;">
+        <div style="font-family:'Fraunces',serif;font-size:22px;color:var(--ink);margin-bottom:10px;font-weight:700;">No trend data loaded yet.</div>
+        <div style="color:var(--ink-soft);font-size:14px;line-height:1.55;">
+          The trend pipeline runs daily at 7am ET in the <code>trend-detector</code> repo. Run <code style="background:var(--bg2);padding:3px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;">scripts/refresh-trends.sh</code> from <code>mfm-universe/</code> to copy the latest snapshot into <code>data/trends-latest.json</code>, then redeploy.
+        </div>
+      </div>`;
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>

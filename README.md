@@ -10,11 +10,11 @@ A single static site hosting five complementary views over MFM and its sibling S
 
 | Page | What |
 |---|---|
-| [`index.html`](index.html) | The hub. Five tiles routing to each tool. |
-| [`MFM_Episodes.html`](MFM_Episodes.html) | Curated episode database. 39 episodes with key ideas, topics, guest tags. Search + filter. |
-| [`MFM_Guest_Profiles.html`](MFM_Guest_Profiles.html) | 44 notable MFM guests. Net worth, companies founded, quotes, contrarian takes, episode appearances. The canonical guest database. |
-| [`Starter_Story.html`](Starter_Story.html) | 50 Starter Story episodes mined for apps, revenue, tactics. 12 $100K+/mo apps surfaced. 8 cross-episode playbooks. |
-| [`App_Pipeline.html`](App_Pipeline.html) | A 4-stage Source → Validate → Build → Launch framework with a worked example. |
+| [`index.html`](index.html) | The hub. Tiles routing to each tool. |
+| [`episodes.html`](episodes.html) | Curated episode database. 39 episodes with key ideas, topics, guest tags. Search + filter. |
+| [`guests.html`](guests.html) | 44 notable MFM guests. Net worth, companies founded, quotes, contrarian takes, episode appearances. The canonical guest database. |
+| [`trends.html`](trends.html) | Daily multi-source trend signal — Wikipedia velocity cross-validated against TikTok, X, HuggingFace, GitHub. Data refreshes via `scripts/refresh-trends.sh`. |
+| [`app_pipeline.html`](app_pipeline.html) | A 4-stage Source → Validate → Build → Launch framework with a worked example. |
 
 Plus a "Newsletter (coming W19)" placeholder tile and signup section on `index.html` — the W19 ship target for the umbrella workstream.
 

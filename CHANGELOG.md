@@ -6,6 +6,27 @@ Format: each entry is dated, newest first. Same shape as Keep-a-Changelog but li
 
 ---
 
+## 2026-05-18 — Trends page redesign (absorbed into MFM Universe)
+
+**Summary.** Brought the previously-external `trend-detector` deploy inside MFM Universe as a first-class page — `/trends`. Same data (Wikipedia velocity + TikTok + X + HF + GitHub), redesigned in the locked cream-blue v2 system used by Episodes and Guests (Fraunces / Inter / JetBrains Mono / Press Start 2P, light bg, primary-deep blue, tile accents, modal-for-detail). Home tile now points internally instead of out to `trend-detector-kappa.vercel.app`.
+
+### Added
+- `trends.html` — single static page. Renders triple-validated entities, TikTok/X-validated lanes, raw TikTok + X feeds, the AI builder ecosystem (HF + GitHub), buildable Wikipedia entities, and a compact "all Wikipedia trending" list. Source-filter pills (All / Wikipedia / TikTok / X / HF / GitHub) toggle section visibility. Entity click opens a modal with synthesis brief, velocity stats, pageview chart, startup angles, source posts, and a copy-to-clipboard brainstorm prompt for Claude.
+- `data/trends-latest.json` — daily JSON snapshot, fetched by `trends.html` at runtime. Today's 5/18 snapshot is checked in (32 top entities, 13 buildable, 15 HF models, 8 HF datasets, 15 GitHub repos, 25 X trends, daily brief). Page renders with real content on first load; the refresh script keeps it fresh going forward.
+- `data/trends-daily-brief.md` — daily morning brief markdown, fetched + rendered inline as a green-accent callout at the top of the page.
+- `scripts/refresh-trends.sh` + `scripts/refresh-trends.js` — one-command refresh that reads `../trend-detector/data/processed/latest.json` + `daily-brief-latest.md`, trims, and writes to `data/`. The Node script trims pageview history to 14 days and sample_items to 5 per entity. Run after each trend-detector cron, then `git push` to redeploy.
+
+### Changed
+- `index.html` — Trend Detector tile now links internally to `/trends` (was external `trend-detector-kappa.vercel.app`). Arrow glyph switched from ↗ to →. Tile description and stats unchanged.
+- `episodes.html`, `guests.html`, `app_pipeline.html` — added a "Trends" nav button to each page so navigation across the canon is symmetric.
+
+### Notes for the operator
+- `vercel.json`'s `cleanUrls: true` makes `/trends` resolve to `trends.html` with no extra config.
+- Local preview note: the page uses `fetch('/data/trends-latest.json')` so opening via `file://` will show "no data loaded yet". Use `python3 -m http.server 8000` (or similar) from the repo root, then visit `http://localhost:8000/trends.html`. On Vercel it Just Works.
+- Refresh cadence: trend-detector publishes data every morning at 7am ET. Running `bash scripts/refresh-trends.sh` is the only thing that updates the live page — there is no auto-pull. Hook into the trend-detector cron later if desired.
+
+---
+
 ## 2026-05-18 — Launch instrumentation + newsletter signup
 
 **Summary.** Launch day. The "newsletter coming soon" callout is now a real email-capture form, a modal popup catches engaged visitors at 60s or on exit-intent, and every page is wired to Vercel Web Analytics + Speed Insights with custom event tracking.
