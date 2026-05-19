@@ -48,6 +48,17 @@ else
   echo "  (no daily-brief-latest.md found, skipping)"
 fi
 
+# Headline-of-the-day chart data — copy as-is if present.
+# This is produced by `npm run headline-chart` in the trend-detector repo
+# (scripts/build-headline-chart-data.mjs reading config/featured-repos.json).
+# The trends-headline-latest.md content is hand-authored in this repo and is NOT copied from trend-detector.
+if [[ -f "$SRC/headline-chart-data.json" ]]; then
+  cp "$SRC/headline-chart-data.json" "$DST/headline-chart-data.json"
+  echo "✓ headline-chart-data.json → data/headline-chart-data.json"
+else
+  echo "  (no headline-chart-data.json found, skipping — run 'npm run headline-chart' in trend-detector)"
+fi
+
 echo ""
 echo "✓ Refresh complete."
 echo "  Review: open trends.html"

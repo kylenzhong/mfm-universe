@@ -221,6 +221,98 @@
   }
   .headline-body a:hover { text-decoration-color: var(--primary-deep); }
 
+  /* ─── HEADLINE CHART (star-trajectory grid) ──────────────────────────── */
+  .headline-chart {
+    margin: 20px 0 22px;
+    border: 1px solid var(--card-edge);
+    border-radius: 14px;
+    background: var(--card-bg);
+    padding: 18px 20px 20px;
+  }
+  .headline-chart-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 14px; margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .headline-chart-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px; font-weight: 700; color: var(--ink); letter-spacing: -.2px;
+  }
+  .headline-chart-sub {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: .3px;
+  }
+  .headline-chart-legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin: 0 0 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--muted); letter-spacing: .5px; text-transform: uppercase;
+  }
+  .headline-chart-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+  .headline-chart-legend .lg .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; box-shadow: 1px 1px 0 rgba(13,37,64,.15); }
+  .headline-chart-grid {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  .hc-cell {
+    border: 1px solid var(--card-edge);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 6px;
+    text-decoration: none; color: inherit;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+    position: relative; overflow: hidden;
+  }
+  .hc-cell:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(13,74,140,.10);
+  }
+  .hc-cell::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--cat-color, var(--primary));
+  }
+  .hc-cell .hc-name {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12.5px;
+    color: var(--ink); letter-spacing: -.2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding-left: 4px;
+  }
+  .hc-cell .hc-tagline {
+    font-size: 11.5px; color: var(--muted); font-style: italic; line-height: 1.35;
+    padding-left: 4px; min-height: 32px;
+  }
+  .hc-cell .hc-spark { padding-left: 4px; margin: 2px 0 4px; }
+  .hc-cell .hc-stats {
+    display: flex; align-items: baseline; gap: 10px;
+    padding-left: 4px; flex-wrap: wrap;
+  }
+  .hc-cell .hc-stars {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700;
+    color: var(--ink);
+  }
+  .hc-cell .hc-stars .sym { color: var(--classic); margin-right: 1px; }
+  .hc-cell .hc-delta {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--good-green);
+    background: rgba(26,169,113,.10);
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .hc-cell .hc-delta.flat { color: var(--muted); background: var(--bg2); }
+  .hc-cell .hc-cat {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--cat-color, var(--primary-deep));
+    padding-left: 4px;
+    font-weight: 600;
+  }
+  @media (max-width: 720px) {
+    .headline-chart-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .headline-chart-grid { grid-template-columns: 1fr; }
+  }
+
   /* ─── DAILY BRIEF CALLOUT ─────────────────────────────────────────────── */
   .brief-callout {
     background:
@@ -724,6 +816,7 @@
       <span class="badge-meta" id="headline-meta">a long-form read from today's signal</span>
     </div>
     <div id="headline-body" class="headline-body"></div>
+    <div id="headline-chart-container" style="display:none;"></div>
   </section>
 
   <!-- DAILY BRIEF -->
@@ -923,6 +1016,92 @@ function sparkSvg(points, w, h, color) {
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="spark-host">
     <path d="${path}" fill="none" stroke="${color || 'var(--primary-deep)'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>`;
+}
+
+/* ─── HEADLINE CHART (star-trajectory grid) ─────────────────────────────── */
+function chartSparkSvg(series, w, h, color) {
+  if (!series || series.length < 2) {
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <line x1="0" y1="${h/2}" x2="${w}" y2="${h/2}" stroke="${color || '#888'}" stroke-width="1.2" stroke-dasharray="3,3" opacity=".55"/>
+    </svg>`;
+  }
+  const vals = series.map(p => Number(p.stars || 0));
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = max - min;
+  // If the absolute movement is trivial compared to the mean (<2%), render a
+  // flat midline + the value — exaggerating a 1-star bump into a dramatic
+  // curve is editorial dishonesty.
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+  if (range < 2 || (mean > 0 && range / mean < 0.02)) {
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <line x1="0" y1="${h/2}" x2="${w}" y2="${h/2}" stroke="${color}" stroke-width="1.5" opacity=".65"/>
+      <circle cx="${(w-2).toFixed(1)}" cy="${(h/2).toFixed(1)}" r="2.5" fill="${color}"/>
+    </svg>`;
+  }
+  const step = w / (vals.length - 1);
+  const pathPts = vals.map((v, i) => [i * step, h - ((v - min) / range) * (h - 4) - 2]);
+  const path = pathPts.map(([x, y], i) => (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1)).join(' ');
+  // Fill below the line for visual weight
+  const fillPath = path + ` L${(pathPts[pathPts.length-1][0]).toFixed(1)},${h} L0,${h} Z`;
+  const lastX = pathPts[pathPts.length-1][0];
+  const lastY = pathPts[pathPts.length-1][1];
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <path d="${fillPath}" fill="${color}" opacity=".12"/>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="2.5" fill="${color}"/>
+  </svg>`;
+}
+
+function renderHeadlineChart(data) {
+  const container = $('#headline-chart-container');
+  if (!container || !data || !Array.isArray(data.repos)) return;
+
+  const cats = data.categories || {};
+  const legendItems = Object.entries(cats).map(([key, v]) =>
+    `<span class="lg"><span class="sw" style="background:${v.color};"></span>${escapeHtml(v.label)}</span>`
+  ).join('');
+
+  const cells = data.repos.map(r => {
+    const cat = cats[r.category] || {label: r.category, color: 'var(--primary)'};
+    const spark = chartSparkSvg(r.series, 160, 38, cat.color);
+    const delta = r.delta_24h;
+    const deltaStr = delta > 0 ? `+${delta.toLocaleString()} / 24h`
+      : (delta < 0 ? `${delta.toLocaleString()} / 24h` : 'no change / 24h');
+    const deltaClass = delta > 0 ? '' : 'flat';
+    return `<a class="hc-cell" href="${escapeHtml(r.url)}" target="_blank" rel="noopener" style="--cat-color:${cat.color};">
+      <div class="hc-name">${escapeHtml(r.label_short || r.full_name)}</div>
+      <div class="hc-tagline">${escapeHtml(r.tagline || '')}</div>
+      <div class="hc-spark">${spark}</div>
+      <div class="hc-stats">
+        <span class="hc-stars"><span class="sym">★</span>${r.current_stars.toLocaleString()}</span>
+        <span class="hc-delta ${deltaClass}">${deltaStr}</span>
+      </div>
+      <div class="hc-cat">${escapeHtml(cat.label)}</div>
+    </a>`;
+  }).join('');
+
+  container.innerHTML = `<div class="headline-chart">
+    <div class="headline-chart-head">
+      <div class="headline-chart-title">${escapeHtml(data.title || 'Star trajectories')}</div>
+      <div class="headline-chart-sub">${escapeHtml(data.subtitle || '')}</div>
+    </div>
+    <div class="headline-chart-legend">${legendItems}</div>
+    <div class="headline-chart-grid">${cells}</div>
+  </div>`;
+  container.style.display = '';
+
+  // If the markdown contains a [chart:trajectories] placeholder, move the chart there.
+  const body = $('#headline-body');
+  if (body) {
+    const paragraphs = body.querySelectorAll('p');
+    for (const p of paragraphs) {
+      if (p.textContent.trim() === '[chart:trajectories]') {
+        p.replaceWith(container);
+        container.style.display = '';
+        break;
+      }
+    }
+  }
 }
 
 /* ─── ENTITY CARD ───────────────────────────────────────────────────────── */
@@ -1345,11 +1524,12 @@ function copyPrompt(btn) {
 
 /* ─── BOOT ──────────────────────────────────────────────────────────────── */
 async function loadData() {
-  // Fetch trends data + daily brief + headline of the day in parallel
-  const [dataRes, briefRes, headlineRes] = await Promise.allSettled([
+  // Fetch trends data + daily brief + headline of the day + headline chart data in parallel
+  const [dataRes, briefRes, headlineRes, chartRes] = await Promise.allSettled([
     fetch('/data/trends-latest.json', {cache: 'no-store'}),
     fetch('/data/trends-daily-brief.md', {cache: 'no-store'}),
     fetch('/data/trends-headline-latest.md', {cache: 'no-store'}),
+    fetch('/data/headline-chart-data.json', {cache: 'no-store'}),
   ]);
 
   let latest = null;
@@ -1364,10 +1544,16 @@ async function loadData() {
   if (headlineRes.status === 'fulfilled' && headlineRes.value.ok) {
     try { headline = await headlineRes.value.text(); } catch(e) { /* ignore */ }
   }
+  let chartData = null;
+  if (chartRes.status === 'fulfilled' && chartRes.value.ok) {
+    try { chartData = await chartRes.value.json(); } catch(e) { /* ignore */ }
+  }
 
   if (headline && headline.trim().length > 0) {
     $('#headline-body').innerHTML = renderMarkdown(headline);
     $('#headline-section').style.display = '';
+    // If we have chart data, swap the [chart:trajectories] placeholder for the rendered chart.
+    if (chartData) renderHeadlineChart(chartData);
   }
 
   if (brief && brief.trim().length > 0) {
