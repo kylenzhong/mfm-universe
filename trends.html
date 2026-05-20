@@ -938,6 +938,61 @@
     font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);
     text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
   }
+
+  /* ─── HERO — TODAY'S HEADLINE ─────────────────────────────────────────── */
+  #hero {
+    background:
+      radial-gradient(ellipse 620px 320px at 88% -25%, rgba(74,159,255,.20) 0%, transparent 62%),
+      radial-gradient(ellipse 440px 260px at 4% 125%, rgba(226,169,59,.13) 0%, transparent 60%),
+      var(--card-bg);
+    border: 1.5px solid var(--card-edge);
+    border-radius: 20px;
+    padding: 32px 38px 28px;
+    margin: 22px 0 24px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 22px 52px rgba(13,74,140,.13);
+  }
+  #hero::before {
+    content: ''; position: absolute; left: 0; top: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--primary-deep), var(--primary), var(--classic), var(--primary-deep));
+  }
+  .hero-kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Press Start 2P', monospace; font-size: 10px; letter-spacing: 1.4px;
+    color: var(--primary-deep); text-transform: uppercase;
+    background: var(--bg2); border: 1px solid var(--card-edge);
+    padding: 7px 13px; border-radius: 999px; margin-bottom: 18px;
+  }
+  .hero-kicker .dot { width: 8px; height: 8px; background: var(--good-green); border-radius: 2px; box-shadow: 2px 2px 0 var(--primary-deep); }
+  .hero-headline {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(31px, 4.8vw, 54px);
+    font-weight: 800; line-height: 1.06; letter-spacing: -1.5px;
+    color: var(--ink); margin: 0 0 14px; max-width: 1000px;
+  }
+  .hero-standfirst {
+    font-size: 15.5px; line-height: 1.55; color: var(--ink-soft);
+    max-width: 780px; margin: 0 0 22px;
+  }
+  .hero-viz { border-top: 1px solid var(--card-edge); padding-top: 18px; }
+  .hero-viz-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 1.3px; color: var(--muted);
+    margin-bottom: 11px;
+  }
+  .hero-bar {
+    display: flex; height: 28px; border-radius: 8px; overflow: hidden; gap: 2px;
+    background: var(--bg2);
+  }
+  .hero-seg { min-width: 4px; transition: flex .6s ease; }
+  .hero-legend {
+    display: flex; flex-wrap: wrap; gap: 7px 16px; margin-top: 13px;
+    font-size: 12px; color: var(--ink-soft);
+  }
+  .hero-legend .hero-lg { display: inline-flex; align-items: center; gap: 6px; }
+  .hero-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .hero-legend b { color: var(--ink); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  @media (max-width: 600px) { #hero { padding: 26px 22px 24px; } }
 </style>
 </head>
 <body data-mfm-popup="newsletter">
@@ -966,6 +1021,14 @@
 </header>
 
 <div class="wrap">
+
+  <!-- HERO — TODAY'S HEADLINE -->
+  <section id="hero" style="display:none;">
+    <div class="hero-kicker"><span class="dot"></span>Today&rsquo;s headline</div>
+    <h2 class="hero-headline" id="hero-headline"></h2>
+    <p class="hero-standfirst" id="hero-standfirst" style="display:none;"></p>
+    <div class="hero-viz" id="hero-viz" style="display:none;"></div>
+  </section>
 
   <!-- HEADLINE OF THE DAY -->
   <section id="headline-section" class="headline-callout" style="display:none;">
@@ -2044,6 +2107,48 @@ function copyPrompt(btn) {
   });
 }
 
+/* ─── HERO (today's headline, lifted from the daily brief) ──────────────── */
+function splitBrief(md) {
+  const lines = (md || '').split('\n');
+  let headline = '', standfirst = '', bodyStart = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^#\s+(.+?)\s*$/);
+    if (m) { headline = m[1].trim(); bodyStart = i + 1; break; }
+  }
+  while (bodyStart < lines.length && lines[bodyStart].trim() === '') bodyStart++;
+  const cand = bodyStart < lines.length ? lines[bodyStart].trim() : '';
+  if (/^\*[^*].*\*$/.test(cand)) {
+    standfirst = cand.replace(/^\*+|\*+$/g, '').trim();
+    bodyStart++;
+  }
+  const body = lines.slice(bodyStart).join('\n').trim();
+  return { headline, standfirst, body };
+}
+
+function renderHero(headlineText, standfirstText, latest) {
+  if (!headlineText) return;
+  $('#hero-headline').textContent = headlineText;
+  if (standfirstText) {
+    $('#hero-standfirst').textContent = standfirstText;
+    $('#hero-standfirst').style.display = '';
+  }
+  const themes = latest && latest.viz && latest.viz.consumer_themes;
+  if (themes && themes.length) {
+    const segs = themes.map(t =>
+      `<div class="hero-seg" style="flex:${Math.max(1, t.count)};background:${t.color};" title="${escapeHtml(t.label)} — ${t.pct}%"></div>`
+    ).join('');
+    const legend = themes.map(t =>
+      `<span class="hero-lg"><i style="background:${t.color};"></i>${escapeHtml(t.label)} <b>${t.pct}%</b></span>`
+    ).join('');
+    $('#hero-viz').innerHTML =
+      `<div class="hero-viz-label">What the internet is into today — share of consumer signal</div>
+       <div class="hero-bar">${segs}</div>
+       <div class="hero-legend">${legend}</div>`;
+    $('#hero-viz').style.display = '';
+  }
+  $('#hero').style.display = '';
+}
+
 /* ─── BOOT ──────────────────────────────────────────────────────────────── */
 async function loadData() {
   // Fetch trends data + daily brief + headline of the day + headline chart data in parallel
@@ -2086,8 +2191,10 @@ async function loadData() {
     if (chartData) renderHeadlineChart(chartData);
   }
 
+  let briefParsed = null;
   if (brief && brief.trim().length > 0) {
-    $('#brief-body').innerHTML = renderMarkdown(brief);
+    briefParsed = splitBrief(brief);
+    $('#brief-body').innerHTML = renderMarkdown(briefParsed.body || brief);
     $('#brief-section').style.display = '';
   } else if (!headline) {
     // Only show the "no brief loaded" empty state if we have NEITHER a headline NOR a brief
@@ -2104,6 +2211,11 @@ async function loadData() {
           The trend pipeline runs daily at 7am ET in the <code>trend-detector</code> repo. Run <code style="background:var(--bg2);padding:3px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;">scripts/refresh-trends.sh</code> from <code>mfm-universe/</code> to copy the latest snapshot into <code>data/trends-latest.json</code>, then redeploy.
         </div>
       </div>`;
+  }
+
+  // Hero — today's headline (lifted from the brief) + the at-a-glance visualization.
+  if (briefParsed && briefParsed.headline) {
+    renderHero(briefParsed.headline, briefParsed.standfirst, latest);
   }
 }
 

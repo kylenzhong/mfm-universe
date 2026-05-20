@@ -1,4 +1,6 @@
-# Daily Trend Brief — 2026-05-20
+# All three major AI-companion platforms are melting down at once
+
+*Daily Trend Brief · Wednesday, May 20, 2026*
 
 ## TL;DR
 
