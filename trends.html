@@ -993,6 +993,123 @@
   .hero-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
   .hero-legend b { color: var(--ink); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
   @media (max-width: 600px) { #hero { padding: 26px 22px 24px; } }
+
+  /* ─── TODAY'S PUBLICATION (featured case study) ─────────────────────────── */
+  #todays-publication { margin: 4px 0 26px; }
+  .pub-card {
+    position: relative; overflow: hidden; cursor: pointer;
+    border-radius: 22px; padding: 30px 34px 26px;
+    color: #eaf2fb;
+    background:
+      radial-gradient(ellipse 560px 340px at 91% -22%, rgba(74,159,255,.34) 0%, transparent 60%),
+      radial-gradient(ellipse 480px 320px at 6% 122%, rgba(255,93,110,.24) 0%, transparent 62%),
+      linear-gradient(150deg, #0d2540 0%, #0d4a8c 100%);
+    border: 1.5px solid rgba(255,255,255,.10);
+    box-shadow: 0 26px 58px rgba(13,37,64,.32);
+    opacity: 0; transform: translateY(28px) scale(.972);
+    animation: pubPop .9s cubic-bezier(.16,1,.3,1) .12s forwards;
+    transition: box-shadow .25s ease, transform .25s ease;
+  }
+  @keyframes pubPop { to { opacity: 1; transform: none; } }
+  .pub-card:hover { transform: translateY(-4px); box-shadow: 0 36px 74px rgba(13,37,64,.42); }
+  .pub-card:focus-visible { outline: 3px solid var(--classic); outline-offset: 3px; }
+  .pub-card::before {
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 5px;
+    background: linear-gradient(90deg, var(--primary), var(--hot), var(--classic));
+  }
+  .pub-grid { display: grid; grid-template-columns: 1.32fr 1fr; gap: 30px; align-items: center; }
+  .pub-kicker {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: 'Press Start 2P', monospace; font-size: 9px; letter-spacing: 1.2px;
+    color: #ffd76b; background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.14); padding: 7px 12px; border-radius: 999px;
+    margin-bottom: 15px;
+  }
+  .pub-kicker .pub-star { color: var(--classic); font-size: 11px; }
+  .pub-title {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 800;
+    font-size: clamp(24px, 2.7vw, 35px); line-height: 1.1; letter-spacing: -0.8px;
+    color: #fff; margin: 0 0 12px;
+  }
+  .pub-title em { color: #ff8a96; font-style: normal; }
+  .pub-standfirst { font-size: 14.5px; line-height: 1.6; color: #bcd0e6; margin: 0 0 18px; max-width: 520px; }
+  .pub-cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .pub-cta {
+    border: 0; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13.5px;
+    color: #0d2540; background: linear-gradient(180deg, #ffffff, #e3eefb);
+    padding: 11px 20px; border-radius: 999px; transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 6px 18px rgba(0,0,0,.22);
+  }
+  .pub-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.30); }
+  .pub-ext { font-size: 12.5px; font-weight: 600; color: #9fc4ef; text-decoration: none; }
+  .pub-ext:hover { color: #fff; text-decoration: underline; }
+  .pub-viz {
+    background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px; padding: 15px 16px 16px;
+  }
+  .pub-viz-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 1px;
+    text-transform: uppercase; color: #8fb0d0; margin-bottom: 12px;
+  }
+  .pub-bar { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+  .pub-bar:last-child { margin-bottom: 0; }
+  .pub-bn { width: 64px; font-size: 11px; font-weight: 700; color: #d6e4f3; flex-shrink: 0; }
+  .pub-bt { flex: 1; height: 15px; background: rgba(255,255,255,.09); border-radius: 5px; overflow: hidden; }
+  .pub-bf {
+    display: block; height: 100%; width: 0; border-radius: 5px;
+    background: linear-gradient(90deg, #6fb6ff, #4a9fff);
+    transition: width 1.25s cubic-bezier(.16,1,.3,1);
+  }
+  .pub-bf.pf-hot { background: linear-gradient(90deg, #ff8a96, #ff5d6e); }
+  .pub-bf.pf-mute { background: linear-gradient(90deg, #6f8aa3, #50708c); }
+  .pub-bv { width: 34px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .pub-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .pub-chip {
+    font-size: 11px; color: #bcd0e6; background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12); padding: 6px 10px; border-radius: 8px;
+  }
+  .pub-chip b { color: #fff; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  .pub-hint {
+    margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.10);
+    font-size: 11.5px; color: #7f9cbb; display: flex; align-items: center; gap: 7px;
+  }
+  .pub-hint::before { content: '▶'; font-size: 8px; color: var(--classic); }
+  @media (max-width: 760px) {
+    .pub-grid { grid-template-columns: 1fr; gap: 20px; }
+    .pub-card { padding: 26px 22px 22px; }
+  }
+
+  /* ─── PUBLICATION LIGHTBOX ──────────────────────────────────────────────── */
+  .pub-lightbox {
+    position: fixed; inset: 0; z-index: 9991;
+    background: rgba(13,37,64,.64); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center; padding: 3vh 2vw;
+  }
+  .pub-lightbox.open { display: flex; }
+  .pub-lightbox-card {
+    width: 100%; max-width: 1240px; height: 94vh;
+    background: var(--card-bg); border-radius: 16px; overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 42px 92px rgba(13,37,64,.48);
+    animation: pubLbPop .42s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes pubLbPop { from { opacity: 0; transform: scale(.94) translateY(22px); } to { opacity: 1; transform: none; } }
+  .pub-lightbox-bar {
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    padding: 11px 15px; background: linear-gradient(90deg, #0d2540, #0d4a8c); color: #eaf2fb;
+  }
+  .pub-lightbox-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--good-green); box-shadow: 0 0 0 3px rgba(26,169,113,.28); flex-shrink: 0; }
+  .pub-lightbox-title { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pub-lightbox-ext { margin-left: auto; color: #bcd6f5; font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+  .pub-lightbox-ext:hover { color: #fff; text-decoration: underline; }
+  .pub-lightbox-close {
+    width: 30px; height: 30px; border: 0; border-radius: 7px; cursor: pointer; flex-shrink: 0;
+    background: rgba(255,255,255,.15); color: #fff; font-size: 18px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; transition: background .15s;
+  }
+  .pub-lightbox-close:hover { background: rgba(255,255,255,.28); }
+  .pub-lightbox-frame { flex: 1; width: 100%; border: 0; background: #f7fafd; }
+  @media (max-width: 600px) { .pub-lightbox { padding: 0; } .pub-lightbox-card { height: 100vh; border-radius: 0; } }
 </style>
 </head>
 <body data-mfm-popup="newsletter">
@@ -1028,6 +1145,40 @@
     <h2 class="hero-headline" id="hero-headline"></h2>
     <p class="hero-standfirst" id="hero-standfirst" style="display:none;"></p>
     <div class="hero-viz" id="hero-viz" style="display:none;"></div>
+  </section>
+
+  <!-- TODAY'S PUBLICATION — featured case study -->
+  <section id="todays-publication">
+    <div class="pub-card" role="button" tabindex="0"
+         onclick="openPubLightbox()"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPubLightbox();}">
+      <div class="pub-grid">
+        <div class="pub-left">
+          <div class="pub-kicker"><span class="pub-star">&#9733;</span>&nbsp;Today&rsquo;s Publication &middot; May 20, 2026</div>
+          <h2 class="pub-title">The AI Companion Industry Is <em>Melting Down</em> at the Exact Moment It Won the Consumer</h2>
+          <p class="pub-standfirst">A deep business case study &mdash; six leading companies, the hard numbers, and the structural flaw beneath a category with monopoly-grade product-market fit. Built from today&rsquo;s trend signal.</p>
+          <div class="pub-cta-row">
+            <button class="pub-cta" onclick="event.stopPropagation();openPubLightbox()">Read the full case study &rarr;</button>
+            <a class="pub-ext" href="/case-study-ai-companions" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open in new tab &#8599;</a>
+          </div>
+        </div>
+        <div class="pub-right">
+          <div class="pub-viz">
+            <div class="pub-viz-label">Today&rsquo;s signal &mdash; how people use AI</div>
+            <div class="pub-bar"><span class="pub-bn">Companion</span><span class="pub-bt"><i class="pub-bf pf-hot" data-pw="100"></i></span><span class="pub-bv">421</span></div>
+            <div class="pub-bar"><span class="pub-bn">Creative</span><span class="pub-bt"><i class="pub-bf" data-pw="43"></i></span><span class="pub-bv">182</span></div>
+            <div class="pub-bar"><span class="pub-bn">Code</span><span class="pub-bt"><i class="pub-bf pf-mute" data-pw="8"></i></span><span class="pub-bv">35</span></div>
+            <div class="pub-bar"><span class="pub-bn">Image</span><span class="pub-bt"><i class="pub-bf pf-mute" data-pw="4"></i></span><span class="pub-bv">18</span></div>
+          </div>
+          <div class="pub-chips">
+            <span class="pub-chip"><b>$120M</b>&nbsp;app revenue &rsquo;25</span>
+            <span class="pub-chip"><b>$58M</b>&nbsp;Chai ARR</span>
+            <span class="pub-chip"><b>72%</b>&nbsp;of US teens</span>
+          </div>
+        </div>
+      </div>
+      <div class="pub-hint">Click anywhere to open the interactive report</div>
+    </div>
   </section>
 
   <!-- HEADLINE OF THE DAY -->
@@ -1281,6 +1432,19 @@
   </div>
 </div>
 
+<!-- TODAY'S PUBLICATION LIGHTBOX -->
+<div class="pub-lightbox" id="pub-lightbox" onclick="if(event.target===this)closePubLightbox()">
+  <div class="pub-lightbox-card">
+    <div class="pub-lightbox-bar">
+      <span class="pub-lightbox-dot"></span>
+      <span class="pub-lightbox-title">&#9733; Today&rsquo;s Publication &mdash; AI Companion Industry Case Study</span>
+      <a class="pub-lightbox-ext" id="pub-lightbox-ext" href="/case-study-ai-companions" target="_blank" rel="noopener">Open in new tab &#8599;</a>
+      <button class="pub-lightbox-close" onclick="closePubLightbox()" aria-label="Close">&times;</button>
+    </div>
+    <iframe class="pub-lightbox-frame" id="pub-lightbox-frame" title="The AI Companion Industry — A Business Case Study"></iframe>
+  </div>
+</div>
+
 <footer>
   MFM Universe · TRENDS · consumer + AI signal, refreshed every morning<br>
   <a href="index.html">back to the universe</a> ·
@@ -1491,6 +1655,8 @@ document.addEventListener('click', (ev) => {
 async function openHeadline(date) {
   const meta = HEADLINE_INDEX[date];
   if (!meta) return;
+  // Interactive report headlines open in the publication lightbox, not the markdown modal.
+  if (meta.report) { openPubLightbox(meta.report); return; }
   $('#modal-body').innerHTML = `<div style="padding:36px;text-align:center;color:var(--muted);font-size:13px;">Loading headline…</div>`;
   $('#modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2218,6 +2384,36 @@ async function loadData() {
     renderHero(briefParsed.headline, briefParsed.standfirst, latest);
   }
 }
+
+/* ─── TODAY'S PUBLICATION — lightbox + feature card ─────────────────────── */
+function openPubLightbox(url) {
+  const frame = document.getElementById('pub-lightbox-frame');
+  const target = url || '/case-study-ai-companions';
+  if (frame && frame.getAttribute('src') !== target) frame.setAttribute('src', target);
+  const ext = document.getElementById('pub-lightbox-ext');
+  if (ext) ext.setAttribute('href', target);
+  const box = document.getElementById('pub-lightbox');
+  if (box) box.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePubLightbox() {
+  const box = document.getElementById('pub-lightbox');
+  if (box) box.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePubLightbox();
+});
+// Animate the feature-card mini bars once the page is interactive.
+(function animatePubBars() {
+  function go() {
+    document.querySelectorAll('#todays-publication .pub-bf').forEach((b) => {
+      setTimeout(() => { b.style.width = (b.getAttribute('data-pw') || 0) + '%'; }, 420);
+    });
+  }
+  if (document.readyState !== 'loading') go();
+  else document.addEventListener('DOMContentLoaded', go);
+})();
 
 loadData();
 </script>
