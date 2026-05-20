@@ -182,9 +182,29 @@ if (useCasesRaw && Array.isArray(useCasesRaw.categories)) {
 /* ─── MFM guest affinity ──────────────────────────────────────────────── */
 let guestAffinity = null;
 if (guestsRaw && Array.isArray(guestsRaw.topics)) {
-  const topics = guestsRaw.topics
-    .slice()
-    .sort((a, b) => num(b.trend_score) - num(a.trend_score))
+  // trend_score is on wildly different scales per source_kind (follower counts
+  // vs post counts vs pageviews), so a raw score sort buries the substantive
+  // topics under raw social. Rank by source_kind priority instead, cap the
+  // noisy social kinds, and sort by score only within a kind.
+  const SK_PRIORITY = {
+    daily_brief_opportunity: 0, consumer_ai_use_case: 1, wikipedia_entity: 2,
+    huggingface_cluster: 3, github_cluster: 3, google_trends_query: 4,
+    instagram_topic_cluster: 5, youtube_trending_video: 6, tiktok_trend: 7,
+  };
+  const SK_CAP = {
+    google_trends_query: 4, instagram_topic_cluster: 3,
+    youtube_trending_video: 3, tiktok_trend: 3,
+  };
+  const byKind = {};
+  for (const t of guestsRaw.topics) (byKind[t.source_kind] ||= []).push(t);
+  let ranked = [];
+  for (const [kind, arr] of Object.entries(byKind)) {
+    arr.sort((a, b) => num(b.trend_score) - num(a.trend_score));
+    ranked.push(...(SK_CAP[kind] ? arr.slice(0, SK_CAP[kind]) : arr));
+  }
+  ranked.sort((a, b) => (SK_PRIORITY[a.source_kind] ?? 9) - (SK_PRIORITY[b.source_kind] ?? 9));
+
+  const topics = ranked
     .slice(0, 24)
     .map((t) => ({
       id: t.id, name: t.name,
