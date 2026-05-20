@@ -890,6 +890,54 @@
   }
   .gcov-chip b { color: var(--ink); font-weight: 700; }
   .gcov-chip .gcov-n { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--primary-deep); font-weight: 700; }
+
+  /* ─── HEADLINE ARCHIVE CALENDAR ───────────────────────────────────────── */
+  .cal-wrap {
+    background: var(--card-bg); border: 1.5px solid var(--card-edge);
+    border-radius: 14px; padding: 16px 18px 18px; max-width: 470px;
+  }
+  .cal-head {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+  }
+  .cal-month { font-family: 'Fraunces', Georgia, serif; font-size: 16px; font-weight: 700; color: var(--ink); }
+  .cal-nav {
+    background: var(--bg); border: 1px solid var(--card-edge); color: var(--ink-soft);
+    width: 28px; height: 28px; border-radius: 8px; cursor: pointer; font-size: 15px;
+    display: flex; align-items: center; justify-content: center; transition: all .15s; padding: 0;
+  }
+  .cal-nav:hover { border-color: var(--primary); color: var(--primary-deep); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted);
+    text-align: center; padding: 3px 0 5px; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .cal-day {
+    aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-soft);
+    border-radius: 8px; border: 1px solid transparent; position: relative;
+  }
+  .cal-day.empty { color: transparent; }
+  .cal-day.today { border-color: var(--primary); color: var(--primary-deep); font-weight: 700; }
+  .cal-day.has-headline {
+    background: var(--primary-deep); color: #fff; font-weight: 700; cursor: pointer;
+    box-shadow: 0 3px 8px var(--primary-shadow); transition: transform .12s;
+  }
+  .cal-day.has-headline:hover { transform: translateY(-2px); }
+  .cal-day.has-headline.today { box-shadow: 0 0 0 2px var(--classic); }
+  .cal-day .cal-dot {
+    position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%; background: var(--classic-2);
+  }
+  .cal-legend {
+    display: flex; gap: 14px; margin-top: 13px; flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted);
+  }
+  .cal-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .cal-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .modal-headline .headline-date {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+  }
 </style>
 </head>
 <body data-mfm-popup="newsletter">
@@ -941,6 +989,27 @@
   <div id="brief-empty" class="brief-empty" style="display:none;">
     No daily brief loaded. Run <code>scripts/refresh-trends.sh</code> to pull the latest from the trend-detector repo.
   </div>
+
+  <!-- HEADLINE ARCHIVE (calendar) -->
+  <section id="headline-archive" class="section" style="display:none;">
+    <div class="section-head">
+      <h2>★ Headline archive</h2>
+      <div class="meta"><b id="cal-count">0</b> long-form pieces · pick a date to read</div>
+    </div>
+    <p class="section-sub">Deep-dive headlines from past daily signals. Today&rsquo;s signal stays at the top of the page &mdash; finished pieces land here on the calendar.</p>
+    <div class="cal-wrap">
+      <div class="cal-head">
+        <button class="cal-nav" id="cal-prev" aria-label="Previous month">&lsaquo;</button>
+        <div class="cal-month" id="cal-month">&mdash;</div>
+        <button class="cal-nav" id="cal-next" aria-label="Next month">&rsaquo;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <span><i style="background:var(--primary-deep);"></i> headline &mdash; click to read</span>
+        <span><i style="background:transparent;border:1.5px solid var(--primary);"></i> today</span>
+      </div>
+    </div>
+  </section>
 
   <!-- SOURCE FILTER -->
   <div class="source-filter">
@@ -1248,15 +1317,12 @@ function chartSparkSvg(series, w, h, color) {
   </svg>`;
 }
 
-function renderHeadlineChart(data) {
-  const container = $('#headline-chart-container');
-  if (!container || !data || !Array.isArray(data.repos)) return;
-
+function headlineChartHtml(data) {
+  if (!data || !Array.isArray(data.repos)) return '';
   const cats = data.categories || {};
   const legendItems = Object.entries(cats).map(([key, v]) =>
     `<span class="lg"><span class="sw" style="background:${v.color};"></span>${escapeHtml(v.label)}</span>`
   ).join('');
-
   const cells = data.repos.map(r => {
     const cat = cats[r.category] || {label: r.category, color: 'var(--primary)'};
     const spark = chartSparkSvg(r.series, 160, 38, cat.color);
@@ -1269,14 +1335,13 @@ function renderHeadlineChart(data) {
       <div class="hc-tagline">${escapeHtml(r.tagline || '')}</div>
       <div class="hc-spark">${spark}</div>
       <div class="hc-stats">
-        <span class="hc-stars"><span class="sym">★</span>${r.current_stars.toLocaleString()}</span>
+        <span class="hc-stars"><span class="sym">★</span>${(r.current_stars || 0).toLocaleString()}</span>
         <span class="hc-delta ${deltaClass}">${deltaStr}</span>
       </div>
       <div class="hc-cat">${escapeHtml(cat.label)}</div>
     </a>`;
   }).join('');
-
-  container.innerHTML = `<div class="headline-chart">
+  return `<div class="headline-chart">
     <div class="headline-chart-head">
       <div class="headline-chart-title">${escapeHtml(data.title || 'Star trajectories')}</div>
       <div class="headline-chart-sub">${escapeHtml(data.subtitle || '')}</div>
@@ -1284,8 +1349,13 @@ function renderHeadlineChart(data) {
     <div class="headline-chart-legend">${legendItems}</div>
     <div class="headline-chart-grid">${cells}</div>
   </div>`;
-  container.style.display = '';
+}
 
+function renderHeadlineChart(data) {
+  const container = $('#headline-chart-container');
+  if (!container || !data || !Array.isArray(data.repos)) return;
+  container.innerHTML = headlineChartHtml(data);
+  container.style.display = '';
   // If the markdown contains a [chart:trajectories] placeholder, move the chart there.
   const body = $('#headline-body');
   if (body) {
@@ -1294,6 +1364,111 @@ function renderHeadlineChart(data) {
       if (p.textContent.trim() === '[chart:trajectories]') {
         p.replaceWith(container);
         container.style.display = '';
+        break;
+      }
+    }
+  }
+}
+
+/* ─── HEADLINE ARCHIVE CALENDAR ─────────────────────────────────────────── */
+const CAL_MONTHS = ['January','February','March','April','May','June',
+  'July','August','September','October','November','December'];
+let HEADLINE_INDEX = {};   // 'YYYY-MM-DD' → { title, chart }
+let CAL_VIEW = null;       // { year, month }  (month 0-11)
+
+function renderHeadlineCalendar(index) {
+  if (!Array.isArray(index) || !index.length) return;
+  HEADLINE_INDEX = {};
+  index.forEach(e => { if (e && e.date) HEADLINE_INDEX[e.date] = e; });
+  $('#cal-count').textContent = index.length;
+  $('#headline-archive').style.display = '';
+  // Open on the month of the most recent headline.
+  const newest = index.map(e => e.date).filter(Boolean).sort().pop();
+  const d = newest ? new Date(newest + 'T12:00:00') : new Date();
+  CAL_VIEW = { year: d.getFullYear(), month: d.getMonth() };
+  drawCalendar();
+  $('#cal-prev').addEventListener('click', () => shiftCalendar(-1));
+  $('#cal-next').addEventListener('click', () => shiftCalendar(1));
+}
+
+function shiftCalendar(delta) {
+  let m = CAL_VIEW.month + delta, y = CAL_VIEW.year;
+  if (m < 0) { m = 11; y--; }
+  if (m > 11) { m = 0; y++; }
+  CAL_VIEW = { year: y, month: m };
+  drawCalendar();
+}
+
+function drawCalendar() {
+  const { year, month } = CAL_VIEW;
+  $('#cal-month').textContent = `${CAL_MONTHS[month]} ${year}`;
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  let cells = ['S','M','T','W','T','F','S'].map(d => `<div class="cal-dow">${d}</div>`).join('');
+  for (let i = 0; i < firstDow; i++) cells += `<div class="cal-day empty"></div>`;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const has = HEADLINE_INDEX[iso];
+    const cls = ['cal-day'];
+    if (has) cls.push('has-headline');
+    if (iso === todayISO) cls.push('today');
+    const attrs = has ? ` data-headline-date="${iso}" title="${escapeHtml(has.title)}"` : '';
+    cells += `<div class="${cls.join(' ')}"${attrs}>${day}${has ? '<span class="cal-dot"></span>' : ''}</div>`;
+  }
+  $('#cal-grid').innerHTML = cells;
+}
+
+// Delegated click: open a headline when a calendar day with a piece is clicked.
+document.addEventListener('click', (ev) => {
+  const cell = ev.target.closest('[data-headline-date]');
+  if (cell) openHeadline(cell.dataset.headlineDate);
+});
+
+async function openHeadline(date) {
+  const meta = HEADLINE_INDEX[date];
+  if (!meta) return;
+  $('#modal-body').innerHTML = `<div style="padding:36px;text-align:center;color:var(--muted);font-size:13px;">Loading headline…</div>`;
+  $('#modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const reqs = [fetch(`/data/headlines/${date}.md`, {cache: 'no-store'})];
+  if (meta.chart) reqs.push(fetch(`/data/headlines/${date}-chart.json`, {cache: 'no-store'}));
+  const results = await Promise.allSettled(reqs);
+
+  let md = '';
+  if (results[0].status === 'fulfilled' && results[0].value.ok) {
+    try { md = await results[0].value.text(); } catch(e) { /* ignore */ }
+  }
+  let chart = null;
+  if (meta.chart && results[1] && results[1].status === 'fulfilled' && results[1].value.ok) {
+    try { chart = await results[1].value.json(); } catch(e) { /* ignore */ }
+  }
+  if (!md.trim()) {
+    $('#modal-body').innerHTML = `<div style="padding:36px;text-align:center;color:var(--muted);font-size:13px;">Couldn&rsquo;t load this headline.</div>`;
+    return;
+  }
+
+  let dateLabel = date;
+  try {
+    dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('en-US',
+      {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'});
+  } catch(e) { /* keep iso */ }
+
+  $('#modal-body').innerHTML = `<div class="modal-headline">
+    <div class="headline-date">★ Headline &middot; ${escapeHtml(dateLabel)}</div>
+    <div class="headline-body" id="modal-headline-body">${renderMarkdown(md)}</div>
+  </div>`;
+
+  // Swap the [chart:trajectories] placeholder for the rendered chart.
+  if (chart) {
+    const body = $('#modal-headline-body');
+    const ps = body ? body.querySelectorAll('p') : [];
+    for (const p of ps) {
+      if (p.textContent.trim() === '[chart:trajectories]') {
+        const div = document.createElement('div');
+        div.innerHTML = headlineChartHtml(chart);
+        p.replaceWith(div);
         break;
       }
     }
@@ -1872,11 +2047,12 @@ function copyPrompt(btn) {
 /* ─── BOOT ──────────────────────────────────────────────────────────────── */
 async function loadData() {
   // Fetch trends data + daily brief + headline of the day + headline chart data in parallel
-  const [dataRes, briefRes, headlineRes, chartRes] = await Promise.allSettled([
+  const [dataRes, briefRes, headlineRes, chartRes, indexRes] = await Promise.allSettled([
     fetch('/data/trends-latest.json', {cache: 'no-store'}),
     fetch('/data/trends-daily-brief.md', {cache: 'no-store'}),
     fetch('/data/trends-headline-latest.md', {cache: 'no-store'}),
     fetch('/data/headline-chart-data.json', {cache: 'no-store'}),
+    fetch('/data/headlines/index.json', {cache: 'no-store'}),
   ]);
 
   let latest = null;
@@ -1895,6 +2071,13 @@ async function loadData() {
   if (chartRes.status === 'fulfilled' && chartRes.value.ok) {
     try { chartData = await chartRes.value.json(); } catch(e) { /* ignore */ }
   }
+  let headlineIndex = null;
+  if (indexRes.status === 'fulfilled' && indexRes.value.ok) {
+    try { headlineIndex = await indexRes.value.json(); } catch(e) { /* ignore */ }
+  }
+
+  // Headline archive calendar — independent of whether there's a headline today.
+  if (headlineIndex) renderHeadlineCalendar(headlineIndex);
 
   if (headline && headline.trim().length > 0) {
     $('#headline-body').innerHTML = renderMarkdown(headline);
