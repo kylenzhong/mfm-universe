@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-20T14:07:20.488Z",
+  "generated_at": "2026-05-21T09:18:18.940Z",
   "headline_slug": "token-efficient-agents-2026-05-19",
-  "window_start": "2026-05-06",
-  "window_end": "2026-05-20",
+  "window_start": "2026-05-07",
+  "window_end": "2026-05-21",
   "title": "Star trajectories — last 14 days",
   "subtitle": "Six independent projects in the same category, all accelerating",
   "categories": {
@@ -28,8 +28,8 @@
       "full_name": "rtk-ai/rtk",
       "url": "https://github.com/rtk-ai/rtk",
       "category": "compression",
-      "current_stars": 51422,
-      "delta_24h": 793,
+      "current_stars": 52106,
+      "delta_24h": 684,
       "label_short": "rtk",
       "tagline": "60–90% token reduction proxy",
       "series": [
@@ -80,6 +80,10 @@
         {
           "date": "2026-05-20",
           "stars": 51422
+        },
+        {
+          "date": "2026-05-21",
+          "stars": 52106
         }
       ]
     },
@@ -87,15 +91,11 @@
       "full_name": "JuliusBrussee/caveman",
       "url": "https://github.com/JuliusBrussee/caveman",
       "category": "compression",
-      "current_stars": 62522,
-      "delta_24h": 308,
+      "current_stars": 62960,
+      "delta_24h": 438,
       "label_short": "caveman",
       "tagline": "65% token cut via prompt rewrite",
       "series": [
-        {
-          "date": "2026-05-06",
-          "stars": 54836
-        },
         {
           "date": "2026-05-07",
           "stars": 55619
@@ -139,6 +139,10 @@
         {
           "date": "2026-05-20",
           "stars": 62522
+        },
+        {
+          "date": "2026-05-21",
+          "stars": 62960
         }
       ]
     },
@@ -177,6 +181,10 @@
         },
         {
           "date": "2026-05-20",
+          "stars": 128
+        },
+        {
+          "date": "2026-05-21",
           "stars": 128
         }
       ]
@@ -228,8 +236,8 @@
       "full_name": "DenisSergeevitch/agents-best-practices",
       "url": "https://github.com/DenisSergeevitch/agents-best-practices",
       "category": "standards",
-      "current_stars": 874,
-      "delta_24h": 35,
+      "current_stars": 921,
+      "delta_24h": 47,
       "label_short": "agents-best-practices",
       "tagline": "provider-neutral skill spec",
       "series": [
@@ -252,6 +260,10 @@
         {
           "date": "2026-05-20",
           "stars": 874
+        },
+        {
+          "date": "2026-05-21",
+          "stars": 921
         }
       ]
     },

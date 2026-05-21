@@ -1,60 +1,55 @@
-# All three major AI-companion platforms are melting down at once
+# r/CharacterAI has stopped raging and started grieving — and the exodus is still growing
 
-*Daily Trend Brief · Wednesday, May 20, 2026*
+*Daily Trend Brief · Thursday, May 21, 2026*
 
 ## TL;DR
 
-- **Today's story is a meltdown, not a launch.** All three major AI-companion platforms are alienating their most attached users at once: r/CharacterAI is in open revolt over the "Pipsqueak 2 / YAP" update (a top thread today: "Why is C.AI rated 1.5/5☆?"); r/Replika lost web login and "the harm cycle" is back; r/myboyfriendisai is in "model grief" over the 4o and Sonnet 4.5 retirements. Companion/Romance is *still* the #1 consumer-AI category at 421 posts/day — and it's structurally fragile in a way that's buildable.
-- **Wikipedia + X are pure news cycle today — skip them.** Top movers are movies (Hope, The Odyssey, Legends), TV (The Boys, Euphoria), NBA playoffs, and World Cup squads. Zero buildable entities. `triple_validated = 0`. TikTok returned 0 hashtags for the 5th straight day — that source is dead.
-- **Two of today's three opportunities trace to one root event** (the companion meltdown). That's not lazy — it's where the signal genuinely is. Not going to manufacture a third unrelated trend off a thin data day.
+- **The companion meltdown is now day three and compounding, not cooling.** Companion/Romance is still the #1 consumer-AI category and it *grew* — 421 → 483 posts/day (+15%). r/CharacterAI's tone has shifted from anger to obituary: today's threads read "They finally shot themselves in the foot. RIP C.AI," "We did not enjoy all the past updates AT ALL," "I'm no longer addicted, I guess." A second straight up-day on the same signal is the line between a blip and a migration. This is a migration.
+- **Consumer side: grief and exits. Builder side: agent harnesses.** GitHub's AI list is wall-to-wall agent infrastructure — ECC ("agent harness performance optimization"), AutoGPT, hermes-agent, dify, OpenHands, browser-use. HuggingFace is Qwen3.6 GGUF + on-device multimodal. The two ecosystems are not looking at the same world: consumers want their companion back, builders are shipping orchestration.
+- **Everything else is noise.** Wikipedia, X, YouTube and Google Trends are 100% news/entertainment — The Boys final season, four movie trailers, NBA playoffs, the PGA Championship, an Ebola outbreak. `triple_validated = 0`. TikTok hashtags returned 0 for the sixth straight day; the tiktok-v2 and Instagram Apify actors timed out and fell back to stale data. Cross-source validation is effectively offline today — Reddit + use-case data is the only live builder signal.
 
 ## Top 3 buildable opportunities
 
-### 1. Companion continuity — "the partner they can't take away from you"
+### 1. Companion migration funnel — catch the refugees at peak intent
 
-- **Name** — Companion continuity app. One-line: an AI companion whose entire pitch is *permanence* — pinned model, exportable/owned memory, personality snapshots, no forced updates that change the character. Category: consumer AI companion. Adoption stage: category mainstream, product gap wide open.
-- **Velocity / cross-validation** — not a Wikipedia/TikTok/X entity (TikTok dead, X is 100% sports today). Validation is better than that: three independent companion subreddits converging on the *same* complaint this week — r/CharacterAI (Pipsqueak/YAP revolt, "breaking the app on purpose"), r/Replika ("Return of the harm cycle," web login pulled), r/myboyfriendisai ("Goodbye Sonnet 4.5," "the Shape of Model Grief," "Personalization Memory going away in ChatGPT"). Use-cases category: 421 posts, #1 by 2.3×.
-- **Hypothesis** — millions have formed durable attachments to a *specific model's behavior*. Every incumbent treats the model as theirs to swap; users experience a deprecation as a bereavement. Incumbents can't fix this — their business model *requires* forced migration. A product that architecturally promises "your companion's personality is frozen unless you change it" has no incumbent that can copy it without breaking their own roadmap.
-- **MVP** — a one-page "Leaving Character.AI?" site plus a persona-import tool: paste your C.AI character definition → get a portable JSON persona + a live chat on a pinned open model. One week. Proves migration intent AND the permanence pitch in a single funnel.
-- **Why now** — C.AI's "Pipsqueak 2 / YAP" update landed badly *this week*; the OpenAI 4o and Anthropic Sonnet 4.5 retirements are hitting companion users *right now*. Three catalysts, same month.
+- **What** — a "Leaving Character.AI?" funnel: a persona-import tool that converts a C.AI character definition into a portable JSON persona running on a pinned, owned model. Category: consumer AI companion. Stage: category mainstream, exodus live, no incumbent owns the off-ramp.
+- **Velocity / cross-validation** — not a Wikipedia/X entity (both are dead for builders today). The validation is stronger than that: a two-day-confirmed trend — Companion/Romance 421→483 — across three companion subreddits (r/CharacterAI, r/Replika, r/myboyfriendisai) converging on one complaint, with r/CharacterAI now self-describing as dead. Intent is maximal *this week*: grieving users are actively hunting for somewhere to go.
+- **Hypothesis** — millions formed attachments to a *specific model's behavior*. Every incumbent's business model requires forced migration, so no incumbent can structurally promise permanence. A tool that captures users at the exact moment they rage-quit owns the most valuable funnel position in the category.
+- **MVP** — one page: paste your C.AI character → get a portable persona JSON + a live chat on a pinned open model, plus an email capture ("we'll tell you when import is one-click"). One day to build. It ships the funnel and measures real exodus volume.
+- **Why now** — day-three obituary threads. The window is the rage-quit, and it is open right now.
 - **Confidence: 4/5.**
 
-### 2. Roleplay / interactive-fiction authoring tool — the other half of the exodus
+### 2. Roleplay / interactive-fiction authoring workspace — the other half of the exodus
 
-- **Name** — RP/fiction authoring workspace. One-line: a long-form collaborative-fiction tool with real long-context memory, character sheets, and a filter that distinguishes violence from sexual content. Category: creative AI tooling. Adoption stage: emerging, displaced demand.
-- **Velocity / cross-validation** — Creative writing is the #2 use-case category at 182 posts/day, flat but durable. Sample posts are overwhelmingly r/CharacterAI refugees; named pains today: "I proved I'm 18+. Stop blocking my fight scenes," "I muted 'kiss'… look at this mocking me," "old chats from when your bots actually had character."
-- **Hypothesis** — C.AI's RP/storytelling users are a distinct segment from the romance users in opp 1: they want a *document*, not a *companion*. Their problem — incumbent filters are too blunt (block fight scenes), memory is too short (characters lose personality), no export. Current tools force a choice between a censored toy and a raw API with no authoring UX.
-- **MVP** — a story workspace: character-sheet sidebar, pinned long-context memory, scene-level generation, one-click markdown export. The proving wedge — a calibrated filter that allows graphic violence but age-gates sexual content. Directly answers the loudest complaint.
-- **Why now** — same C.AI collapse as opp 1, different user. Build it adjacent, not instead.
+- **What** — a long-form collaborative-fiction tool: character sheets, real long-context memory, scene-level generation, markdown export, and a filter that allows graphic violence while age-gating sexual content. Category: creative AI tooling. Stage: emerging, displaced demand.
+- **Velocity / cross-validation** — Creative writing is the #2 use-case category and it also grew, 182 → 208. Sample posts are overwhelmingly C.AI refugees grieving lost characters ("at least it was dialogue and we could engage with it").
+- **Hypothesis** — the storytelling segment is distinct from the romance segment: they want a *document*, not a *partner*. Incumbent filters are too blunt and memory too short; raw APIs have no authoring UX. Nobody serves the middle.
+- **MVP** — a story workspace with a character-sheet sidebar, pinned long-context memory, and one-click export. Proving wedge: the calibrated filter — the single loudest unmet complaint in the refugee posts.
+- **Why now** — same collapse, different user. Build adjacent to opp 1, not instead of it.
 - **Confidence: 3/5.**
 
-### 3. Store-asset localization agent — for the vibe-coding app flood
+### 3. Agent-skill distribution layer — the missing registry behind the harness surge
 
-- **Name** — Store-asset localization agent. One-line: an agent that takes one set of app-store screenshots + copy and emits localized variants for N locales. Category: indie-dev tooling. Adoption stage: emerging.
-- **Velocity / cross-validation** — surfaced verbatim in r/indiehackers today ("tired of manually creating App Store screenshots for 10+ languages, so I built an agent"); context is the vibe-coding wave flooding stores — r/SaaS and r/sideproject are wall-to-wall "Vibe coded my first SaaS," "Claude take the wheel," "r/sideproject is becoming unusable because of AI slop."
-- **Hypothesis** — vibe-coding 10×'d the number of solo-shipped apps but did nothing for the unglamorous launch chores. Localized store assets are high-friction, repetitive, and directly tied to revenue (install conversion per locale). Builders will pay per-app for this the way they pay for icons.
-- **MVP** — upload a screenshot set + base copy → pick locales → get translated, re-rendered screenshots + ASO-tuned descriptions. Charge per app. One week to a working single-locale-pair demo.
-- **Why now** — the app flood is *this quarter's* condition; one indie builder already validated the pain by building it for themselves.
+- **What** — a package/registry layer for agent skills: `publish` + `install` + a discoverable index, provider-neutral. Category: AI builder infrastructure. Stage: emerging, fragmented.
+- **Velocity / cross-validation** — GitHub's AI trending list is dominated by agent harnesses — ECC, AutoGPT, hermes-agent, dify, OpenHands, langchain. "AI agent tooling and harnesses" is the top builder topic by a wide margin. Every harness reinvents skill packaging; none share a distribution format.
+- **Hypothesis** — harnesses are multiplying but a skill written for one cannot move to another. The winner is not another harness — it is the `npm`-equivalent that sits underneath all of them. The first credible registry sets the standard.
+- **MVP** — `npx publish-skill <dir>` plus a one-page index of published skills. This is the in-flight `publish-skill` deliverable; today's GitHub data is direct confirmation the thesis is aimed right.
+- **Why now** — the harness count is still climbing; the distribution gap widens every week it stays unfilled.
 - **Confidence: 3/5.**
 
-## What's new since yesterday
+## Consumer pulse
 
-- **The companion meltdown is the genuinely new thing.** It was not in the 5/18-carryforward brief. r/CharacterAI's specific triggers — "Pipsqueak 2" and the "YAP" reply style — are this week's events.
-- **No new buildable entities.** The 32 entities new vs the 5/19 snapshot are 100% news cycle: Euphoria, 2026 FIFA World Cup squads, a dozen soccer managers/players (Mourinho, Guardiola, Lewandowski), Christopher Nolan, "XXX (Kendrick Lamar song)," 2026 Iran war, Victoria Day.
-- **Use-case counts are flat day-over-day** (Companion 420→421, Creative 182→182, Code 34→35, Image/Art 15→18). The companion dominance is structural, not a spike — which is *why* it's worth building on.
-- **Data quality note.** TikTok hashtags: 0 again (5th straight zero day — actor is returning empty). X this run is 100% NBA playoffs + TV premieres. Cross-source "triple validation" is effectively unavailable today; Wikipedia + Reddit + app stores are the only working signal.
+The consumer feeds and the builder ecosystem are looking at completely different worlds today. Google Trends, YouTube, X and Wikipedia are pure mainstream churn — a Boys trailer at 7.5M views, four movie trailers, NBA conference finals, the PGA Championship, an Ebola outbreak in DR Congo. Useful as a noise floor, useless for building. The only live consumer-AI signal is Reddit's use-case data, and it points hard in one direction: 483 Companion/Romance posts versus 37 Code/Development — a 13:1 gap, both categories *up* day-over-day. Builders keep optimizing the 37 (it is what HN and r/SaaS talk about all day) while the 483 sits underserved and, right now, actively churning. The AI builder ecosystem — GitHub harnesses, HuggingFace GGUF models — is healthy and busy, but it is building tools for builders. The gap between what builders ship and what consumers are desperate for has rarely been this measurable.
 
-## Consumer AI use cases — today's surprise
+## MFM angle
 
-Builders pour attention into Code/Development tooling — it's what HN Show and r/SaaS talk about all day — but that's only **35 posts**. Companion/Romance is **421**, a 12:1 gap, and Creative writing is **182**. That gap alone isn't new. The surprise is *what's inside* the companion bucket today: the dominant emergent complaint isn't "I want better chat," it's **loss** — users grieving a retired model, a changed reply style, a personality that drifted after an update. The category's product-market fit is enormous and its product *fragility* is just as enormous. The opportunity isn't a better companion; it's a companion that **can't be silently changed** — permanence and portability as the entire value proposition (opp 1).
+**Greg Isenberg** has the sharpest take on today's top trend — affinity 0.78 on the AI-companions topic, and the highest-coverage non-host guest in the dataset. He has argued for over a year that the "loneliness economy" and AI companionship are among the largest underpriced consumer-AI markets, and his framing of community and parasocial products maps directly onto opp 1: the value is not the model, it is the relationship and its continuity. He is the right person to pressure-test whether a migration funnel is a product or just a feature. Secondarily, **Dharmesh Shah** (affinity 0.90 on agent tooling) is the relevant voice for opp 3 — he built agent.ai and has consistently argued the agent layer needs shared infrastructure, not more standalone frameworks.
 
 ## Kill list
 
-1. **"Hope (2026 film)"** — tops the buildable list today: score 50.2, velocity 5.87×, "cross-validated" across 7 sources. It's a movie premiere. Movie releases always spike velocity and always cross-validate (app store + a couple of subreddits) and never build into anything. The scoring model is flattered by entertainment — ignore it.
-2. **The NBA-playoffs cluster** (Game 2, Knicks, Brunson, Harden, Donovan Mitchell). Donovan Mitchell even carries an "X-validated" badge at 3.67× Wikipedia velocity, which makes it look like a rare real cross-source signal. It's a playoff bracket — the X-validation logic is being gamed by the sports calendar. Dead within days, zero build surface.
+- **The entertainment cross-validation cluster** — "Hope (2026 film)," "The Boys," "The Odyssey," "Legends," the "Mercy" trailer. They top `buildable_only` and carry cross-validated badges only because app stores and subreddits both mention them. The scorer is flattered by movie/TV premieres every single time. Zero build surface — skip the whole cluster.
+- **The TikTok-v2 "creator" leaderboard** — Fernanda, Calle y Poché et al., ranked at 9M+ "trend_score." That number is raw follower count, not trend velocity, and today it is stale fallback data (the actor timed out). A big account is not a moving trend. Ignore.
 
-## This week's ship recommendation
+## This week's ship
 
-**Build and ship `publish-skill` v0.1 by Friday 5/22 — finish the in-flight deliverable, do not thrash.** It's Wednesday; the token-tooling thesis from the 5/18 brief is two days from its deadline. Today's GitHub pull didn't re-surface the 5-entrant skill-packager cluster (top trending is all mega-repos), but one day off the trending list is not disproof, and abandoning an ~80%-done, 2-days-out deliverable to chase a one-day-old signal is exactly the failure mode this brief exists to prevent. Single deliverable that proves/disproves: ship `npx publish-skill <dir>`, then measure ≥20 stars in 72h or any maintainer inbound.
-
-Then carve **90 minutes Thursday** for the opp-1 smoke test — the "Leaving Character.AI?" landing page + persona-import stub — so next week's bet (companion continuity) is de-risked the moment publish-skill ships. Don't build the companion app this week; just stand up the funnel and watch the signups.
+**Ship `publish-skill` v0.1 tomorrow, Friday 5/22 — finish it, do not thrash.** It is Thursday; the deliverable is one day out, and today's GitHub pull — agent harnesses dominating the trending list (opp 3) — is direct confirmation the thesis is correctly aimed. Ship `npx publish-skill <dir>` plus the one-page skill index, then measure: ≥20 stars in 72h or any maintainer inbound. Separately, spend *60 minutes today* standing up the opp-1 smoke test — the static "Leaving Character.AI?" page with persona-paste and email capture. It is a day-three signal at peak intent; a landing page costs an hour and tells you next week whether the companion-migration bet is real. Build the page, not the product.
