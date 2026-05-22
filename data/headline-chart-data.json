@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-21T09:18:18.940Z",
+  "generated_at": "2026-05-22T14:09:53.023Z",
   "headline_slug": "token-efficient-agents-2026-05-19",
-  "window_start": "2026-05-07",
-  "window_end": "2026-05-21",
+  "window_start": "2026-05-22",
+  "window_end": "2026-05-22",
   "title": "Star trajectories — last 14 days",
   "subtitle": "Six independent projects in the same category, all accelerating",
   "categories": {
@@ -28,62 +28,14 @@
       "full_name": "rtk-ai/rtk",
       "url": "https://github.com/rtk-ai/rtk",
       "category": "compression",
-      "current_stars": 52106,
-      "delta_24h": 684,
+      "current_stars": 52721,
+      "delta_24h": 0,
       "label_short": "rtk",
       "tagline": "60–90% token reduction proxy",
       "series": [
         {
-          "date": "2026-05-08",
-          "stars": 44362
-        },
-        {
-          "date": "2026-05-09",
-          "stars": 44975
-        },
-        {
-          "date": "2026-05-10",
-          "stars": 45395
-        },
-        {
-          "date": "2026-05-11",
-          "stars": 45795
-        },
-        {
-          "date": "2026-05-12",
-          "stars": 46353
-        },
-        {
-          "date": "2026-05-14",
-          "stars": 47619
-        },
-        {
-          "date": "2026-05-15",
-          "stars": 48221
-        },
-        {
-          "date": "2026-05-16",
-          "stars": 48660
-        },
-        {
-          "date": "2026-05-17",
-          "stars": 49068
-        },
-        {
-          "date": "2026-05-18",
-          "stars": 49585
-        },
-        {
-          "date": "2026-05-19",
-          "stars": 50629
-        },
-        {
-          "date": "2026-05-20",
-          "stars": 51422
-        },
-        {
-          "date": "2026-05-21",
-          "stars": 52106
+          "date": "2026-05-22",
+          "stars": 52721
         }
       ]
     },
@@ -91,58 +43,14 @@
       "full_name": "JuliusBrussee/caveman",
       "url": "https://github.com/JuliusBrussee/caveman",
       "category": "compression",
-      "current_stars": 62960,
-      "delta_24h": 438,
+      "current_stars": 63579,
+      "delta_24h": 0,
       "label_short": "caveman",
       "tagline": "65% token cut via prompt rewrite",
       "series": [
         {
-          "date": "2026-05-07",
-          "stars": 55619
-        },
-        {
-          "date": "2026-05-08",
-          "stars": 56331
-        },
-        {
-          "date": "2026-05-11",
-          "stars": 57835
-        },
-        {
-          "date": "2026-05-12",
-          "stars": 58596
-        },
-        {
-          "date": "2026-05-14",
-          "stars": 59883
-        },
-        {
-          "date": "2026-05-15",
-          "stars": 60445
-        },
-        {
-          "date": "2026-05-16",
-          "stars": 60845
-        },
-        {
-          "date": "2026-05-17",
-          "stars": 61121
-        },
-        {
-          "date": "2026-05-18",
-          "stars": 61522
-        },
-        {
-          "date": "2026-05-19",
-          "stars": 62214
-        },
-        {
-          "date": "2026-05-20",
-          "stars": 62522
-        },
-        {
-          "date": "2026-05-21",
-          "stars": 62960
+          "date": "2026-05-22",
+          "stars": 63579
         }
       ]
     },
@@ -156,79 +64,8 @@
       "tagline": "production LLM call layer",
       "series": [
         {
-          "date": "2026-05-14",
-          "stars": 127
-        },
-        {
-          "date": "2026-05-15",
-          "stars": 127
-        },
-        {
-          "date": "2026-05-16",
+          "date": "2026-05-22",
           "stars": 128
-        },
-        {
-          "date": "2026-05-17",
-          "stars": 128
-        },
-        {
-          "date": "2026-05-18",
-          "stars": 128
-        },
-        {
-          "date": "2026-05-19",
-          "stars": 128
-        },
-        {
-          "date": "2026-05-20",
-          "stars": 128
-        },
-        {
-          "date": "2026-05-21",
-          "stars": 128
-        }
-      ]
-    },
-    {
-      "full_name": "opensquilla/opensquilla",
-      "url": "https://github.com/opensquilla/opensquilla",
-      "category": "orchestration",
-      "current_stars": 1174,
-      "delta_24h": 42,
-      "label_short": "opensquilla",
-      "tagline": "agent framework — higher density",
-      "series": [
-        {
-          "date": "2026-05-12",
-          "stars": 231
-        },
-        {
-          "date": "2026-05-14",
-          "stars": 386
-        },
-        {
-          "date": "2026-05-15",
-          "stars": 717
-        },
-        {
-          "date": "2026-05-16",
-          "stars": 859
-        },
-        {
-          "date": "2026-05-17",
-          "stars": 930
-        },
-        {
-          "date": "2026-05-18",
-          "stars": 999
-        },
-        {
-          "date": "2026-05-19",
-          "stars": 1132
-        },
-        {
-          "date": "2026-05-20",
-          "stars": 1174
         }
       ]
     },
@@ -236,97 +73,14 @@
       "full_name": "DenisSergeevitch/agents-best-practices",
       "url": "https://github.com/DenisSergeevitch/agents-best-practices",
       "category": "standards",
-      "current_stars": 921,
-      "delta_24h": 47,
+      "current_stars": 957,
+      "delta_24h": 0,
       "label_short": "agents-best-practices",
       "tagline": "provider-neutral skill spec",
       "series": [
         {
-          "date": "2026-05-16",
-          "stars": 352
-        },
-        {
-          "date": "2026-05-17",
-          "stars": 625
-        },
-        {
-          "date": "2026-05-18",
-          "stars": 760
-        },
-        {
-          "date": "2026-05-19",
-          "stars": 839
-        },
-        {
-          "date": "2026-05-20",
-          "stars": 874
-        },
-        {
-          "date": "2026-05-21",
-          "stars": 921
-        }
-      ]
-    },
-    {
-      "full_name": "lightseekorg/tokenspeed",
-      "url": "https://github.com/lightseekorg/tokenspeed",
-      "category": "infrastructure",
-      "current_stars": 1065,
-      "delta_24h": 9,
-      "label_short": "tokenspeed",
-      "tagline": "speed-of-light inference engine",
-      "series": [
-        {
-          "date": "2026-05-07",
-          "stars": 478
-        },
-        {
-          "date": "2026-05-08",
-          "stars": 708
-        },
-        {
-          "date": "2026-05-09",
-          "stars": 822
-        },
-        {
-          "date": "2026-05-10",
-          "stars": 877
-        },
-        {
-          "date": "2026-05-11",
-          "stars": 934
-        },
-        {
-          "date": "2026-05-12",
+          "date": "2026-05-22",
           "stars": 957
-        },
-        {
-          "date": "2026-05-14",
-          "stars": 1002
-        },
-        {
-          "date": "2026-05-15",
-          "stars": 1020
-        },
-        {
-          "date": "2026-05-16",
-          "stars": 1028
-        },
-        {
-          "date": "2026-05-17",
-          "stars": 1033
-        },
-        {
-          "date": "2026-05-18",
-          "stars": 1048
-        },
-        {
-          "date": "2026-05-19",
-          "stars": 1056
-        },
-        {
-          "date": "2026-05-20",
-          "stars": 1065
         }
       ]
     }
