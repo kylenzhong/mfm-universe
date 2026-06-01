@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-28T09:23:55.636Z",
+  "generated_at": "2026-05-21T09:18:18.940Z",
   "headline_slug": "token-efficient-agents-2026-05-19",
-  "window_start": "2026-05-18",
-  "window_end": "2026-05-28",
+  "window_start": "2026-05-07",
+  "window_end": "2026-05-21",
   "title": "Star trajectories — last 14 days",
   "subtitle": "Six independent projects in the same category, all accelerating",
   "categories": {
@@ -28,11 +28,47 @@
       "full_name": "rtk-ai/rtk",
       "url": "https://github.com/rtk-ai/rtk",
       "category": "compression",
-      "current_stars": 55505,
-      "delta_24h": 2784,
+      "current_stars": 52106,
+      "delta_24h": 684,
       "label_short": "rtk",
       "tagline": "60–90% token reduction proxy",
       "series": [
+        {
+          "date": "2026-05-08",
+          "stars": 44362
+        },
+        {
+          "date": "2026-05-09",
+          "stars": 44975
+        },
+        {
+          "date": "2026-05-10",
+          "stars": 45395
+        },
+        {
+          "date": "2026-05-11",
+          "stars": 45795
+        },
+        {
+          "date": "2026-05-12",
+          "stars": 46353
+        },
+        {
+          "date": "2026-05-14",
+          "stars": 47619
+        },
+        {
+          "date": "2026-05-15",
+          "stars": 48221
+        },
+        {
+          "date": "2026-05-16",
+          "stars": 48660
+        },
+        {
+          "date": "2026-05-17",
+          "stars": 49068
+        },
         {
           "date": "2026-05-18",
           "stars": 49585
@@ -48,14 +84,6 @@
         {
           "date": "2026-05-21",
           "stars": 52106
-        },
-        {
-          "date": "2026-05-22",
-          "stars": 52721
-        },
-        {
-          "date": "2026-05-28",
-          "stars": 55505
         }
       ]
     },
@@ -63,11 +91,43 @@
       "full_name": "JuliusBrussee/caveman",
       "url": "https://github.com/JuliusBrussee/caveman",
       "category": "compression",
-      "current_stars": 63579,
-      "delta_24h": 619,
+      "current_stars": 62960,
+      "delta_24h": 438,
       "label_short": "caveman",
       "tagline": "65% token cut via prompt rewrite",
       "series": [
+        {
+          "date": "2026-05-07",
+          "stars": 55619
+        },
+        {
+          "date": "2026-05-08",
+          "stars": 56331
+        },
+        {
+          "date": "2026-05-11",
+          "stars": 57835
+        },
+        {
+          "date": "2026-05-12",
+          "stars": 58596
+        },
+        {
+          "date": "2026-05-14",
+          "stars": 59883
+        },
+        {
+          "date": "2026-05-15",
+          "stars": 60445
+        },
+        {
+          "date": "2026-05-16",
+          "stars": 60845
+        },
+        {
+          "date": "2026-05-17",
+          "stars": 61121
+        },
         {
           "date": "2026-05-18",
           "stars": 61522
@@ -83,10 +143,6 @@
         {
           "date": "2026-05-21",
           "stars": 62960
-        },
-        {
-          "date": "2026-05-22",
-          "stars": 63579
         }
       ]
     },
@@ -99,6 +155,22 @@
       "label_short": "llmix",
       "tagline": "production LLM call layer",
       "series": [
+        {
+          "date": "2026-05-14",
+          "stars": 127
+        },
+        {
+          "date": "2026-05-15",
+          "stars": 127
+        },
+        {
+          "date": "2026-05-16",
+          "stars": 128
+        },
+        {
+          "date": "2026-05-17",
+          "stars": 128
+        },
         {
           "date": "2026-05-18",
           "stars": 128
@@ -114,10 +186,6 @@
         {
           "date": "2026-05-21",
           "stars": 128
-        },
-        {
-          "date": "2026-05-22",
-          "stars": 128
         }
       ]
     },
@@ -130,6 +198,26 @@
       "label_short": "opensquilla",
       "tagline": "agent framework — higher density",
       "series": [
+        {
+          "date": "2026-05-12",
+          "stars": 231
+        },
+        {
+          "date": "2026-05-14",
+          "stars": 386
+        },
+        {
+          "date": "2026-05-15",
+          "stars": 717
+        },
+        {
+          "date": "2026-05-16",
+          "stars": 859
+        },
+        {
+          "date": "2026-05-17",
+          "stars": 930
+        },
         {
           "date": "2026-05-18",
           "stars": 999
@@ -148,11 +236,19 @@
       "full_name": "DenisSergeevitch/agents-best-practices",
       "url": "https://github.com/DenisSergeevitch/agents-best-practices",
       "category": "standards",
-      "current_stars": 1101,
-      "delta_24h": 144,
+      "current_stars": 921,
+      "delta_24h": 47,
       "label_short": "agents-best-practices",
       "tagline": "provider-neutral skill spec",
       "series": [
+        {
+          "date": "2026-05-16",
+          "stars": 352
+        },
+        {
+          "date": "2026-05-17",
+          "stars": 625
+        },
         {
           "date": "2026-05-18",
           "stars": 760
@@ -168,14 +264,6 @@
         {
           "date": "2026-05-21",
           "stars": 921
-        },
-        {
-          "date": "2026-05-22",
-          "stars": 957
-        },
-        {
-          "date": "2026-05-28",
-          "stars": 1101
         }
       ]
     },
@@ -188,6 +276,46 @@
       "label_short": "tokenspeed",
       "tagline": "speed-of-light inference engine",
       "series": [
+        {
+          "date": "2026-05-07",
+          "stars": 478
+        },
+        {
+          "date": "2026-05-08",
+          "stars": 708
+        },
+        {
+          "date": "2026-05-09",
+          "stars": 822
+        },
+        {
+          "date": "2026-05-10",
+          "stars": 877
+        },
+        {
+          "date": "2026-05-11",
+          "stars": 934
+        },
+        {
+          "date": "2026-05-12",
+          "stars": 957
+        },
+        {
+          "date": "2026-05-14",
+          "stars": 1002
+        },
+        {
+          "date": "2026-05-15",
+          "stars": 1020
+        },
+        {
+          "date": "2026-05-16",
+          "stars": 1028
+        },
+        {
+          "date": "2026-05-17",
+          "stars": 1033
+        },
         {
           "date": "2026-05-18",
           "stars": 1048
