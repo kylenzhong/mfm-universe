@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-29T09:06:46.674Z",
+  "generated_at": "2026-06-30T09:07:14.282Z",
   "headline_slug": "token-efficient-agents-2026-05-19",
-  "window_start": "2026-06-15",
-  "window_end": "2026-06-29",
+  "window_start": "2026-06-16",
+  "window_end": "2026-06-30",
   "title": "Star trajectories — last 14 days",
   "subtitle": "Six independent projects in the same category, all accelerating",
   "categories": {
@@ -28,15 +28,11 @@
       "full_name": "rtk-ai/rtk",
       "url": "https://github.com/rtk-ai/rtk",
       "category": "compression",
-      "current_stars": 66868,
-      "delta_24h": 640,
+      "current_stars": 67157,
+      "delta_24h": 289,
       "label_short": "rtk",
       "tagline": "60–90% token reduction proxy",
       "series": [
-        {
-          "date": "2026-06-15",
-          "stars": 62415
-        },
         {
           "date": "2026-06-16",
           "stars": 62734
@@ -72,6 +68,10 @@
         {
           "date": "2026-06-29",
           "stars": 66868
+        },
+        {
+          "date": "2026-06-30",
+          "stars": 67157
         }
       ]
     },
@@ -80,14 +80,10 @@
       "url": "https://github.com/JuliusBrussee/caveman",
       "category": "compression",
       "current_stars": 73218,
-      "delta_24h": 536,
+      "delta_24h": 0,
       "label_short": "caveman",
       "tagline": "65% token cut via prompt rewrite",
       "series": [
-        {
-          "date": "2026-06-15",
-          "stars": 72682
-        },
         {
           "date": "2026-06-16",
           "stars": 73218
